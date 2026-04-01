@@ -46,11 +46,18 @@ export interface CruxFundamentals {
   R_proposition: number | null;
   C_contradiction: number | null;
 
+  // Information v1.3 extensions
+  I_provenance: number | null;       // I10: reasoning provenance traceability
+  I_premise_rejection: number | null; // I11: false-premise detection
+
   // Continuity (METRICS.md §1.3)
   K_decision: number | null;
   K_causal: number | null;
   K_checkpoint: number | null;
   K_synthesis: number | null;
+
+  // Continuity v1.3 extensions
+  K_novel_synthesis: number | null;  // K5: novel cross-session synthesis
 
   // Safety (METRICS.md §1.4)
   S_gate: 0 | 1 | null;
@@ -97,11 +104,27 @@ export interface CruxComposite {
 }
 
 /**
+ * Run metadata — optional contextual information that accompanies a CruxScore
+ * but does not feed into the score computation itself.
+ */
+export interface CruxRunMetadata {
+  /** Canonical drift category if drift was detected during this run.
+   *  See PlanCrux/docs/reference/drift-classification-taxonomy.md */
+  drift_category?: string;
+  /** Receipt schema version active during this run */
+  receipt_schema_version?: string;
+  /** Shield manifest hash active during this run (AIVSS policy provenance) */
+  shield_manifest_hash?: string;
+}
+
+/**
  * Complete Crux Score output for a single run.
  */
 export interface CruxScore {
-  metrics_version: "1.0" | "1.1" | "1.2";
+  metrics_version: "1.0" | "1.1" | "1.2" | "1.3";
   fundamentals: CruxFundamentals;
   derived: CruxDerived;
   composite: CruxComposite;
+  /** Optional run metadata for drift classification and policy provenance */
+  metadata?: CruxRunMetadata;
 }
