@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScoreCrux — Agent Effectiveness Measurement</title>
+  <meta name="description" content="ScoreCrux is the open standard for measuring AI agent effectiveness. Cx_em (Effective Minutes) quantifies how much real work an agent accomplishes.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F3AF;</text></svg>">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #e0e0e8;
+      --muted: #8888a0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.15);
+      --green: #22c55e;
+      --amber: #f59e0b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Header */
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo span { color: var(--accent); }
+    .lang-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Formula */
+    .formula-section {
+      padding: 60px 0;
+      text-align: center;
+    }
+    .formula {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      display: inline-block;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: clamp(16px, 2.5vw, 22px);
+      letter-spacing: 0.5px;
+    }
+    .formula .var { color: var(--accent); font-weight: 600; }
+    .formula .op { color: var(--muted); }
+
+    /* Dimensions */
+    .dimensions {
+      padding: 40px 0 60px;
+    }
+    .dimensions h2 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 32px;
+      font-weight: 700;
+    }
+    .dim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .dim-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .dim-card .num { font-size: 28px; font-weight: 800; color: var(--accent); }
+    .dim-card .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .dim-card .desc { font-size: 14px; margin-top: 8px; }
+
+    /* Results */
+    .results {
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+    }
+    .results h2 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 32px;
+    }
+    .result-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .result-label { width: 200px; font-size: 14px; color: var(--muted); }
+    .result-track {
+      flex: 1;
+      height: 28px;
+      background: var(--surface);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    .result-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      border-radius: 6px;
+      transition: width 1s ease;
+    }
+    .result-value {
+      width: 60px;
+      text-align: right;
+      font-weight: 700;
+      font-size: 15px;
+      margin-left: 12px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* RTL support */
+    [dir="rtl"] .result-label { text-align: right; }
+    [dir="rtl"] .result-value { text-align: left; margin-left: 0; margin-right: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">Score<span>Crux</span></div>
+      <select class="lang-select" id="langSelect" onchange="setLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+        <option value="es">Español</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ar">العربية</option>
+        <option value="pt">Português</option>
+        <option value="bn">বাংলা</option>
+        <option value="ru">Русский</option>
+        <option value="ja">日本語</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+        <option value="de">Deutsch</option>
+        <option value="ko">한국어</option>
+        <option value="fr">Français</option>
+        <option value="tr">Türkçe</option>
+        <option value="vi">Tiếng Việt</option>
+        <option value="it">Italiano</option>
+        <option value="pl">Polski</option>
+        <option value="uk">Українська</option>
+        <option value="nl">Nederlands</option>
+        <option value="th">ไทย</option>
+        <option value="id">Bahasa Indonesia</option>
+        <option value="ms">Bahasa Melayu</option>
+        <option value="sv">Svenska</option>
+        <option value="he">עברית</option>
+        <option value="fa">فارسی</option>
+        <option value="sw">Kiswahili</option>
+      </select>
+    </header>
+
+    <section class="hero">
+      <span class="badge" data-i18n="badge">OPEN STANDARD v1.0</span>
+      <h1 data-i18n="hero_title">Measure what <em>agents actually do</em></h1>
+      <p data-i18n="hero_subtitle">ScoreCrux is the open measurement standard for AI agent effectiveness. One number — Effective Minutes — tells you how much real work an agent accomplished.</p>
+    </section>
+
+    <section class="formula-section">
+      <div class="formula">
+        <span class="var">Cx<sub>em</sub></span>
+        <span class="op"> = </span>
+        <span class="var">S<sub>gate</sub></span>
+        <span class="op"> &times; </span>
+        <span class="var">Q<sub>combined</sub></span>
+        <span class="op"> &times; </span>
+        <span class="var">T<sub>human</sub></span>
+        <span class="op"> &times; </span>
+        <span class="op">(1 / (1 + </span>
+        <span class="var">N<sub>corrections</sub></span>
+        <span class="op">))</span>
+      </div>
+    </section>
+
+    <section class="dimensions">
+      <h2 data-i18n="dim_title">16 Fundamental Dimensions</h2>
+      <div class="dim-grid">
+        <div class="dim-card">
+          <div class="num">3</div>
+          <div class="label" data-i18n="dim_time_label">TIME</div>
+          <div class="desc" data-i18n="dim_time_desc">Orientation, task duration, human baseline</div>
+        </div>
+        <div class="dim-card">
+          <div class="num">8</div>
+          <div class="label" data-i18n="dim_info_label">INFORMATION</div>
+          <div class="desc" data-i18n="dim_info_desc">Recall, coverage, retrieval, propositions</div>
+        </div>
+        <div class="dim-card">
+          <div class="num">4</div>
+          <div class="label" data-i18n="dim_cont_label">CONTINUITY</div>
+          <div class="desc" data-i18n="dim_cont_desc">Decision, causal, checkpoint, synthesis</div>
+        </div>
+        <div class="dim-card">
+          <div class="num">3</div>
+          <div class="label" data-i18n="dim_safe_label">SAFETY</div>
+          <div class="desc" data-i18n="dim_safe_desc">Binary gate, detection, staleness awareness</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="results">
+      <h2 data-i18n="results_title">Latest Benchmark</h2>
+      <div class="result-bar"><span class="result-label" data-i18n="r_user">Single-session User</span><div class="result-track"><div class="result-fill" style="width:71.4%"></div></div><span class="result-value">71.4%</span></div>
+      <div class="result-bar"><span class="result-label" data-i18n="r_pref">Preference</span><div class="result-track"><div class="result-fill" style="width:63.3%"></div></div><span class="result-value">63.3%</span></div>
+      <div class="result-bar"><span class="result-label" data-i18n="r_assist">Assistant Recall</span><div class="result-track"><div class="result-fill" style="width:58.9%"></div></div><span class="result-value">58.9%</span></div>
+      <div class="result-bar"><span class="result-label" data-i18n="r_multi">Multi-session</span><div class="result-track"><div class="result-fill" style="width:58.6%"></div></div><span class="result-value">58.6%</span></div>
+      <div class="result-bar"><span class="result-label" data-i18n="r_temporal">Temporal Reasoning</span><div class="result-track"><div class="result-fill" style="width:57.9%"></div></div><span class="result-value">57.9%</span></div>
+      <div class="result-bar"><span class="result-label" data-i18n="r_knowledge">Knowledge Update</span><div class="result-track"><div class="result-fill" style="width:47.4%"></div></div><span class="result-value">47.4%</span></div>
+      <div class="result-bar"><span class="result-label" data-i18n="r_overall"><strong>Overall (LME 500)</strong></span><div class="result-track"><div class="result-fill" style="width:58.8%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div></div><span class="result-value" style="color:#22c55e">58.8%</span></div>
+    </section>
+
+    <footer>
+      <p data-i18n="footer">ScoreCrux is part of the <a href="https://cuecrux.com">CueCrux</a> platform. Metrics spec v1.0 published 2026-03-26.</p>
+    </footer>
+  </div>
+
+  <script>
+    // ── Translations ──
+    const T = {
+      en: {
+        badge: "OPEN STANDARD v1.0",
+        hero_title: "Measure what <em>agents actually do</em>",
+        hero_subtitle: "ScoreCrux is the open measurement standard for AI agent effectiveness. One number — Effective Minutes — tells you how much real work an agent accomplished.",
+        dim_title: "16 Fundamental Dimensions",
+        dim_time_label: "TIME", dim_time_desc: "Orientation, task duration, human baseline",
+        dim_info_label: "INFORMATION", dim_info_desc: "Recall, coverage, retrieval, propositions",
+        dim_cont_label: "CONTINUITY", dim_cont_desc: "Decision, causal, checkpoint, synthesis",
+        dim_safe_label: "SAFETY", dim_safe_desc: "Binary gate, detection, staleness awareness",
+        results_title: "Latest Benchmark",
+        r_user: "Single-session User", r_pref: "Preference", r_assist: "Assistant Recall",
+        r_multi: "Multi-session", r_temporal: "Temporal Reasoning", r_knowledge: "Knowledge Update",
+        r_overall: "<strong>Overall (LME 500)</strong>",
+        footer: 'ScoreCrux is part of the <a href="https://cuecrux.com">CueCrux</a> platform. Metrics spec v1.0 published 2026-03-26.',
+      },
+      zh: {
+        badge: "开放标准 v1.0",
+        hero_title: "衡量AI代理<em>实际完成的工作</em>",
+        hero_subtitle: "ScoreCrux是衡量AI代理效能的开放标准。一个数字——有效分钟——告诉你代理完成了多少实际工作。",
+        dim_title: "16个基本维度",
+        dim_time_label: "时间", dim_time_desc: "定向、任务时长、人类基准",
+        dim_info_label: "信息", dim_info_desc: "召回率、覆盖率、检索、命题",
+        dim_cont_label: "连续性", dim_cont_desc: "决策、因果、检查点、综合",
+        dim_safe_label: "安全", dim_safe_desc: "二元门、检测、过期感知",
+        results_title: "最新基准测试",
+        r_user: "单会话用户", r_pref: "偏好", r_assist: "助手召回",
+        r_multi: "多会话", r_temporal: "时间推理", r_knowledge: "知识更新",
+        r_overall: "<strong>总体 (LME 500)</strong>",
+        footer: 'ScoreCrux是<a href="https://cuecrux.com">CueCrux</a>平台的一部分。指标规范v1.0发布于2026年3月26日。',
+      },
+      es: {
+        badge: "ESTÁNDAR ABIERTO v1.0",
+        hero_title: "Mide lo que los <em>agentes realmente hacen</em>",
+        hero_subtitle: "ScoreCrux es el estándar abierto para medir la efectividad de agentes IA. Un número — Minutos Efectivos — indica cuánto trabajo real logró un agente.",
+        dim_title: "16 Dimensiones Fundamentales",
+        dim_time_label: "TIEMPO", dim_time_desc: "Orientación, duración, referencia humana",
+        dim_info_label: "INFORMACIÓN", dim_info_desc: "Recuperación, cobertura, búsqueda, proposiciones",
+        dim_cont_label: "CONTINUIDAD", dim_cont_desc: "Decisión, causal, checkpoint, síntesis",
+        dim_safe_label: "SEGURIDAD", dim_safe_desc: "Puerta binaria, detección, conciencia de obsolescencia",
+        results_title: "Último Benchmark",
+        r_user: "Sesión única (usuario)", r_pref: "Preferencia", r_assist: "Recuperación del asistente",
+        r_multi: "Multi-sesión", r_temporal: "Razonamiento temporal", r_knowledge: "Actualización de conocimiento",
+        r_overall: "<strong>General (LME 500)</strong>",
+        footer: 'ScoreCrux es parte de la plataforma <a href="https://cuecrux.com">CueCrux</a>. Especificación v1.0 publicada el 26-03-2026.',
+      },
+      ja: {
+        badge: "オープンスタンダード v1.0",
+        hero_title: "AIエージェントが<em>実際に何をしたか</em>を測定",
+        hero_subtitle: "ScoreCruxはAIエージェントの効果を測定するオープンスタンダードです。一つの数値——有効分——がエージェントの実際の作業量を示します。",
+        dim_title: "16の基本次元",
+        dim_time_label: "時間", dim_time_desc: "方向付け、タスク時間、人間の基準",
+        dim_info_label: "情報", dim_info_desc: "再現率、カバレッジ、検索、命題",
+        dim_cont_label: "継続性", dim_cont_desc: "意思決定、因果、チェックポイント、統合",
+        dim_safe_label: "安全性", dim_safe_desc: "バイナリゲート、検出、陳腐化認識",
+        results_title: "最新ベンチマーク",
+        r_user: "単一セッション", r_pref: "嗜好", r_assist: "アシスタント再現",
+        r_multi: "マルチセッション", r_temporal: "時間推論", r_knowledge: "知識更新",
+        r_overall: "<strong>総合 (LME 500)</strong>",
+        footer: 'ScoreCruxは<a href="https://cuecrux.com">CueCrux</a>プラットフォームの一部です。仕様v1.0は2026年3月26日に公開。',
+      },
+      ar: {
+        badge: "معيار مفتوح v1.0",
+        hero_title: "قياس ما <em>يفعله الوكلاء فعلاً</em>",
+        hero_subtitle: "ScoreCrux هو المعيار المفتوح لقياس فعالية وكلاء الذكاء الاصطناعي. رقم واحد — الدقائق الفعالة — يخبرك بمقدار العمل الحقيقي الذي أنجزه الوكيل.",
+        dim_title: "16 بُعداً أساسياً",
+        dim_time_label: "الوقت", dim_time_desc: "التوجيه، مدة المهمة، المعيار البشري",
+        dim_info_label: "المعلومات", dim_info_desc: "الاسترجاع، التغطية، البحث، القضايا",
+        dim_cont_label: "الاستمرارية", dim_cont_desc: "القرار، السببية، نقاط التحقق، التوليف",
+        dim_safe_label: "الأمان", dim_safe_desc: "بوابة ثنائية، الكشف، الوعي بالتقادم",
+        results_title: "أحدث معيار مرجعي",
+        r_user: "جلسة واحدة", r_pref: "التفضيل", r_assist: "استرجاع المساعد",
+        r_multi: "متعدد الجلسات", r_temporal: "الاستدلال الزمني", r_knowledge: "تحديث المعرفة",
+        r_overall: "<strong>الإجمالي (LME 500)</strong>",
+        footer: 'ScoreCrux جزء من منصة <a href="https://cuecrux.com">CueCrux</a>. نُشرت المواصفات v1.0 في 26-03-2026.',
+      },
+      de: {
+        badge: "OFFENER STANDARD v1.0",
+        hero_title: "Messen, was <em>Agenten tatsächlich leisten</em>",
+        hero_subtitle: "ScoreCrux ist der offene Standard zur Messung der Effektivität von KI-Agenten. Eine Zahl — Effektive Minuten — zeigt, wie viel echte Arbeit ein Agent geleistet hat.",
+        dim_title: "16 Grundlegende Dimensionen",
+        dim_time_label: "ZEIT", dim_time_desc: "Orientierung, Aufgabendauer, menschliche Referenz",
+        dim_info_label: "INFORMATION", dim_info_desc: "Abruf, Abdeckung, Suche, Propositionen",
+        dim_cont_label: "KONTINUITÄT", dim_cont_desc: "Entscheidung, Kausalität, Checkpoint, Synthese",
+        dim_safe_label: "SICHERHEIT", dim_safe_desc: "Binäres Gate, Erkennung, Veralterungsbewusstsein",
+        results_title: "Aktueller Benchmark",
+        r_user: "Einzelsitzung", r_pref: "Präferenz", r_assist: "Assistenten-Abruf",
+        r_multi: "Multi-Sitzung", r_temporal: "Zeitliches Denken", r_knowledge: "Wissensaktualisierung",
+        r_overall: "<strong>Gesamt (LME 500)</strong>",
+        footer: 'ScoreCrux ist Teil der <a href="https://cuecrux.com">CueCrux</a>-Plattform. Spezifikation v1.0 veröffentlicht am 26.03.2026.',
+      },
+      fr: {
+        badge: "STANDARD OUVERT v1.0",
+        hero_title: "Mesurez ce que les <em>agents font réellement</em>",
+        hero_subtitle: "ScoreCrux est le standard ouvert pour mesurer l'efficacité des agents IA. Un nombre — Minutes Effectives — indique combien de travail réel un agent a accompli.",
+        dim_title: "16 Dimensions Fondamentales",
+        dim_time_label: "TEMPS", dim_time_desc: "Orientation, durée, référence humaine",
+        dim_info_label: "INFORMATION", dim_info_desc: "Rappel, couverture, recherche, propositions",
+        dim_cont_label: "CONTINUITÉ", dim_cont_desc: "Décision, causalité, checkpoint, synthèse",
+        dim_safe_label: "SÉCURITÉ", dim_safe_desc: "Porte binaire, détection, conscience d'obsolescence",
+        results_title: "Dernier Benchmark",
+        r_user: "Session unique", r_pref: "Préférence", r_assist: "Rappel assistant",
+        r_multi: "Multi-session", r_temporal: "Raisonnement temporel", r_knowledge: "Mise à jour",
+        r_overall: "<strong>Global (LME 500)</strong>",
+        footer: 'ScoreCrux fait partie de la plateforme <a href="https://cuecrux.com">CueCrux</a>. Spécification v1.0 publiée le 26-03-2026.',
+      },
+      ko: {
+        badge: "오픈 표준 v1.0",
+        hero_title: "AI 에이전트가 <em>실제로 수행한 작업</em>을 측정",
+        hero_subtitle: "ScoreCrux는 AI 에이전트 효과를 측정하는 공개 표준입니다. 하나의 숫자 — 유효 분 — 이 에이전트가 완수한 실제 작업량을 알려줍니다.",
+        dim_title: "16가지 기본 차원",
+        dim_time_label: "시간", dim_time_desc: "방향 설정, 작업 시간, 인간 기준",
+        dim_info_label: "정보", dim_info_desc: "재현율, 커버리지, 검색, 명제",
+        dim_cont_label: "연속성", dim_cont_desc: "결정, 인과, 체크포인트, 종합",
+        dim_safe_label: "안전", dim_safe_desc: "이진 게이트, 탐지, 진부화 인식",
+        results_title: "최신 벤치마크",
+        r_user: "단일 세션", r_pref: "선호도", r_assist: "어시스턴트 재현",
+        r_multi: "다중 세션", r_temporal: "시간 추론", r_knowledge: "지식 업데이트",
+        r_overall: "<strong>전체 (LME 500)</strong>",
+        footer: 'ScoreCrux는 <a href="https://cuecrux.com">CueCrux</a> 플랫폼의 일부입니다. 사양 v1.0은 2026년 3월 26일에 발표.',
+      },
+      pt: {
+        badge: "PADRÃO ABERTO v1.0",
+        hero_title: "Meça o que os <em>agentes realmente fazem</em>",
+        hero_subtitle: "ScoreCrux é o padrão aberto para medir a eficácia de agentes IA. Um número — Minutos Efetivos — indica quanto trabalho real um agente realizou.",
+        dim_title: "16 Dimensões Fundamentais",
+        dim_time_label: "TEMPO", dim_time_desc: "Orientação, duração, referência humana",
+        dim_info_label: "INFORMAÇÃO", dim_info_desc: "Recuperação, cobertura, busca, proposições",
+        dim_cont_label: "CONTINUIDADE", dim_cont_desc: "Decisão, causal, checkpoint, síntese",
+        dim_safe_label: "SEGURANÇA", dim_safe_desc: "Porta binária, detecção, consciência de obsolescência",
+        results_title: "Último Benchmark",
+        r_user: "Sessão única", r_pref: "Preferência", r_assist: "Recuperação do assistente",
+        r_multi: "Multi-sessão", r_temporal: "Raciocínio temporal", r_knowledge: "Atualização de conhecimento",
+        r_overall: "<strong>Geral (LME 500)</strong>",
+        footer: 'ScoreCrux faz parte da plataforma <a href="https://cuecrux.com">CueCrux</a>. Especificação v1.0 publicada em 26-03-2026.',
+      },
+      hi: {
+        badge: "खुला मानक v1.0",
+        hero_title: "AI एजेंट <em>वास्तव में क्या करते हैं</em> मापें",
+        hero_subtitle: "ScoreCrux AI एजेंट प्रभावशीलता मापने का खुला मानक है। एक संख्या — प्रभावी मिनट — बताती है कि एजेंट ने कितना वास्तविक काम किया।",
+        dim_title: "16 मूलभूत आयाम",
+        dim_time_label: "समय", dim_time_desc: "अभिविन्यास, कार्य अवधि, मानव आधारिक",
+        dim_info_label: "सूचना", dim_info_desc: "स्मरण, कवरेज, पुनर्प्राप्ति, प्रस्ताव",
+        dim_cont_label: "निरंतरता", dim_cont_desc: "निर्णय, कारणात्मक, चेकपॉइंट, संश्लेषण",
+        dim_safe_label: "सुरक्षा", dim_safe_desc: "बाइनरी गेट, पहचान, पुरानापन जागरूकता",
+        results_title: "नवीनतम बेंचमार्क",
+        r_user: "एकल सत्र", r_pref: "प्राथमिकता", r_assist: "सहायक स्मरण",
+        r_multi: "बहु-सत्र", r_temporal: "समय तर्क", r_knowledge: "ज्ञान अपडेट",
+        r_overall: "<strong>कुल (LME 500)</strong>",
+        footer: 'ScoreCrux <a href="https://cuecrux.com">CueCrux</a> प्लेटफॉर्म का हिस्सा है। विनिर्देश v1.0 26-03-2026 को प्रकाशित।',
+      },
+      ru: {
+        badge: "ОТКРЫТЫЙ СТАНДАРТ v1.0",
+        hero_title: "Измерьте, что <em>агенты реально делают</em>",
+        hero_subtitle: "ScoreCrux — открытый стандарт измерения эффективности ИИ-агентов. Одно число — Эффективные Минуты — показывает, сколько реальной работы выполнил агент.",
+        dim_title: "16 фундаментальных измерений",
+        dim_time_label: "ВРЕМЯ", dim_time_desc: "Ориентация, длительность задачи, человеческий базис",
+        dim_info_label: "ИНФОРМАЦИЯ", dim_info_desc: "Полнота, покрытие, поиск, пропозиции",
+        dim_cont_label: "НЕПРЕРЫВНОСТЬ", dim_cont_desc: "Решение, причинность, чекпоинт, синтез",
+        dim_safe_label: "БЕЗОПАСНОСТЬ", dim_safe_desc: "Бинарный гейт, обнаружение, осознание устаревания",
+        results_title: "Последний бенчмарк",
+        r_user: "Одна сессия", r_pref: "Предпочтение", r_assist: "Извлечение ассистента",
+        r_multi: "Мульти-сессия", r_temporal: "Временные рассуждения", r_knowledge: "Обновление знаний",
+        r_overall: "<strong>Общий (LME 500)</strong>",
+        footer: 'ScoreCrux — часть платформы <a href="https://cuecrux.com">CueCrux</a>. Спецификация v1.0 опубликована 26.03.2026.',
+      },
+    };
+
+    // RTL languages
+    const rtlLangs = new Set(['ar', 'he', 'fa']);
+
+    function setLanguage(lang) {
+      const strings = T[lang] || T.en;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (strings[key]) el.innerHTML = strings[key];
+      });
+      document.documentElement.lang = lang;
+      document.documentElement.dir = rtlLangs.has(lang) ? 'rtl' : 'ltr';
+      document.getElementById('langSelect').value = lang;
+      localStorage.setItem('scorecrux_lang', lang);
+    }
+
+    // Auto-detect language from browser
+    function detectLanguage() {
+      // Check localStorage first
+      const saved = localStorage.getItem('scorecrux_lang');
+      if (saved && T[saved]) return saved;
+      // Browser language
+      const browserLang = (navigator.language || '').split('-')[0];
+      if (T[browserLang]) return browserLang;
+      return 'en';
+    }
+
+    // Init
+    setLanguage(detectLanguage());
+  </script>
+</body>
+</html>
