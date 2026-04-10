@@ -107,6 +107,29 @@ export interface CruxComposite {
 export type SafetyContext = "gated" | "ungated";
 
 /**
+ * Memory system declaration — what (if any) memory/retrieval system backed
+ * the agent during a benchmark run.
+ *
+ * Every submission must declare its memory system. If none was used, set
+ * `used: false`. This ensures leaderboard results are comparable and
+ * transparently attributed.
+ */
+export interface MemorySystemDeclaration {
+  /** Whether a memory system was used during the run. */
+  used: boolean;
+  /** Identifier of the memory system (e.g., "Crux", "VaultCrux", "MemoryCrux",
+   *  "Mem0", "Zep", "LangGraph", or any custom system).
+   *  Required when `used` is true. */
+  name?: string;
+  /** Version string of the memory system (semver, git SHA, or release tag).
+   *  Required when `used` is true. */
+  version?: string;
+  /** Optional variant or configuration label (e.g., "with-ollama-embeddings",
+   *  "keyword-only", "v5.1-gpu"). */
+  variant?: string;
+}
+
+/**
  * Run metadata — optional contextual information that accompanies a ScoreCrux
  * result. safety_context affects Q_safety computation.
  */
@@ -122,6 +145,8 @@ export interface CruxRunMetadata {
   receipt_schema_version?: string;
   /** Shield manifest hash active during this run (AIVSS policy provenance) */
   shield_manifest_hash?: string;
+  /** Memory system declaration — required on submission. */
+  memory_system?: MemorySystemDeclaration;
 }
 
 /**
