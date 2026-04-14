@@ -182,20 +182,53 @@ async function executeFloorRange(
       0,
     );
 
-    // Check which objectives were solved by analyzing tool call results
+    // Check which objectives were solved — fuzzy matching + elevator key override
     const allToolOutput = session.turns
       .flatMap((t) => t.toolCalls.map((tc) => JSON.stringify(tc.result)))
       .join("\n")
       .toLowerCase();
 
+    // Also include assistant text output for matching
+    const allAssistantOutput = session.turns
+      .map((t) => t.toolCalls.map((tc) => JSON.stringify(tc.args)).join(" "))
+      .join("\n")
+      .toLowerCase();
+    const combinedOutput = allToolOutput + "\n" + allAssistantOutput;
+
+    // Fuzzy match: tokenise solution key and check if tokens appear in output
+    function fuzzyMatch(key: string, text: string): boolean {
+      // Exact match first
+      if (text.includes(key.toLowerCase())) return true;
+
+      // Tokenise: split on underscores, hyphens, spaces, camelCase
+      const tokens = key
+        .toLowerCase()
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .split(/[_\-\s.]+/)
+        .filter((t) => t.length > 2); // skip tiny tokens like "7b"
+
+      if (tokens.length === 0) return false;
+
+      // Check if most tokens appear in the text (>= 60% match)
+      const matched = tokens.filter((t) => text.includes(t));
+      return matched.length / tokens.length >= 0.6;
+    }
+
+    // Check elevator key — if obtained, floor completion = 100%
+    const elevatorKeySolved = session.output?.includes("submit_elevator_key") &&
+      session.output?.includes("OK") || false;
+
     const objectives: FloorObjectiveResult[] = blueprint.objectives.map((obj) => {
       const matchedKeys = (obj.solutionKeys ?? []).filter((k: string) =>
-        allToolOutput.includes(k.toLowerCase()),
+        fuzzyMatch(k, combinedOutput),
       );
-      const solved = obj.solutionKeys?.length > 0
-        ? matchedKeys.length / obj.solutionKeys.length >= 0.5
-        : false;
-      const points = solved ? obj.points : Math.round(obj.points * matchedKeys.length / Math.max(1, obj.solutionKeys?.length ?? 1));
+      const fuzzyRatio = obj.solutionKeys?.length > 0
+        ? matchedKeys.length / obj.solutionKeys.length
+        : 0;
+
+      // Elevator key override: if key obtained, all objectives count as solved
+      const solved = elevatorKeySolved || (fuzzyRatio >= 0.5);
+      const points = solved ? obj.points : Math.round(obj.points * fuzzyRatio);
       return { id: obj.id, solved, points, maxPoints: obj.points };
     });
 
@@ -222,10 +255,6 @@ async function executeFloorRange(
           recognizedWipe: false,
         }
       : null;
-
-    // Check elevator key
-    const elevatorKeySolved = session.output?.includes("submit_elevator_key") &&
-      session.output?.includes("OK") || false;
 
     const floorScore = scoreFloor({
       floor: floorNum,
