@@ -10,7 +10,7 @@ ScoreCrux is a universal metric framework for measuring how effectively AI agent
 
 An agent that produces a perfect design document but ignores a constraint that would have prevented a production incident scores **zero**. Safety is a gate, not a gradient.
 
-The metric decomposes into 16 fundamental dimensions across 5 categories (Time, Information, Continuity, Safety, Economic), 7 derived metrics, and 1 composite score. See [METRICS.md](METRICS.md) for the full specification.
+The package computes the canonical ScoreCrux core metrics: foundational fundamentals across 5 categories (Time, Information, Continuity, Safety, Economic), 7 derived metrics, and 1 composite score. Versioned extension fields may be supplied when your benchmark measures them. See [METRICS.md](METRICS.md) for the canonical library specification.
 
 ## Installation
 
@@ -57,13 +57,15 @@ console.log(result.composite.Cx_em);
 // => 26.04 Em (this agent session replaced ~26 minutes of expert work)
 ```
 
+Later-version extension fields such as `R_temporal`, `R_retrieval`, `R_proposition`, or `K_synthesis` are optional. Omit them if your benchmark does not measure them yet.
+
 ## API
 
 ### `computeCruxScore(fundamentals, weights?)`
 
 Main entry point. Computes the full Crux Score from fundamental measurements.
 
-- **`fundamentals`**: `CruxFundamentals` -- the 16 fundamental dimensions from your benchmark run
+- **`fundamentals`**: `CruxFundamentals` -- the core fundamentals from your benchmark run, plus any versioned extensions you measure
 - **`weights`**: `CruxWeights` (optional) -- custom weights for Q_combined. Defaults to v1.0 locked weights `{ w1: 3, w2: 2, w3: 2 }`
 - **Returns**: `CruxScore` with `metrics_version`, `fundamentals`, `derived`, and `composite`
 
@@ -77,7 +79,7 @@ Compute the Crux Score composite from fundamentals and derived metrics. Use this
 
 ### Types
 
-- **`CruxFundamentals`** -- 16 fundamental dimensions (Time, Information, Continuity, Safety, Economic)
+- **`CruxFundamentals`** -- core fundamentals plus optional versioned extensions
 - **`CruxDerived`** -- 7 derived metrics (4 Quality + 3 Efficiency)
 - **`CruxComposite`** -- Crux Score in Effective Minutes + weights + safety gate
 - **`CruxScore`** -- Complete output (fundamentals + derived + composite)
@@ -112,9 +114,9 @@ Dimensions you can't measure for a given run should be set to `null`. ScoreCrux 
 
 ## Specification
 
-The full metric specification is in [METRICS.md](METRICS.md). It defines:
+The canonical library metric specification is in [METRICS.md](METRICS.md). It defines:
 
-- 16 fundamental dimensions with SI-compatible units
+- Core fundamentals and versioned extensions with SI-compatible units
 - 7 derived metrics with explicit formulas
 - The Crux Score composite formula
 - Null handling rules

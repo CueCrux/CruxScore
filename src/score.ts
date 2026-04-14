@@ -7,11 +7,11 @@ import { computeComposite } from "./composite.js";
 /**
  * Compute the full Crux Score from fundamentals.
  *
- * This is the main entry point. Provide your 16 fundamental measurements
- * and receive the complete ScoreCrux object with fundamentals, derived
- * metrics, and composite score.
+ * This is the main entry point. Provide the core fundamentals plus any
+ * versioned extensions you measure and receive the complete ScoreCrux
+ * object with fundamentals, derived metrics, and composite score.
  *
- * @param fundamentals - The 16 fundamental dimensions from your benchmark run.
+ * @param fundamentals - The core fundamentals and any versioned extensions from your benchmark run.
  * @param weights - Optional custom weights for Q_combined. Defaults to v1.0 (3, 2, 2).
  * @param metadata - Optional run metadata. If metadata.safety_context is "ungated",
  *   S_detect is excluded from Q_safety (no constraint tools were available).

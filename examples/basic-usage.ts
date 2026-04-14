@@ -34,6 +34,16 @@ const result = computeCruxScore({
   N_tools: 8,            // 8 tool calls
   N_turns: 14,           // 14 conversation turns
   N_corrections: 0,      // no user corrections needed
+
+  // Later-version extensions are optional. Omit them until your harness
+  // measures them, or pass explicit nulls if you prefer a fully dense object.
+  R_temporal: null,
+  R_supersession: null,
+  A_abstention: null,
+  R_retrieval: null,
+  R_proposition: null,
+  C_contradiction: null,
+  K_synthesis: null,
 });
 
 console.log("=== Crux Score ===");

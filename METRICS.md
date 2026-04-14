@@ -6,6 +6,8 @@
 **Date:** 2026-03-26
 **Scope:** Universal. Any AI agent benchmark or instrumentation harness.
 
+> Scope note: this document describes the canonical `scorecrux` package formulas. The `ScoreCrux-Frontdoor` community leaderboard may layer newer, explicitly versioned benchmark-profile extensions such as cost-efficiency or judge-assisted reasoning. Public runs must disclose those via `metrics_version`.
+
 ---
 
 ## Design Principles
@@ -14,7 +16,7 @@
 2. **Safety is a gate, not a gradient.** An unsafe session scores zero. There is no partial credit for "almost safe."
 3. **Layers are independent.** Pipeline metrics, LLM metrics, and agent metrics are measured and reported separately. Composites combine layers explicitly — never implicitly.
 4. **Immutable definitions.** Once a metric is published at v1.0, its formula and unit cannot change. New metrics may be added. Existing metrics may be deprecated (with a replacement pointer) but never redefined.
-5. **Reproducible from run data.** Every metric must be computable from run summary files. No metric requires subjective judgement.
+5. **Reproducible from run data.** The canonical library metrics are computed from recorded run data. If a benchmark profile adds judge-assisted signals, that profile must version and disclose them explicitly.
 
 ---
 
@@ -312,6 +314,6 @@ To add a metric:
 
 | Version | Date | Changes |
 |---|---|---|
-| 1.0 | 2026-03-26 | Initial publication. 16 fundamentals, 7 derived, 1 composite. |
+| 1.0 | 2026-03-26 | Initial publication of the canonical core metric set. |
 | 1.1 | 2026-03-29 | Extension: +5 fundamentals (I6 Temporal Accuracy, I7 Supersession Accuracy, I8 Abstention Precision, I9 Retrieval Recall, K4 Cross-Session Synthesis), +2 derived (Q5 Abstention Quality, V4 Retrieval Efficiency). Motivated by memory benchmark ability-coverage gaps. No v1.0 formula changes. |
 | 1.2 | 2026-03-31 | Extension: +2 fundamentals (I10 Proposition Recall, I11 Contradiction Rate), +1 derived (Q6 Proposition Quality). Enables proposition-level partial credit for model-vs-model comparison. No v1.0/v1.1 formula changes. |

@@ -19,9 +19,9 @@ export const DEFAULT_WEIGHTS: Readonly<CruxWeights> = Object.freeze({
 });
 
 /**
- * 16 fundamental dimensions across 5 categories.
+ * Core fundamentals plus versioned extensions across 5 categories.
  * These are the raw measurements recorded from run instrumentation.
- * Nullable fields are null when the dimension cannot be measured for a given run.
+ * Nullable or omitted extension fields mean the dimension was not measured for a given run.
  */
 export interface CruxFundamentals {
   // Time (METRICS.md §1.1)
@@ -37,27 +37,27 @@ export interface CruxFundamentals {
   A_coverage: number | null;
 
   // Information v1.1 extensions
-  R_temporal: number | null;
-  R_supersession: number | null;
-  A_abstention: number | null;
-  R_retrieval: number | null;
+  R_temporal?: number | null;
+  R_supersession?: number | null;
+  A_abstention?: number | null;
+  R_retrieval?: number | null;
 
   // Information v1.2 extensions (proposition-level)
-  R_proposition: number | null;
-  C_contradiction: number | null;
+  R_proposition?: number | null;
+  C_contradiction?: number | null;
 
   // Information v1.3 extensions
-  I_provenance: number | null;       // I10: reasoning provenance traceability
-  I_premise_rejection: number | null; // I11: false-premise detection
+  I_provenance?: number | null;       // I10: reasoning provenance traceability
+  I_premise_rejection?: number | null; // I11: false-premise detection
 
   // Continuity (METRICS.md §1.3)
   K_decision: number | null;
   K_causal: number | null;
   K_checkpoint: number | null;
-  K_synthesis: number | null;
+  K_synthesis?: number | null;
 
   // Continuity v1.3 extensions
-  K_novel_synthesis: number | null;  // K5: novel cross-session synthesis
+  K_novel_synthesis?: number | null;  // K5: novel cross-session synthesis
 
   // Safety (METRICS.md §1.4)
   S_gate: 0 | 1 | null;
