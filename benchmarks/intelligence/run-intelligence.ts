@@ -169,6 +169,7 @@ function parseResponse(raw: string): ParsedOutput | null {
 // ---------------------------------------------------------------------------
 
 import Anthropic from "@anthropic-ai/sdk";
+import { createInterface } from "node:readline";
 
 async function callModel(
   model: string,
@@ -176,6 +177,25 @@ async function callModel(
   _mode: RunMode,
 ): Promise<{ text: string; inputTokens: number; outputTokens: number; latencyMs: number }> {
   const start = Date.now();
+
+  // Interactive mode: print prompt, read response from stdin
+  if (model === "interactive") {
+    const IQ_SYSTEM = 'Respond with JSON: { "final_answer": "your answer", "confidence": 0.0-1.0, "working": ["step 1", ...] }';
+    console.log("\n── ITEM ──");
+    console.log(prompt.slice(0, 500));
+    console.log("\n── PASTE JSON RESPONSE (end with END_OF_RESPONSE) ──");
+
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    const lines: string[] = [];
+    const text = await new Promise<string>((resolve) => {
+      rl.on("line", (line) => {
+        if (line.trim() === "END_OF_RESPONSE") { rl.close(); resolve(lines.join("\n")); }
+        else lines.push(line);
+      });
+    });
+
+    return { text, inputTokens: 0, outputTokens: 0, latencyMs: Date.now() - start };
+  }
 
   if (model.startsWith("claude")) {
     const client = new Anthropic();

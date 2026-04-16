@@ -1,8 +1,15 @@
 /**
  * Model caller — sends coding prompts to LLM and extracts code.
+ *
+ * Supports three providers:
+ * - "claude-*" / "gpt-*" — direct API calls (uses credits)
+ * - "interactive" — prints prompt to stdout, reads code from stdin (free, uses current session)
+ * - "file:<path>" — reads pre-generated code from a file (for batch/offline runs)
  */
 
 import Anthropic from "@anthropic-ai/sdk";
+import { createInterface } from "node:readline";
+import { readFileSync, existsSync } from "node:fs";
 
 export interface ModelResponse {
   code: string;
@@ -22,6 +29,16 @@ export async function callModel(
   prompt: string,
 ): Promise<ModelResponse> {
   const start = Date.now();
+
+  // Interactive mode: print prompt, read response from stdin
+  if (model === "interactive") {
+    return callInteractive(prompt, start);
+  }
+
+  // File mode: read pre-generated code from a file
+  if (model.startsWith("file:")) {
+    return callFromFile(model.slice(5), start);
+  }
 
   if (model.startsWith("claude")) {
     const client = new Anthropic();
@@ -90,4 +107,64 @@ function extractCode(text: string): string {
 
   // Already clean code
   return text.trim();
+}
+
+/**
+ * Interactive mode — prints the prompt and reads code from stdin.
+ * Use this when running inside a Claude Code session to use your allowance.
+ *
+ * The harness prints the task, you paste to Claude, Claude generates code,
+ * you paste the code back. Type END_OF_CODE on a line by itself to finish.
+ */
+async function callInteractive(prompt: string, start: number): Promise<ModelResponse> {
+  console.log("\n╔══════════════════════════════════════════════════════════╗");
+  console.log("║  INTERACTIVE MODE — paste the prompt below to your LLM  ║");
+  console.log("║  Then paste the generated code back here.               ║");
+  console.log("║  Type END_OF_CODE on a line by itself when done.        ║");
+  console.log("╚══════════════════════════════════════════════════════════╝\n");
+  console.log("── SYSTEM PROMPT ──");
+  console.log(SYSTEM_PROMPT);
+  console.log("\n── TASK PROMPT ──");
+  console.log(prompt);
+  console.log("\n── PASTE YOUR CODE BELOW (end with END_OF_CODE) ──\n");
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const lines: string[] = [];
+
+  const code = await new Promise<string>((resolve) => {
+    rl.on("line", (line) => {
+      if (line.trim() === "END_OF_CODE") {
+        rl.close();
+        resolve(lines.join("\n"));
+      } else {
+        lines.push(line);
+      }
+    });
+  });
+
+  return {
+    code: extractCode(code),
+    rawOutput: code,
+    inputTokens: 0,
+    outputTokens: 0,
+    latencyMs: Date.now() - start,
+  };
+}
+
+/**
+ * File mode — reads pre-generated code from a file.
+ * Use: --model file:/path/to/solution.ts
+ */
+async function callFromFile(filepath: string, start: number): Promise<ModelResponse> {
+  if (!existsSync(filepath)) {
+    throw new Error(`File not found: ${filepath}`);
+  }
+  const code = readFileSync(filepath, "utf-8");
+  return {
+    code: extractCode(code),
+    rawOutput: code,
+    inputTokens: 0,
+    outputTokens: 0,
+    latencyMs: Date.now() - start,
+  };
 }
