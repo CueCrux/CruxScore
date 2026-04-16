@@ -58,24 +58,40 @@ const cruxComposite = computeIntelligenceCruxComposite(cruxMappings);
 
 console.log();
 for (const c of report.categoryScores) {
-  console.log(`  ${c.category} ${c.categoryLabel}: ${(c.accuracy * 100).toFixed(0)}% (${c.correctCount}/${c.itemCount})`);
+  console.log(`  ${c.category} ${c.label}: ${(c.accuracy * 100).toFixed(0)}% (${c.correctCount}/${c.itemCount})`);
 }
 console.log();
 for (const f of report.factorScores) {
-  console.log(`  ${f.factor} ${f.factorLabel}: IQ ${f.iqEquivalent} (${f.ci95Lower}-${f.ci95Upper})`);
+  const ci = f.confidenceInterval;
+  console.log(`  ${f.factor} ${f.factorLabel}: IQ ${f.iqEquivalent.toFixed(0)} (${ci?.lower?.toFixed(0) ?? '?'}-${ci?.upper?.toFixed(0) ?? '?'})`);
 }
 console.log();
+const ci = report.compositeIQ.confidenceInterval;
 console.log(`  Full Scale IQ: ${report.compositeIQ.fullScaleIQ}`);
-console.log(`  95% CI: ${report.compositeIQ.ci95Lower}-${report.compositeIQ.ci95Upper}`);
+console.log(`  95% CI: ${ci?.lower?.toFixed(0) ?? '?'}-${ci?.upper?.toFixed(0) ?? '?'}`);
 console.log(`  Classification: ${report.compositeIQ.classification}`);
 console.log(`  CruxScore: ${(cruxComposite * 100).toFixed(1)}%`);
 
 const runId = `opus-interactive-${Date.now().toString(36)}`;
 mkdirSync("results", { recursive: true });
+const compositeCI = report.compositeIQ.confidenceInterval;
 const result = {
   runId, model, modelId: model, mode: "closed_prompt_only", runMode: "closed_prompt_only",
   benchmarkVersion: "1.0", score: report,
-  compositeIQ: report.compositeIQ, categoryScores: report.categoryScores, factorScores: report.factorScores,
+  compositeIQ: {
+    ...report.compositeIQ,
+    ciLower: compositeCI?.lower,
+    ciUpper: compositeCI?.upper,
+    ci95Lower: compositeCI?.lower,
+    ci95Upper: compositeCI?.upper,
+  },
+  categoryScores: report.categoryScores.map(c => ({ ...c, categoryLabel: c.label })),
+  factorScores: report.factorScores.map(f => ({
+    ...f,
+    iq: f.iqEquivalent,
+    ci95Lower: f.confidenceInterval?.lower,
+    ci95Upper: f.confidenceInterval?.upper,
+  })),
   totalItems: itemScores.length, totalCorrect: correct,
   usage: { totalInputTokens: 0, totalOutputTokens: 0, estimatedCostUsd: 0, totalLatencyMs: 90000 },
   cruxComposite, durationMs: 90000,

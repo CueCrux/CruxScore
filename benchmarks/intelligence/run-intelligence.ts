@@ -169,7 +169,33 @@ function parseResponse(raw: string): ParsedOutput | null {
 // ---------------------------------------------------------------------------
 
 import Anthropic from "@anthropic-ai/sdk";
-import { createInterface } from "node:readline";
+import { createInterface, type Interface as ReadlineInterface } from "node:readline";
+
+// Shared readline for interactive mode (creating multiple instances on stdin breaks piping)
+let sharedRl: ReadlineInterface | null = null;
+
+function getInteractiveRl(): ReadlineInterface {
+  if (!sharedRl) {
+    sharedRl = createInterface({ input: process.stdin, output: process.stdout, terminal: false });
+  }
+  return sharedRl;
+}
+
+function readUntilMarker(marker: string): Promise<string> {
+  const rl = getInteractiveRl();
+  const lines: string[] = [];
+  return new Promise<string>((resolve) => {
+    const onLine = (line: string) => {
+      if (line.trim() === marker) {
+        rl.removeListener("line", onLine);
+        resolve(lines.join("\n"));
+      } else {
+        lines.push(line);
+      }
+    };
+    rl.on("line", onLine);
+  });
+}
 
 async function callModel(
   model: string,
@@ -180,20 +206,11 @@ async function callModel(
 
   // Interactive mode: print prompt, read response from stdin
   if (model === "interactive") {
-    const IQ_SYSTEM = 'Respond with JSON: { "final_answer": "your answer", "confidence": 0.0-1.0, "working": ["step 1", ...] }';
     console.log("\n── ITEM ──");
     console.log(prompt.slice(0, 500));
     console.log("\n── PASTE JSON RESPONSE (end with END_OF_RESPONSE) ──");
 
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const lines: string[] = [];
-    const text = await new Promise<string>((resolve) => {
-      rl.on("line", (line) => {
-        if (line.trim() === "END_OF_RESPONSE") { rl.close(); resolve(lines.join("\n")); }
-        else lines.push(line);
-      });
-    });
-
+    const text = await readUntilMarker("END_OF_RESPONSE");
     return { text, inputTokens: 0, outputTokens: 0, latencyMs: Date.now() - start };
   }
 

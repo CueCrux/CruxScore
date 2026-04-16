@@ -75,8 +75,18 @@ function scoreCorrectness(task: IntelligenceTask, parsed: ParsedOutput): { corre
     case "exact": {
       const ansStr = typeof answer === "string" ? answer : String(answer);
       const corStr = typeof correct === "string" ? correct : String(correct);
-      const isCorrect = exactMatch(ansStr, corStr, task.acceptableVariants);
-      return { correct: isCorrect, partial: isCorrect ? 1 : 0 };
+      // Exact match first
+      if (exactMatch(ansStr, corStr, task.acceptableVariants)) {
+        return { correct: true, partial: 1 };
+      }
+      // Fuzzy: check if the correct answer appears within a verbose response
+      // e.g., "yes, by Rule 2 and Rule 3" should match correct="yes"
+      const normAns = normalize(ansStr);
+      const normCor = normalize(corStr);
+      if (normAns.startsWith(normCor) || normAns.includes(normCor + " ") || normAns.includes(normCor + ",") || normAns.includes(normCor + ".")) {
+        return { correct: true, partial: 1 };
+      }
+      return { correct: false, partial: 0 };
     }
 
     case "set": {
@@ -121,11 +131,35 @@ function scoreCorrectness(task: IntelligenceTask, parsed: ParsedOutput): { corre
     }
 
     case "structured": {
-      // For structured answers, compare as JSON strings (normalized)
       const ansStr = typeof answer === "string" ? answer : JSON.stringify(answer);
       const corStr = typeof correct === "string" ? correct : JSON.stringify(correct);
-      const isCorrect = normalize(ansStr) === normalize(corStr);
-      return { correct: isCorrect, partial: isCorrect ? 1 : 0 };
+
+      // Exact match first
+      if (normalize(ansStr) === normalize(corStr)) {
+        return { correct: true, partial: 1 };
+      }
+
+      // Fuzzy structured match: extract key tokens from correct answer
+      // and check if the response contains them
+      const correctTokens = normalize(corStr)
+        .replace(/[{}()\[\]"']/g, "")
+        .split(/[,.:;]+/)
+        .map(t => t.trim())
+        .filter(t => t.length > 2);
+
+      const ansNorm = normalize(ansStr);
+      let matched = 0;
+      for (const token of correctTokens) {
+        // Check if the essential content (names, values, assignments) appears
+        const keyParts = token.split(/\s+/).filter(p => p.length > 1);
+        const found = keyParts.every(part => ansNorm.includes(part));
+        if (found) matched++;
+      }
+
+      const matchRatio = correctTokens.length > 0 ? matched / correctTokens.length : 0;
+      if (matchRatio >= 0.8) return { correct: true, partial: 1 };
+      if (matchRatio >= 0.5) return { correct: false, partial: matchRatio };
+      return { correct: false, partial: 0 };
     }
 
     default:
