@@ -1,0 +1,29 @@
+{
+  "taskId": "D001",
+  "version": 1,
+  "category": "D",
+  "categoryLabel": "Causal & Counterfactual",
+  "tier": 1,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": -1.0, "c": 0 },
+  "track": "R1",
+  "statement": "In a factory, Machine P produces Part X. Part X is required to assemble Product Y. Product Y is required to assemble Product Z.\n\nMachine P breaks down and cannot produce Part X.\n\nWhich products can no longer be assembled? List all affected products.",
+  "constraints": [
+    "Only consider the dependency chain as stated",
+    "A product cannot be assembled if any required input is unavailable"
+  ],
+  "answerType": "set",
+  "correctAnswer": ["product y", "product z"],
+  "acceptableVariants": ["y and z", "product y, product z"],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "array", "items": { "type": "string" } },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

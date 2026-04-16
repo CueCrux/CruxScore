@@ -1,0 +1,35 @@
+{
+  "taskId": "D002",
+  "version": 1,
+  "category": "D",
+  "categoryLabel": "Causal & Counterfactual",
+  "tier": 2,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 0.0, "c": 0 },
+  "track": "R1",
+  "statement": "A garden irrigation system works as follows:\n\n- The rain sensor detects whether it rained in the last 24 hours.\n- If the rain sensor reports NO rain, the timer activates the pump at 6 AM.\n- The pump draws water from the tank.\n- If the tank level is above 20%, the pump sends water to the sprinklers.\n- If the tank level is 20% or below, the pump activates the refill valve instead, and no water goes to the sprinklers that cycle.\n- The refill valve fills the tank from the mains supply.\n\nCurrent state: It did not rain in the last 24 hours. The tank is at 15%. It is now 6 AM.\n\nAnswer these three questions:\n1. Do the sprinklers run this cycle?\n2. Does the refill valve activate?\n3. If the rain sensor were removed from the system entirely (so the timer always activates the pump regardless of rain), and it had rained in the last 24 hours, what would happen at 6 AM given the same 15% tank level?",
+  "constraints": [
+    "Follow the causal chain exactly as described",
+    "Answer all three sub-questions"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "1: no, 2: yes, 3: the pump would activate (no rain sensor to block it), tank is at 15% so refill valve activates, sprinklers do not run",
+  "acceptableVariants": [
+    "1=no, 2=yes, 3=pump runs and refill valve activates and sprinklers do not run"
+  ],
+  "partialCreditRules": [
+    { "condition": "questions_1_and_2_correct", "credit": 0.5 },
+    { "condition": "question_3_correct", "credit": 0.5 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

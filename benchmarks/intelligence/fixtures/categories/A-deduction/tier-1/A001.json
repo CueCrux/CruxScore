@@ -1,0 +1,33 @@
+{
+  "taskId": "A001",
+  "version": 1,
+  "category": "A",
+  "categoryLabel": "Deduction & Elimination",
+  "tier": 1,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": -1.0, "c": 0 },
+  "track": "R1",
+  "statement": "Three friends — Kael, Mira, and Tobin — each ordered a different drink: tea, coffee, or juice. Use these clues to determine who ordered what.\n\n1. Kael did not order coffee.\n2. Mira did not order tea.\n3. Tobin ordered juice.\n\nList each person and their drink.",
+  "constraints": [
+    "Each person gets exactly one drink",
+    "All three drinks are assigned",
+    "Answer must match all three clues"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "kael: tea, mira: coffee, tobin: juice",
+  "acceptableVariants": [
+    "kael=tea, mira=coffee, tobin=juice",
+    "kael-tea mira-coffee tobin-juice"
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

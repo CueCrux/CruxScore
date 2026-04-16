@@ -1,0 +1,37 @@
+{
+  "taskId": "A003",
+  "version": 1,
+  "category": "A",
+  "categoryLabel": "Deduction & Elimination",
+  "tier": 3,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 1.5, "c": 0 },
+  "track": "R1",
+  "statement": "Five people — Kael, Mira, Tobin, Wren, and Joss — each live on a different floor of a building (floors 1 through 5, where 1 is ground). Each owns a different pet: cat, dog, fish, bird, lizard. Determine who lives on which floor and owns which pet.\n\n1. Mira lives on a higher floor than Kael but a lower floor than Wren.\n2. The person on floor 3 owns the fish.\n3. Tobin does not live on floor 1 or floor 5.\n4. Joss owns the bird.\n5. The person on floor 1 owns the dog.\n6. Kael does not own the cat.\n7. Wren lives on floor 5.\n8. Tobin lives exactly two floors above Kael.\n9. Joss does not live on floor 2.\n10. The person on floor 5 does not own the cat.\n\nGive each person's floor and pet.",
+  "constraints": [
+    "Each person on exactly one floor",
+    "Each person owns exactly one pet",
+    "All five floors and all five pets assigned",
+    "Answer must satisfy all ten clues"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "kael: floor 1 dog, mira: floor 2 cat, tobin: floor 3 fish, joss: floor 4 bird, wren: floor 5 lizard",
+  "acceptableVariants": [
+    "kael=floor1=dog, mira=floor2=cat, tobin=floor3=fish, joss=floor4=bird, wren=floor5=lizard"
+  ],
+  "partialCreditRules": [
+    { "condition": "all_floors_correct_but_pets_wrong", "credit": 0.4 },
+    { "condition": "at_least_4_fully_correct", "credit": 0.7 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

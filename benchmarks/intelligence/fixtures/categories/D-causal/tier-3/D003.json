@@ -1,0 +1,37 @@
+{
+  "taskId": "D003",
+  "version": 1,
+  "category": "D",
+  "categoryLabel": "Causal & Counterfactual",
+  "tier": 3,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 1.5, "c": 0 },
+  "track": "R1",
+  "statement": "A network of five processing nodes (N1 through N5) passes messages according to these rules:\n\n- N1 sends a message to N2 and N3 simultaneously at time T=0.\n- N2 forwards any message it receives to N4 after a 2-step delay.\n- N3 forwards any message it receives to N4 and N5 after a 1-step delay.\n- N4 only activates (produces output) when it has received messages from BOTH N2 and N3. It activates at the time step when the second message arrives.\n- N5 activates immediately upon receiving any message.\n- When N4 activates, it sends a message to N5 with no delay.\n\nQuestion 1: At what time step does N4 activate?\nQuestion 2: At what time step does N5 first activate?\nQuestion 3: Counterfactual — if the link from N1 to N3 were removed, which nodes would never activate?\nQuestion 4: Counterfactual — if N2's delay were changed from 2 steps to 0 steps (instant forwarding), at what time step would N4 activate?",
+  "constraints": [
+    "Messages propagate exactly as described",
+    "Simultaneous arrival counts as both received",
+    "Answer all four sub-questions"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "1: t=2, 2: t=1, 3: n4 and n5 never activate (n2 still forwards to n4 at t=2 but n4 never receives from n3 so it never activates; n5 never receives from n3 or n4), 4: t=1 (n2 forwards instantly at t=0 and n3 forwards at t=1; n4 gets both at t=1 since n3 message arrives at t=1)",
+  "acceptableVariants": [
+    "1=t2, 2=t1, 3=n4 and n5, 4=t1"
+  ],
+  "partialCreditRules": [
+    { "condition": "questions_1_and_2_correct", "credit": 0.4 },
+    { "condition": "question_3_correct", "credit": 0.3 },
+    { "condition": "question_4_correct", "credit": 0.3 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

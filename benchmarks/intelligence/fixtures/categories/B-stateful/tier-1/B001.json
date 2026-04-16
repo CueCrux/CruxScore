@@ -1,0 +1,28 @@
+{
+  "taskId": "B001",
+  "version": 1,
+  "category": "B",
+  "categoryLabel": "Stateful Process Reasoning",
+  "tier": 1,
+  "chcPrimaryFactor": "Gwm",
+  "irt": { "model": "2PL", "a": 1.0, "b": -1.0, "c": 0 },
+  "track": "R1",
+  "statement": "A counter starts at 0. The following operations are applied in order:\n\n1. Add 5.\n2. Double the current value.\n3. Subtract 3.\n4. Add 1.\n\nWhat is the final value of the counter?",
+  "constraints": [
+    "Operations applied strictly in listed order",
+    "Each operation modifies the running total"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "8",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

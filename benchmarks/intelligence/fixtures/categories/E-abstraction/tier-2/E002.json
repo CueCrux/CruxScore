@@ -1,0 +1,33 @@
+{
+  "taskId": "E002",
+  "version": 1,
+  "category": "E",
+  "categoryLabel": "Abstraction & Transformation",
+  "tier": 2,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 0.0, "c": 0 },
+  "track": "R1",
+  "statement": "A transformation rule converts one 3x3 text grid into another. Study the examples and apply the rule to the test input.\n\nExample 1:\nInput:          Output:\nA B C           C B A\nD E F    →      F E D\nG H I           I H G\n\nExample 2:\nInput:          Output:\nX Y Z           Z Y X\nP Q R    →      R Q P\nS T U           U T S\n\nTest input:\nInput:\nK L M\nN O P\nQ R S\n\nWhat is the output grid? Give it as three rows.",
+  "constraints": [
+    "Identify the transformation from the examples",
+    "Apply the same transformation to the test input",
+    "Output must be a 3x3 grid"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "m l k, p o n, s r q",
+  "acceptableVariants": [
+    "M L K / P O N / S R Q",
+    "row1: m l k, row2: p o n, row3: s r q"
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

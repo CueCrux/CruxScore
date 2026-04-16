@@ -1,0 +1,36 @@
+{
+  "taskId": "B003",
+  "version": 1,
+  "category": "B",
+  "categoryLabel": "Stateful Process Reasoning",
+  "tier": 3,
+  "chcPrimaryFactor": "Gwm",
+  "irt": { "model": "2PL", "a": 1.0, "b": 1.5, "c": 0 },
+  "track": "R1",
+  "statement": "Three registers — A, B, and C — start with values A=2, B=5, C=1. Six operations are performed in sequence. Each operation reads the current values of all registers at the time it executes, then writes to the target register.\n\n1. A = B - A\n2. C = A + C\n3. B = A * C\n4. A = B - C\n5. C = A + B\n6. B = C - A\n\nWhat are the final values of A, B, and C?",
+  "constraints": [
+    "Operations execute strictly in order 1 through 6",
+    "Each operation reads current state then writes one register",
+    "Initial values: A=2, B=5, C=1"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "a: 8, b: 12, c: 20",
+  "acceptableVariants": [
+    "a=8, b=12, c=20",
+    "a: 8 b: 12 c: 20"
+  ],
+  "partialCreditRules": [
+    { "condition": "two_of_three_correct", "credit": 0.4 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

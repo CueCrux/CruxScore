@@ -1,0 +1,29 @@
+{
+  "taskId": "E001",
+  "version": 1,
+  "category": "E",
+  "categoryLabel": "Abstraction & Transformation",
+  "tier": 1,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": -1.0, "c": 0 },
+  "track": "R1",
+  "statement": "A sequence of symbols follows a pattern:\n\n@ # @ # # @ # # # @ # # # # ?\n\nThe pattern is: @ followed by an increasing number of # symbols. The first group has 1 #, the second has 2 #, the third has 3 #, the fourth has 4 #.\n\nWhat comes next in the sequence? Give the next complete group (the separator symbol and the repeated symbols).",
+  "constraints": [
+    "Continue the established pattern",
+    "Give the next complete group"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "@ # # # # #",
+  "acceptableVariants": ["@#####", "@ followed by 5 #"],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

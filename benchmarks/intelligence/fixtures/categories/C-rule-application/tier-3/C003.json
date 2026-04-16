@@ -1,0 +1,39 @@
+{
+  "taskId": "C003",
+  "version": 1,
+  "category": "C",
+  "categoryLabel": "Rule Application",
+  "tier": 3,
+  "chcPrimaryFactor": "Gc",
+  "chcSecondaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 1.5, "c": 0 },
+  "track": "R1",
+  "statement": "A grant review board uses this scoring and eligibility policy:\n\nRule 1: Each proposal is scored on three criteria — Impact (0-40), Feasibility (0-30), Novelty (0-30). Total score is the sum.\nRule 2: A proposal is funded if its total score is at least 70 AND no single criterion is below 15.\nRule 3: If a proposer has received a grant in the previous 2 cycles, their Novelty score is reduced by 5 (minimum 0) before the total is computed.\nRule 4: Proposals from new applicants (first-time submitters) receive a 3-point bonus added to their lowest criterion score before the total is computed.\nRule 5: If two or more proposals tie on total score and both meet Rule 2, the one with the higher Impact score is funded first. If Impact also ties, Feasibility breaks the tie.\nRule 6: The board funds at most 2 proposals per cycle.\n\nCurrent cycle proposals:\n- Proposal A (Kael, new applicant): Impact=28, Feasibility=22, Novelty=18\n- Proposal B (Mira, received grant 1 cycle ago): Impact=35, Feasibility=25, Novelty=20\n- Proposal C (Tobin, no recent grants): Impact=30, Feasibility=20, Novelty=21\n- Proposal D (Wren, new applicant): Impact=25, Feasibility=18, Novelty=24\n\nWhich proposals are funded this cycle? Show the adjusted scores.",
+  "constraints": [
+    "Apply rules 1-6 in logical order",
+    "Show adjusted criterion scores for each proposal",
+    "Identify which proposals meet Rule 2 eligibility",
+    "Apply Rule 6 funding cap"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "proposal a: impact=28, feasibility=22, novelty=21 (bonus applied to novelty), total=71, eligible. proposal b: impact=35, feasibility=25, novelty=15 (reduced by 5), total=75, eligible. proposal c: impact=30, feasibility=20, novelty=21, total=71, eligible. proposal d: impact=25, feasibility=21 (bonus applied to feasibility), novelty=24, total=70, eligible. funded: proposal b (75) and proposal c (71, higher impact than a). proposal a not funded (tied at 71 with c but lower impact).",
+  "acceptableVariants": [
+    "funded: b and c"
+  ],
+  "partialCreditRules": [
+    { "condition": "all_adjusted_scores_correct", "credit": 0.5 },
+    { "condition": "correct_eligibility_determinations", "credit": 0.3 },
+    { "condition": "correct_tiebreak_reasoning", "credit": 0.2 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

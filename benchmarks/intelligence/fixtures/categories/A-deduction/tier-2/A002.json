@@ -1,0 +1,37 @@
+{
+  "taskId": "A002",
+  "version": 1,
+  "category": "A",
+  "categoryLabel": "Deduction & Elimination",
+  "tier": 2,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 0.0, "c": 0 },
+  "track": "R1",
+  "statement": "Four coworkers — Wren, Joss, Kael, and Mira — sit in a row of four desks numbered 1 through 4 (left to right). Determine each person's desk using these clues.\n\n1. Wren sits immediately to the left of Joss.\n2. Kael does not sit at desk 1 or desk 2.\n3. Mira sits at a lower-numbered desk than Kael.\n4. Joss does not sit at desk 4.\n5. Mira does not sit at desk 1.\n\nGive each person's desk number.",
+  "constraints": [
+    "Each person sits at exactly one desk",
+    "All four desks are occupied",
+    "Desk numbers are 1 through 4",
+    "Answer must satisfy all five clues"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "wren: 1, joss: 2, mira: 3, kael: 4",
+  "acceptableVariants": [
+    "wren=1, joss=2, mira=3, kael=4",
+    "wren-1 joss-2 mira-3 kael-4"
+  ],
+  "partialCreditRules": [
+    { "condition": "at_least_3_correct_assignments", "credit": 0.5 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

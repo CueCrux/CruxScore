@@ -1,0 +1,35 @@
+{
+  "taskId": "F002",
+  "version": 1,
+  "category": "F",
+  "categoryLabel": "Planning Under Constraints",
+  "tier": 2,
+  "chcPrimaryFactor": "Gs",
+  "chcSecondaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 0.0, "c": 0 },
+  "track": "R1",
+  "statement": "Four tasks have dependencies and durations. Two workers are available (Worker 1 and Worker 2). Each worker can handle one task at a time. Tasks cannot be split across workers.\n\nTask A: 3 hours, no dependencies\nTask B: 2 hours, no dependencies\nTask C: 2 hours, depends on A (cannot start until A is complete)\nTask D: 4 hours, depends on B (cannot start until B is complete)\n\nAll workers start at hour 0. Find a schedule that minimizes the total completion time (makespan). What is the earliest hour at which all tasks are done? Provide the full schedule.",
+  "constraints": [
+    "Two workers available",
+    "Dependencies must be respected",
+    "Tasks cannot be split",
+    "Minimize makespan"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "worker 1: task a (0-3), task c (3-5). worker 2: task b (0-2), task d (2-6). makespan: 6.",
+  "acceptableVariants": [
+    "w1: a(0-3) c(3-5), w2: b(0-2) d(2-6), makespan=6",
+    "worker 1: b(0-2) d(2-6), worker 2: a(0-3) c(3-5), makespan=6"
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

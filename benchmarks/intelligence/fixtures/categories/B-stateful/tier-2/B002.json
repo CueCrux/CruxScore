@@ -1,0 +1,30 @@
+{
+  "taskId": "B002",
+  "version": 1,
+  "category": "B",
+  "categoryLabel": "Stateful Process Reasoning",
+  "tier": 2,
+  "chcPrimaryFactor": "Gwm",
+  "irt": { "model": "2PL", "a": 1.0, "b": 0.0, "c": 0 },
+  "track": "R1",
+  "statement": "A token sits on cell 1 of a 1-dimensional grid with cells numbered 1 through 8. The token follows these movement instructions in order. If a move would take the token off the grid (below 1 or above 8), the token stays in place for that step.\n\n1. Move right 3 cells.\n2. Move left 1 cell.\n3. Move right 4 cells.\n4. Move left 2 cells.\n5. Move right 3 cells.\n6. Move left 5 cells.\n\nWhat cell does the token end on?",
+  "constraints": [
+    "Grid cells are 1 through 8",
+    "Token cannot move below cell 1 or above cell 8",
+    "If a move would leave the grid the token stays put for that step",
+    "Moves are applied in listed order"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "3",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

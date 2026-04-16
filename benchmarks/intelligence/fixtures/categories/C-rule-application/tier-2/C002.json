@@ -1,0 +1,38 @@
+{
+  "taskId": "C002",
+  "version": 1,
+  "category": "C",
+  "categoryLabel": "Rule Application",
+  "tier": 2,
+  "chcPrimaryFactor": "Gc",
+  "chcSecondaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 0.0, "c": 0 },
+  "track": "R1",
+  "statement": "A company's expense reimbursement policy has these rules:\n\nRule 1: Meals are reimbursed up to 40 credits per day.\nRule 2: Travel is reimbursed at 0.5 credits per kilometer.\nRule 3: If a single expense exceeds 200 credits, it requires manager approval before reimbursement.\nRule 4: Expenses submitted more than 30 days after they occurred are not reimbursable.\nRule 5: If the employee is on an approved international assignment, the meal limit in Rule 1 is doubled to 80 credits per day.\nRule 6: Receipts are required for any single expense over 25 credits.\n\nTobin is on an approved international assignment. On day 1, Tobin had meals totaling 75 credits and travel of 300 km. On day 2, Tobin had meals totaling 90 credits and a single equipment purchase of 210 credits. Tobin submits all expenses 10 days after they occurred. All receipts are provided.\n\nWhat is the total reimbursable amount? Break down by item.",
+  "constraints": [
+    "Apply all rules in order",
+    "International assignment modifier applies",
+    "Show per-item calculation"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "day 1 meals: 75, day 1 travel: 150, day 2 meals: 80, day 2 equipment: 210 pending manager approval. total without pending: 305. total if approved: 515.",
+  "acceptableVariants": [
+    "meals day1=75, travel day1=150, meals day2=80, equipment=210 (needs manager approval), total=305 or 515"
+  ],
+  "partialCreditRules": [
+    { "condition": "correct_meal_cap_applied", "credit": 0.3 },
+    { "condition": "correct_travel_calculation", "credit": 0.2 },
+    { "condition": "identifies_manager_approval_needed", "credit": 0.3 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

@@ -1,0 +1,31 @@
+{
+  "taskId": "E003",
+  "version": 1,
+  "category": "E",
+  "categoryLabel": "Abstraction & Transformation",
+  "tier": 3,
+  "chcPrimaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 1.5, "c": 0 },
+  "track": "R1",
+  "statement": "Two transformation rules, T1 and T2, operate on strings of symbols (using letters A-Z). Study the examples to infer each rule, then apply them in sequence.\n\nT1 examples:\n  \"ABCD\" → \"DCBA\"\n  \"XYZ\" → \"ZYX\"\n  \"HELLO\" → \"OLLEH\"\n\nT2 examples:\n  \"ABC\" → \"BCD\"\n  \"XYZ\" → \"YZA\"\n  \"HELLO\" → \"IFMMP\"\n\nT2 operates on each letter independently. The alphabet wraps around (Z+1=A).\n\nNow apply T1 first, then T2 to the result.\n\nInput: \"PARK\"\n\nWhat is the final output after applying T1 then T2?",
+  "constraints": [
+    "T1 is applied first to the input",
+    "T2 is applied to the result of T1",
+    "Alphabet wraps: after Z comes A",
+    "All letters are uppercase in processing"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "lsbq",
+  "acceptableVariants": ["LSBQ"],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

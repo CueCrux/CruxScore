@@ -1,0 +1,30 @@
+{
+  "taskId": "C001",
+  "version": 1,
+  "category": "C",
+  "categoryLabel": "Rule Application",
+  "tier": 1,
+  "chcPrimaryFactor": "Gc",
+  "chcSecondaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": -1.0, "c": 0 },
+  "track": "R1",
+  "statement": "A library uses the following rules for borrowing limits:\n\nRule 1: Standard members may borrow up to 3 books at a time.\nRule 2: Premium members may borrow up to 7 books at a time.\nRule 3: Any member with an overdue book cannot borrow additional books until the overdue book is returned.\nRule 4: Children (age 12 or under) may only borrow from the children's section.\n\nKael is a premium member, age 15, currently has 5 books checked out, and none are overdue. Can Kael borrow 2 more books from the adult section? Answer yes or no and state which rule(s) determine the answer.",
+  "constraints": [
+    "Apply rules exactly as stated",
+    "All relevant rules must be cited"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "yes",
+  "acceptableVariants": ["yes, rule 2 allows up to 7 and kael has 5 so 2 more is within limit"],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}

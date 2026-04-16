@@ -1,0 +1,41 @@
+{
+  "taskId": "F003",
+  "version": 1,
+  "category": "F",
+  "categoryLabel": "Planning Under Constraints",
+  "tier": 3,
+  "chcPrimaryFactor": "Gs",
+  "chcSecondaryFactor": "Gf",
+  "irt": { "model": "2PL", "a": 1.0, "b": 1.5, "c": 0 },
+  "track": "R1",
+  "statement": "Six tasks (T1 through T6) must be scheduled on two machines (M1 and M2). Each task runs on exactly one machine and cannot be interrupted. Tasks on the same machine cannot overlap.\n\nTask durations:\n- T1: 3 hours\n- T2: 2 hours\n- T3: 4 hours\n- T4: 1 hour\n- T5: 2 hours\n- T6: 3 hours\n\nDependencies (a task cannot start until all its prerequisites are complete, regardless of which machine they run on):\n- T3 depends on T1\n- T4 depends on T2\n- T5 depends on T3 and T4 (both must be complete)\n- T6 depends on T4\n\nT1 and T2 have no dependencies and can start at hour 0.\n\nFind a schedule that minimizes the total completion time (makespan). State which machine each task runs on, when it starts, and when it finishes. What is the minimum makespan?",
+  "constraints": [
+    "Two machines available",
+    "Tasks cannot be split or interrupted",
+    "Dependencies must be respected",
+    "Tasks on the same machine cannot overlap",
+    "Minimize the time at which all tasks are complete"
+  ],
+  "answerType": "structured",
+  "correctAnswer": "m1: t1(0-3), t3(3-7), t5(7-9). m2: t2(0-2), t4(2-3), t6(3-6). makespan: 9.",
+  "acceptableVariants": [
+    "m1: t1 0-3 t3 3-7 t5 7-9; m2: t2 0-2 t4 2-3 t6 3-6; makespan=9",
+    "m2: t1(0-3) t3(3-7) t5(7-9); m1: t2(0-2) t4(2-3) t6(3-6); makespan=9"
+  ],
+  "partialCreditRules": [
+    { "condition": "correct_makespan_but_suboptimal_assignment", "credit": 0.5 },
+    { "condition": "all_dependencies_respected", "credit": 0.3 },
+    { "condition": "correct_makespan_value_only", "credit": 0.4 }
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "working": { "type": "array", "items": { "type": "string" } }
+    },
+    "required": ["final_answer", "confidence", "working"]
+  },
+  "isHoldout": false,
+  "scoringWeights": { "correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence": 0.10, "outputCompliance": 0.05 }
+}
