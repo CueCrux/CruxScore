@@ -44,6 +44,8 @@ interface CLIArgs {
   dryRun: boolean;
   verbose: boolean;
   output: string;
+  claimCode?: string;
+  submitUrl: string;
 }
 
 function parseArgs(argv: string[]): CLIArgs {
@@ -55,6 +57,8 @@ function parseArgs(argv: string[]): CLIArgs {
     dryRun: false,
     verbose: false,
     output: "",
+    claimCode: undefined,
+    submitUrl: "https://scorecrux.com",
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -86,6 +90,14 @@ function parseArgs(argv: string[]): CLIArgs {
         break;
       case "--output":
         args.output = next;
+        i++;
+        break;
+      case "--claim-code":
+        args.claimCode = next;
+        i++;
+        break;
+      case "--submit-url":
+        args.submitUrl = next;
         i++;
         break;
       default:
@@ -369,7 +381,47 @@ async function run(): Promise<void> {
   if (!existsSync(outputDir)) mkdirSync(outputDir, { recursive: true });
 
   writeFileSync(outputPath, JSON.stringify(runResult, null, 2));
-  console.log(`  Results saved to: ${outputPath}\n`);
+  console.log(`  Results saved to: ${outputPath}`);
+
+  // Auto-submit to ScoreCrux
+  if (args.claimCode) {
+    const submitUrl = `${args.submitUrl}/api/intelligence/submit`;
+    console.log(`\n  Submitting to ${args.submitUrl}...`);
+    try {
+      const payload = {
+        claimCode: args.claimCode,
+        runId: runResult.runId,
+        model: runResult.model,
+        runMode: runResult.mode,
+        benchmarkVersion: '1.0',
+        score: runResult.score,
+        compositeIQ: runResult.score?.compositeIQ,
+        categoryScores: runResult.score?.categoryScores,
+        factorScores: runResult.score?.factorScores,
+        totalItems: responses.length,
+        totalCorrect: itemScores.filter((s: any) => s.correct).length,
+        usage: runResult.usage,
+        durationMs: totalLatencyMs,
+        cruxComposite: cruxComposite,
+      };
+      const res = await fetch(submitUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        console.log(`  Submitted! IQ: ${data.summary?.iq ?? 'N/A'}, ID: ${data.id}`);
+      } else {
+        const err = await res.text();
+        console.warn(`  Submit failed: ${res.status} ${err.slice(0, 100)}`);
+      }
+    } catch (e: any) {
+      console.warn(`  Submit error: ${e.message}`);
+    }
+  }
+
+  console.log();
 }
 
 run().catch(err => {
