@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
  * Score pre-computed responses and submit to ScoreCrux.
- * Usage: npx tsx run-from-file.ts --responses /tmp/opus-iq-responses.json --model claude-opus-4-6 --claim-code TOWER-...
+ * Usage: npx tsx run-from-file.ts --responses /tmp/opus-iq-responses.json --model claude-opus-4-6 --claim-code CRUX-...
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";

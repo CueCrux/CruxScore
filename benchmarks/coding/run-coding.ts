@@ -5,7 +5,7 @@
  * Usage:
  *   npx tsx run-coding.ts --model claude-sonnet-4-6
  *   npx tsx run-coding.ts --model gpt-5.4 --mode C-A --tasks greenfield-01,bugfix-01
- *   npx tsx run-coding.ts --model claude-sonnet-4-6 --claim-code TOWER-XXXX-XXXXX
+ *   npx tsx run-coding.ts --model claude-sonnet-4-6 --claim-code CRUX-XXXX-XXXXX
  *   npx tsx run-coding.ts --dry-run --verbose
  */
 
