@@ -1,0 +1,109 @@
+{
+  "runId": "aff5c35e",
+  "benchmarkVersion": "1.0",
+  "model": "claude-sonnet-4-6",
+  "mode": "C-A",
+  "startedAt": "2026-04-16T16:52:56.534Z",
+  "completedAt": "2026-04-16T16:53:21.905Z",
+  "taskResults": [
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "c1": {
+        "buildSuccess": true,
+        "typecheckPassed": true,
+        "visibleTestsPassed": 8,
+        "visibleTestsTotal": 8,
+        "hiddenTestsPassed": 12,
+        "hiddenTestsTotal": 12,
+        "lintErrors": 0,
+        "lintWarnings": 0,
+        "score": 1
+      },
+      "c2": {
+        "cyclomaticComplexity": 25,
+        "duplicationRatio": 0.10112359550561797,
+        "dependencyCount": 0,
+        "securitySmells": 0,
+        "linesOfCode": 89,
+        "score": 0.6735955056179777
+      },
+      "c3": {
+        "fileCount": 1,
+        "functionCount": 2,
+        "avgFunctionLength": 45,
+        "maxNestingDepth": 4,
+        "exportCount": 3,
+        "decompositionScore": 0.8,
+        "abstractionScore": 0.7,
+        "overEngineeringPenalty": 1,
+        "score": 0.8300000000000001
+      },
+      "composite": 0.8517584269662922,
+      "generatedCode": "export interface CronSchedule {\n  minutes: number[];\n  hours: number[];\n  daysOfMonth: number[];\n  months: number[];\n  daysOfWeek: number[];\n  original: string;\n}\n\nexport class CronParseError extends Error {\n  constructor(message: string, public field?: string) {\n    super(message);\n    this.name = 'CronParseError';\n  }\n}\n\nfunction parseField(field: string, min: number, max: number, fieldName: string): number[] {\n  const results: number[] = [];\n\n  if (field === '*') {\n    for (let i = min; i <= max; i++) results.push(i);\n    return results;\n  }\n\n  // Handle lists\n  if (field.includes(',')) {\n    const parts = field.split(',');\n    for (const part of parts) {\n      const values = parseField(part.trim(), min, max, fieldName);\n      for (const v of values) {\n        if (!results.includes(v)) results.push(v);\n      }\n    }\n    results.sort((a, b) => a - b);\n    return results;\n  }\n\n  // Handle range with step: N-M/S\n  const rangeStepMatch = field.match(/^(\\d+)-(\\d+)\\/(\\d+)$/);\n  if (rangeStepMatch) {\n    const start = parseInt(rangeStepMatch[1], 10);\n    const end = parseInt(rangeStepMatch[2], 10);\n    const step = parseInt(rangeStepMatch[3], 10);\n\n    if (start < min || start > max) throw new CronParseError(`Value ${start} out of range [${min}-${max}] in field \"${fieldName}\"`, fieldName);\n    if (end < min || end > max) throw new CronParseError(`Value ${end} out of range [${min}-${max}] in field \"${fieldName}\"`, fieldName);\n    if (start > end) throw new CronParseError(`Invalid range ${start}-${end} in field \"${fieldName}\"`, fieldName);\n    if (step <= 0) throw new CronParseError(`Invalid step ${step} in field \"${fieldName}\"`, fieldName);\n\n    for (let i = start; i <= end; i += step) results.push(i);\n    return results;\n  }\n\n  // Handle step with wildcard: */N\n  const wildcardStepMatch = field.match(/^\\*\\/(\\d+)$/);\n  if (wildcardStepMatch) {\n    const step = parseInt(wildcardStepMatch[1], 10);\n    if (step <= 0) throw new CronParseError(`Invalid step ${step} in field \"${fieldName}\"`, fieldName);\n    for (let i = min; i <= max; i += step) results.push(i);\n    return results;\n  }\n\n  // Handle range: N-M\n  const rangeMatch = field.match(/^(\\d+)-(\\d+)$/);\n  if (rangeMatch) {\n    const start = parseInt(rangeMatch[1], 10);\n    const end = parseInt(rangeMatch[2], 10);\n\n    if (start < min || start > max) throw new CronParseError(`Value ${start} out of range [${min}-${max}] in field \"${fieldName}\"`, fieldName);\n    if (end < min || end > max) throw new CronParseError(`Value ${end} out of range [${min}-${max}] in field \"${fieldName}\"`, fieldName);\n    if (start > end) throw new CronParseError(`Invalid range ${start}-${end} in field \"${fieldName}\"`, fieldName);\n\n    for (let i = start; i <= end; i++) results.push(i);\n    return results;\n  }\n\n  // Handle single value\n  const singleMatch = field.match(/^(\\d+)$/);\n  if (singleMatch) {\n    const val = parseInt(singleMatch[1], 10);\n    if (val < min || val > max) throw new CronParseError(`Value ${val} out of range [${min}-${max}] in field \"${fieldName}\"`, fieldName);\n    results.push(val);\n    return results;\n  }\n\n  throw new CronParseError(`Invalid syntax \"${field}\" in field \"${fieldName}\"`, fieldName);\n}\n\nexport function parseCron(expression: string): CronSchedule {\n  const fields = expression.trim().split(/\\s+/);\n\n  if (fields.length !== 5) {\n    throw new CronParseError(`Expected 5 fields, got ${fields.length}`);\n  }\n\n  const [minuteField, hourField, domField, monthField, dowField] = fields;\n\n  const minutes = parseField(minuteField, 0, 59, 'minute');\n  const hours = parseField(hourField, 0, 23, 'hour');\n  const daysOfMonth = parseField(domField, 1, 31, 'day-of-month');\n  const months = parseField(monthField, 1, 12, 'month');\n  const daysOfWeek = parseField(dowField, 0, 6, 'day-of-week');\n\n  return {\n    minutes,\n    hours,\n    daysOfMonth,\n    months,\n    daysOfWeek,\n    original: expression,\n  };\n}",
+      "buildOutput": "npm install succeeded",
+      "testOutput": "{\"numTotalTestSuites\":2,\"numPassedTestSuites\":2,\"numFailedTestSuites\":0,\"numPendingTestSuites\":0,\"numTotalTests\":8,\"numPassedTests\":8,\"numFailedTests\":0,\"numPendingTests\":0,\"numTodoTests\":0,\"snapshot\":{\"added\":0,\"failure\":false,\"filesAdded\":0,\"filesRemoved\":0,\"filesRemovedList\":[],\"filesUnmatched\":0,\"filesUpdated\":0,\"matched\":0,\"total\":0,\"unchecked\":0,\"uncheckedKeysByFile\":[],\"unmatched\":0,\"updated\":0,\"didUpdate\":false},\"startTime\":1776358393280,\"success\":true,\"testResults\":[{\"assertionResults\":[{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests parses wildcard expression\",\"status\":\"passed\",\"title\":\"parses wildcard expression\",\"duration\":1.4057320000000004,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests parses single values\",\"status\":\"passed\",\"title\":\"parses single values\",\"duration\":0.5756729999999948,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests parses ranges\",\"status\":\"passed\",\"title\":\"parses ranges\",\"duration\":0.18207499999999754,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests parses lists\",\"status\":\"passed\",\"title\":\"parses lists\",\"duration\":0.09540499999999952,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests parses steps\",\"status\":\"passed\",\"title\":\"parses steps\",\"duration\":0.06189999999998008,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests parses range with step\",\"status\":\"passed\",\"title\":\"parses range with step\",\"duration\":0.195114000000018,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - visible tests\"],\"fullName\":\"parseCron - visible tests preserves original expression\",\"status\":\"passed\",\"title\":\"preserves original expression\",\"duration\":0.19589000000001988,\"failur\n{\"numTotalTestSuites\":2,\"numPassedTestSuites\":2,\"numFailedTestSuites\":0,\"numPendingTestSuites\":0,\"numTotalTests\":12,\"numPassedTests\":12,\"numFailedTests\":0,\"numPendingTests\":0,\"numTodoTests\":0,\"snapshot\":{\"added\":0,\"failure\":false,\"filesAdded\":0,\"filesRemoved\":0,\"filesRemovedList\":[],\"filesUnmatched\":0,\"filesUpdated\":0,\"matched\":0,\"total\":0,\"unchecked\":0,\"uncheckedKeysByFile\":[],\"unmatched\":0,\"updated\":0,\"didUpdate\":false},\"startTime\":1776358393959,\"success\":true,\"testResults\":[{\"assertionResults\":[{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects minute > 59\",\"status\":\"passed\",\"title\":\"rejects minute > 59\",\"duration\":0.8039410000000089,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects hour > 23\",\"status\":\"passed\",\"title\":\"rejects hour > 23\",\"duration\":0.17351600000000644,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects day-of-month 0\",\"status\":\"passed\",\"title\":\"rejects day-of-month 0\",\"duration\":0.1177860000000237,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects day-of-month > 31\",\"status\":\"passed\",\"title\":\"rejects day-of-month > 31\",\"duration\":0.07388900000000831,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects month 0\",\"status\":\"passed\",\"title\":\"rejects month 0\",\"duration\":0.10017299999998386,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects month > 12\",\"status\":\"passed\",\"title\":\"rejects month > 12\",\"duration\":0.11909900000000562,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"parseCron - hidden edge cases\"],\"fullName\":\"parseCron - hidden edge cases rejects day-of-week > 6\",\"status\":\"passed\",\"t",
+      "lintOutput": "",
+      "inputTokens": 1153,
+      "outputTokens": 1323,
+      "latencyMs": 14110,
+      "estimatedCostUsd": 0.023304
+    },
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "c1": {
+        "buildSuccess": true,
+        "typecheckPassed": true,
+        "visibleTestsPassed": 4,
+        "visibleTestsTotal": 4,
+        "hiddenTestsPassed": 8,
+        "hiddenTestsTotal": 8,
+        "lintErrors": 0,
+        "lintWarnings": 0,
+        "score": 1
+      },
+      "c2": {
+        "cyclomaticComplexity": 2,
+        "duplicationRatio": 0.05714285714285714,
+        "dependencyCount": 0,
+        "securitySmells": 0,
+        "linesOfCode": 35,
+        "score": 0.9285714285714286
+      },
+      "c3": {
+        "fileCount": 1,
+        "functionCount": 0,
+        "avgFunctionLength": 35,
+        "maxNestingDepth": 3,
+        "exportCount": 1,
+        "decompositionScore": 0.3,
+        "abstractionScore": 0.7,
+        "overEngineeringPenalty": 1,
+        "score": 0.6299999999999999
+      },
+      "composite": 0.901,
+      "generatedCode": "export class RateLimiter {\n  private tokens: number;\n  private readonly maxTokens: number;\n  private readonly refillRate: number;\n  private lastRefill: number;\n\n  constructor(maxTokens: number, refillRate: number) {\n    this.maxTokens = maxTokens;\n    this.tokens = maxTokens;\n    this.refillRate = refillRate;\n    this.lastRefill = Date.now();\n  }\n\n  tryConsume(): boolean {\n    this.refill();\n\n    if (this.tokens >= 1) {\n      this.tokens -= 1;\n      return true;\n    }\n    return false;\n  }\n\n  getTokens(): number {\n    this.refill();\n    return this.tokens;\n  }\n\n  reset(): void {\n    this.tokens = this.maxTokens;\n    this.lastRefill = Date.now();\n  }\n\n  private refill(): void {\n    const now = Date.now();\n    const elapsed = now - this.lastRefill;\n\n    const newTokens = (elapsed * this.refillRate) / 1000;\n\n    this.tokens = Math.min(this.maxTokens, this.tokens + newTokens);\n\n    this.lastRefill = now;\n  }\n}",
+      "buildOutput": "npm install succeeded",
+      "testOutput": "{\"numTotalTestSuites\":2,\"numPassedTestSuites\":2,\"numFailedTestSuites\":0,\"numPendingTestSuites\":0,\"numTotalTests\":4,\"numPassedTests\":4,\"numFailedTests\":0,\"numPendingTests\":0,\"numTodoTests\":0,\"snapshot\":{\"added\":0,\"failure\":false,\"filesAdded\":0,\"filesRemoved\":0,\"filesRemovedList\":[],\"filesUnmatched\":0,\"filesUpdated\":0,\"matched\":0,\"total\":0,\"unchecked\":0,\"uncheckedKeysByFile\":[],\"unmatched\":0,\"updated\":0,\"didUpdate\":false},\"startTime\":1776358400442,\"success\":true,\"testResults\":[{\"assertionResults\":[{\"ancestorTitles\":[\"RateLimiter - visible tests\"],\"fullName\":\"RateLimiter - visible tests allows requests within capacity\",\"status\":\"passed\",\"title\":\"allows requests within capacity\",\"duration\":1.418261000000001,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - visible tests\"],\"fullName\":\"RateLimiter - visible tests rejects when tokens exhausted\",\"status\":\"passed\",\"title\":\"rejects when tokens exhausted\",\"duration\":0.3870729999999867,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - visible tests\"],\"fullName\":\"RateLimiter - visible tests refills tokens over time\",\"status\":\"passed\",\"title\":\"refills tokens over time\",\"duration\":0.33700199999998404,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - visible tests\"],\"fullName\":\"RateLimiter - visible tests does not exceed max tokens after long wait\",\"status\":\"passed\",\"title\":\"does not exceed max tokens after long wait\",\"duration\":0.18230299999999033,\"failureMessages\":[],\"meta\":{}}],\"startTime\":1776358400628,\"endTime\":1776358400630.387,\"status\":\"passed\",\"message\":\"\",\"name\":\"/home/myles/CueCrux/ScoreCrux/benchmarks/coding/.sandbox-tmp/sandbox-4cee3032/tests/visible/test.test.ts\"}]}\n\n{\"numTotalTestSuites\":2,\"numPassedTestSuites\":2,\"numFailedTestSuites\":0,\"numPendingTestSuites\":0,\"numTotalTests\":8,\"numPassedTests\":8,\"numFailedTests\":0,\"numPendingTests\":0,\"numTodoTests\":0,\"snapshot\":{\"added\":0,\"failure\":false,\"filesAdded\":0,\"filesRemoved\":0,\"filesRemovedList\":[],\"filesUnmatched\":0,\"filesUpdated\":0,\"matched\":0,\"total\":0,\"unchecked\":0,\"uncheckedKeysByFile\":[],\"unmatched\":0,\"updated\":0,\"didUpdate\":false},\"startTime\":1776358401002,\"success\":true,\"testResults\":[{\"assertionResults\":[{\"ancestorTitles\":[\"RateLimiter - hidden edge cases\"],\"fullName\":\"RateLimiter - hidden edge cases handles zero initial tokens\",\"status\":\"passed\",\"title\":\"handles zero initial tokens\",\"duration\":1.4601370000000031,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - hidden edge cases\"],\"fullName\":\"RateLimiter - hidden edge cases partial refill allows consumption\",\"status\":\"passed\",\"title\":\"partial refill allows consumption\",\"duration\":0.5725060000000042,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - hidden edge cases\"],\"fullName\":\"RateLimiter - hidden edge cases burst followed by wait recovers\",\"status\":\"passed\",\"title\":\"burst followed by wait recovers\",\"duration\":0.5044559999999763,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - hidden edge cases\"],\"fullName\":\"RateLimiter - hidden edge cases reset restores full capacity\",\"status\":\"passed\",\"title\":\"reset restores full capacity\",\"duration\":0.15504200000000878,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - hidden edge cases\"],\"fullName\":\"RateLimiter - hidden edge cases high refill rate works\",\"status\":\"passed\",\"title\":\"high refill rate works\",\"duration\":0.14416199999999435,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"RateLimiter - hidden edge cases\"],\"fullName\":\"RateLimiter - hidden edge cases fractional tokens handled correctly\",\"status\":\"passed\",\"title\":\"fractional tokens handled correctly\",\"duration\":0.19538399999999,\"failureMessages\":[],\"meta\":{}},{",
+      "lintOutput": "",
+      "inputTokens": 1272,
+      "outputTokens": 313,
+      "latencyMs": 3259,
+      "estimatedCostUsd": 0.008511000000000001
+    }
+  ],
+  "aggregate": {
+    "compositeScore": 0.8763792134831461,
+    "testPassRate": 1,
+    "qualityScore": 0.8010834670947031,
+    "designScore": 0.73,
+    "totalTasks": 2
+  },
+  "usage": {
+    "totalInputTokens": 2425,
+    "totalOutputTokens": 1636,
+    "estimatedCostUsd": 0.031815,
+    "totalLatencyMs": 17369
+  }
+}

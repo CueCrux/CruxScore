@@ -1,0 +1,843 @@
+{
+  "runId": "f0d1211d",
+  "benchmarkVersion": "1.0",
+  "modelId": "claude-sonnet-4-20250514",
+  "runMode": "closed_prompt_only",
+  "taskSetId": "a604f3ef3a8a13956e4c149af34cb1c492c5825104acffc4ab4f14f80d867523",
+  "startedAt": "2026-04-16T19:38:08.323Z",
+  "completedAt": "2026-04-16T19:38:08.335Z",
+  "responses": [
+    {
+      "taskId": "A001",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "A002",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "A003",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "B001",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "B002",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "B003",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "C001",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "C002",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "C003",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "D001",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "D002",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "D003",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "E001",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "E002",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "E003",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "F001",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.329Z"
+    },
+    {
+      "taskId": "F002",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.330Z"
+    },
+    {
+      "taskId": "F003",
+      "modelId": "claude-sonnet-4-20250514",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-04-16T19:38:08.330Z"
+    }
+  ],
+  "score": {
+    "itemScores": [
+      {
+        "taskId": "A001",
+        "category": "A",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "A002",
+        "category": "A",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 2,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 0,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "A003",
+        "category": "A",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 3,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 1.5,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "B001",
+        "category": "B",
+        "chcFactor": "Gwm",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "B002",
+        "category": "B",
+        "chcFactor": "Gwm",
+        "chcPrimaryWeight": 1,
+        "tier": 2,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 0,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "B003",
+        "category": "B",
+        "chcFactor": "Gwm",
+        "chcPrimaryWeight": 1,
+        "tier": 3,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 1.5,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "C001",
+        "category": "C",
+        "chcFactor": "Gc",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "C002",
+        "category": "C",
+        "chcFactor": "Gc",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 2,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 0,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "C003",
+        "category": "C",
+        "chcFactor": "Gc",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 3,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 1.5,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "D001",
+        "category": "D",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "D002",
+        "category": "D",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 2,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 0,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "D003",
+        "category": "D",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 3,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 1.5,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "E001",
+        "category": "E",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "E002",
+        "category": "E",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 2,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 0,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "E003",
+        "category": "E",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 3,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 1.5,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "F001",
+        "category": "F",
+        "chcFactor": "Gs",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "F002",
+        "category": "F",
+        "chcFactor": "Gs",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 2,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 0,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "F003",
+        "category": "F",
+        "chcFactor": "Gs",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 3,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": 1.5,
+          "c": 0
+        }
+      }
+    ],
+    "categoryScores": [
+      {
+        "category": "A",
+        "label": "Deduction & Elimination",
+        "itemCount": 3,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "B",
+        "label": "Stateful Process Reasoning",
+        "itemCount": 3,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "C",
+        "label": "Rule Application",
+        "itemCount": 3,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "D",
+        "label": "Causal & Counterfactual",
+        "itemCount": 3,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "E",
+        "label": "Abstraction & Transformation",
+        "itemCount": 3,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "F",
+        "label": "Planning Under Constraints",
+        "itemCount": 3,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      }
+    ],
+    "factorScores": [
+      {
+        "factor": "Gc",
+        "factorLabel": "Comprehension-Knowledge",
+        "theta": {
+          "theta": -0.9258785567943589,
+          "se": 0.8188544237749434,
+          "information": 0.527521625732212,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 3,
+        "iqEquivalent": 86.11182164808461,
+        "confidenceInterval": {
+          "lower": 62,
+          "upper": 110,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "C001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "C002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "C003",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      },
+      {
+        "factor": "Gf",
+        "factorLabel": "Fluid Reasoning",
+        "theta": {
+          "theta": -2.098884119086759,
+          "se": 0.6225828841966495,
+          "information": 1.5533549902954442,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 15,
+        "iqEquivalent": 68.51673821369862,
+        "confidenceInterval": {
+          "lower": 50,
+          "upper": 87,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "A001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "A002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "A003",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "C001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "C002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "C003",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "D001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "D002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "D003",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "E001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "E002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "E003",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "F001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "F002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "F003",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      },
+      {
+        "factor": "Gs",
+        "factorLabel": "Processing Speed",
+        "theta": {
+          "theta": -0.9258785567943589,
+          "se": 0.8188544237749434,
+          "information": 0.527521625732212,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 3,
+        "iqEquivalent": 86.11182164808461,
+        "confidenceInterval": {
+          "lower": 62,
+          "upper": 110,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "F001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "F002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "F003",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      },
+      {
+        "factor": "Gwm",
+        "factorLabel": "Working Memory",
+        "theta": {
+          "theta": -0.9258785567943589,
+          "se": 0.8188544237749434,
+          "information": 0.527521625732212,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 3,
+        "iqEquivalent": 86.11182164808461,
+        "confidenceInterval": {
+          "lower": 62,
+          "upper": 110,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "B001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "B002",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "B003",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      }
+    ],
+    "compositeIQ": {
+      "fullScaleIQ": 66,
+      "confidenceInterval": {
+        "lower": 49,
+        "upper": 84,
+        "level": 0.95
+      },
+      "percentile": 0.9,
+      "classification": "Very Low"
+    }
+  },
+  "usage": {
+    "totalInputTokens": 0,
+    "totalOutputTokens": 0,
+    "estimatedCostUsd": 0
+  },
+  "antiContamination": {
+    "taskSetHash": "a604f3ef3a8a13956e4c149af34cb1c492c5825104acffc4ab4f14f80d867523",
+    "holdoutItemsUsed": 0,
+    "variantRotation": []
+  }
+}
