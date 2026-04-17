@@ -293,17 +293,23 @@ async function callModel(
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY required for OpenAI models");
 
+    // gpt-5.x and o-series reasoning models use `max_completion_tokens`
+    // (and reject `max_tokens`). Older gpt-4/gpt-3.5 still use `max_tokens`.
+    const usesCompletionTokens = /^(gpt-5|o[13])/.test(model);
+    const body: Record<string, unknown> = {
+      model,
+      messages: [
+        { role: "system", content: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text." },
+        { role: "user", content: prompt },
+      ],
+    };
+    if (usesCompletionTokens) body.max_completion_tokens = 4096;
+    else body.max_tokens = 4096;
+
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model,
-        max_tokens: 4096,
-        messages: [
-          { role: "system", content: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text." },
-          { role: "user", content: prompt },
-        ],
-      }),
+      body: JSON.stringify(body),
     });
     const data = (await res.json()) as any;
     if (data.error) throw new Error(`OpenAI: ${data.error.message}`);
