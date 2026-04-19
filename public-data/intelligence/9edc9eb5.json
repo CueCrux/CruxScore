@@ -1,0 +1,91 @@
+{
+  "id": "9edc9eb5",
+  "type": "intelligence",
+  "runId": "9edc9eb5",
+  "benchmarkVersion": "1.0",
+  "model": "claude-sonnet-4-6",
+  "runMode": "closed_prompt_only",
+  "submitter": "Myles Bryning",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "fullScaleIQ": 80,
+  "iqCILower": null,
+  "iqCIUpper": null,
+  "percentile": 7.2,
+  "classification": "Low Average",
+  "categoryScores": [
+    {
+      "category": "A",
+      "label": "Deduction & Elimination",
+      "accuracy": 0,
+      "correctCount": 0,
+      "itemCount": 3
+    },
+    {
+      "category": "B",
+      "label": "Stateful Process Reasoning",
+      "accuracy": 0.6666666666666666,
+      "correctCount": 2,
+      "itemCount": 3
+    },
+    {
+      "category": "C",
+      "label": "Rule Application",
+      "accuracy": 0,
+      "correctCount": 0,
+      "itemCount": 3
+    },
+    {
+      "category": "D",
+      "label": "Causal & Counterfactual",
+      "accuracy": 0.3333333333333333,
+      "correctCount": 1,
+      "itemCount": 3
+    },
+    {
+      "category": "E",
+      "label": "Abstraction & Transformation",
+      "accuracy": 0.3333333333333333,
+      "correctCount": 1,
+      "itemCount": 3
+    },
+    {
+      "category": "F",
+      "label": "Planning Under Constraints",
+      "accuracy": 0,
+      "correctCount": 0,
+      "itemCount": 3
+    }
+  ],
+  "factorScores": [
+    {
+      "factor": "Gc",
+      "factorLabel": "Comprehension-Knowledge",
+      "iqEquivalent": 86.11182164808461
+    },
+    {
+      "factor": "Gf",
+      "factorLabel": "Fluid Reasoning",
+      "iqEquivalent": 69.1937204713733
+    },
+    {
+      "factor": "Gs",
+      "factorLabel": "Processing Speed",
+      "iqEquivalent": 86.11182164808461
+    },
+    {
+      "factor": "Gwm",
+      "factorLabel": "Working Memory",
+      "iqEquivalent": 115.29703182110431
+    }
+  ],
+  "totalItems": 18,
+  "totalCorrect": 4,
+  "totalInputTokens": 6704,
+  "totalOutputTokens": 8838,
+  "estimatedCostUsd": 0.152682,
+  "durationMs": 60000,
+  "cruxComposite": 0.477,
+  "date": "2026-04-16",
+  "submittedAt": "2026-04-16T16:28:25.533Z"
+}
