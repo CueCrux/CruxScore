@@ -1,0 +1,56 @@
+{
+  "taskId": "F005",
+  "version": 2,
+  "category": "F",
+  "categoryLabel": "Planning Under Constraints",
+  "tier": 5,
+  "chcPrimaryFactor": "Gs",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "Eight jobs must run on three machines, numbered 1, 2 and 3. Each job runs on exactly one machine, start to finish, without interruption; a machine runs one job at a time.\n\nDurations (hours): W1 = 6, W2 = 5, W3 = 5, W4 = 4, W5 = 3, W6 = 4, W7 = 3, W8 = 2.\n\nDependencies \u2014 a job may start only once every job it depends on has finished:\nW4 depends on W1\nW5 depends on W2\nW6 depends on W3\nW7 depends on W4 and W5\nW8 depends on W6 and W7\n\nMachine restrictions:\nW1, W3 and W6 may run only on machine 1.\nW2 may run only on machine 1 or machine 2.\nEvery other job may run on any machine.\n\nAll three machines are free from hour 0. What is the minimum number of hours in which all eight jobs can be completed?",
+  "constraints": [
+    "Three machines, each running at most one job at a time",
+    "Jobs cannot be split or paused once started",
+    "The machine restrictions must be respected; the answer is the true minimum, which is larger than both the longest dependency chain and the total work divided by three",
+    "Answer with the minimum makespan as a whole number of hours"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "17",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  },
+  "chcSecondaryFactor": "Gf"
+}

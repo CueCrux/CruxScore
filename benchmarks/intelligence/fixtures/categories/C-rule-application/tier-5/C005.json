@@ -1,0 +1,55 @@
+{
+  "taskId": "C005",
+  "version": 2,
+  "category": "C",
+  "categoryLabel": "Rule Application",
+  "tier": 5,
+  "chcPrimaryFactor": "Gc",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A grant panel scores four applicants.\n\nG1. Every applicant starts from their base score.\nG2. First-time applicants receive +8.\nG3. An applicant who received an award within the last 2 years is penalised 10.\nG4. Applicants from the northern region receive +5.\nG5. Exception to G4: the northern bonus does not apply to first-time applicants.\nG6. Exception to G5: the northern bonus does apply to a first-time applicant whose base score is below 60.\nG7. An applicant is funded if their final score is 62 or more.\n\nApplicants:\n- Amara: base 62, last award 1 year ago, not first-time, northern region.\n- Bruno: base 58, last award 4 years ago, not first-time, southern region.\n- Chen: base 55, no previous award, first-time applicant, northern region.\n- Dara: base 60, last award 3 years ago, not first-time, southern region.\n\nGive every applicant's final score, and say which applicants are funded.",
+  "constraints": [
+    "Rules apply in numerical order, and each exception overrides the rule it names",
+    "G3 does not apply to an applicant who has never received an award",
+    "Answer in the form \"Amara=<score>, Bruno=<score>, Chen=<score>, Dara=<score>; funded: <names or none>\""
+  ],
+  "answerType": "structured",
+  "correctAnswer": "Amara=57, Bruno=58, Chen=68, Dara=60; funded: Chen",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  },
+  "chcSecondaryFactor": "Gf"
+}

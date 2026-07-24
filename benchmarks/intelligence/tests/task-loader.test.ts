@@ -19,8 +19,10 @@ const FIXTURES_DIR = new URL("../fixtures", import.meta.url).pathname;
 describe("loadManifest", () => {
   it("loads the task bank manifest", async () => {
     const manifest = await loadManifest(FIXTURES_DIR);
-    expect(manifest.version).toBe("1.0");
-    expect(manifest.totalTasks).toBe(18);
+    // 1.1 = the 30-item bank (tiers 4-5 added 2026-07-24). Scores are not
+    // comparable across bank versions, so this number is load-bearing.
+    expect(manifest.version).toBe("1.1");
+    expect(manifest.totalTasks).toBe(30);
     expect(Object.keys(manifest.categories)).toHaveLength(6);
   });
 
@@ -64,19 +66,19 @@ describe("loadTask", () => {
 // ---------------------------------------------------------------------------
 
 describe("loadAllTasks", () => {
-  it("loads all 18 seed tasks", async () => {
+  it("loads all 30 bank items (6 categories x 5 tiers)", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
-    expect(tasks.length).toBe(18);
+    expect(tasks.length).toBe(30);
   });
 
-  it("has 3 tasks per category", async () => {
+  it("has 5 tasks per category, one per tier", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
     const byCat = new Map<string, number>();
     for (const t of tasks) {
       byCat.set(t.category, (byCat.get(t.category) ?? 0) + 1);
     }
     for (const count of byCat.values()) {
-      expect(count).toBe(3);
+      expect(count).toBe(5);
     }
   });
 
@@ -94,9 +96,25 @@ describe("loadAllTasks", () => {
 // ---------------------------------------------------------------------------
 
 describe("selectTaskSet", () => {
-  it("selects all 18 tasks with default config", async () => {
+  it("selects 24 items by default — tiers 2-5, one per category per tier", async () => {
     const selected = await selectTaskSet({}, FIXTURES_DIR);
-    expect(selected.length).toBe(18);
+    expect(selected.length).toBe(24);
+    // Tier 1 is excluded by default: every current model passes it, so it
+    // costs a call and contributes no information.
+    expect(selected.some(t => t.tier === 1)).toBe(false);
+    expect(selected.some(t => t.tier === 5)).toBe(true);
+  });
+
+  it("selects only the requested tiers", async () => {
+    const hard = await selectTaskSet({ tiers: [4, 5] }, FIXTURES_DIR);
+    expect(hard.length).toBe(12);
+    expect(hard.every(t => t.tier === 4 || t.tier === 5)).toBe(true);
+  });
+
+  it("honours the legacy tier-1-to-3 selection for comparability with old runs", async () => {
+    const legacy = await selectTaskSet({ tiers: [1, 2, 3], itemsPerCategory: 3 }, FIXTURES_DIR);
+    expect(legacy.length).toBe(18);
+    expect(legacy.every(t => t.tier <= 3)).toBe(true);
   });
 
   it("filters by category", async () => {
@@ -104,7 +122,7 @@ describe("selectTaskSet", () => {
       { categories: ["A", "B"] },
       FIXTURES_DIR,
     );
-    expect(selected.length).toBe(6);
+    expect(selected.length).toBe(8);
     expect(selected.every(t => t.category === "A" || t.category === "B")).toBe(true);
   });
 
@@ -143,7 +161,7 @@ describe("validateTask", () => {
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it("validates all 18 seed tasks", async () => {
+  it("validates every item in the bank", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
     for (const task of tasks) {
       const errors = validateTask(task);

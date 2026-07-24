@@ -1,0 +1,55 @@
+{
+  "taskId": "B005",
+  "version": 2,
+  "category": "B",
+  "categoryLabel": "Stateful Process Reasoning",
+  "tier": 5,
+  "chcPrimaryFactor": "Gwm",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "Three counters start at A=2, B=3, C=1. The system begins in mode alpha.\n\nRounds are numbered 1 to 14. In each round, apply these steps in order:\n\nStep 1. If the system is in mode alpha: add B's current value to A, then add 1 to C if the round number is odd or 2 to C if it is even.\n        If the system is in mode beta: add C's current value to B, then subtract 1 from A.\nStep 2. Look at the values A and C had at the START of the round two rounds earlier (for rounds 1 and 2, use the starting values A=2, B=3, C=1). If that A was greater than that C, add 2 to B; otherwise add 3 to C.\nStep 3. If the system is in mode alpha and A + B + C is now greater than 30, the system switches permanently to mode beta. Once in mode beta it never returns to alpha.\n\nWhat are A, B and C after round 14 completes, and which mode is the system in?",
+  "constraints": [
+    "Steps apply in order within each round",
+    "Step 2 reads the state as it was at the start of the round two rounds earlier",
+    "The mode switch is permanent and is only checked while in mode alpha",
+    "Answer in the form \"A=<value>, B=<value>, C=<value>, mode=<alpha or beta>\""
+  ],
+  "answerType": "exact",
+  "correctAnswer": "A=6, B=86, C=5, mode=beta",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

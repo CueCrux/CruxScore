@@ -1,0 +1,54 @@
+{
+  "taskId": "A005",
+  "version": 2,
+  "category": "A",
+  "categoryLabel": "Deduction & Elimination",
+  "tier": 5,
+  "chcPrimaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "On an island, every inhabitant is either a knight, who always tells the truth, or a knave, who always lies. Six islanders speak:\n\nAna: \"Exactly three of us are knights.\"\nBo: \"Ana is a knave.\"\nCy: \"At least five of us are knaves.\"\nDi: \"Bo and Cy are both knaves.\"\nEli: \"An odd number of us are knights.\"\nFen: \"Eli is a knight and Di is a knave.\"\n\nEach statement is about these six islanders only.\n\nHow many knights are there, and which islanders are they?",
+  "constraints": [
+    "Every islander is either a knight (always truthful) or a knave (always lying)",
+    "A knight's statement must be true; a knave's statement must be false",
+    "Answer as the count, a colon, then the knights in the order listed above, e.g. \"2: Bo, Fen\" (use \"0: none\" if there are none)"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "3: Ana, Di, Eli",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

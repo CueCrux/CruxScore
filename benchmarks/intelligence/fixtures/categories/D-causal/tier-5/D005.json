@@ -1,0 +1,54 @@
+{
+  "taskId": "D005",
+  "version": 2,
+  "category": "D",
+  "categoryLabel": "Causal & Counterfactual",
+  "tier": 5,
+  "chcPrimaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A signalling network has nodes S, P, Q, R, T and U. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay. Once a node fires it stays active and sends its signal onward immediately.\n\nLinks (source \u2192 destination, delay):\nS \u2192 P, 1\nS \u2192 Q, 4\nP \u2192 R, 1\nQ \u2192 R, 1\nP \u2192 T, 1\nR \u2192 T, 3\nR \u2192 U, 1\nT \u2192 U, 4\nQ \u2192 U, 2\n\nThresholds \u2014 a node fires when it holds signals from at least this many distinct sources at the same time:\nP: 1, Q: 1, R: 2, T: 2, U: 2\n\nSignals expire. An arrived signal counts towards a node's threshold only during the 3 time steps after it arrives: it counts at its arrival time and at the next two time steps, and from then on it no longer counts. A node therefore fires only if enough signals are live at the same moment.\n\nQuestion 1: At what time step does U fire?\nQuestion 2: Which nodes (of P, Q, R, T, U) never fire at all?\nQuestion 3: If signals did not expire, at what time step would U fire?",
+  "constraints": [
+    "A signal counts at its arrival time and for the following 2 time steps only",
+    "A node that fires stays active permanently; expiry applies to signals, not to firing",
+    "Answer in the form \"U=<t>; never: <nodes or none>; U=<t> without expiry\", using the word never where a node never fires"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "U=never; never: R, T, U; U=6 without expiry",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

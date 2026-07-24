@@ -28,7 +28,18 @@ const TIER_DIRS: Record<DifficultyTier, string> = {
   1: "tier-1",
   2: "tier-2",
   3: "tier-3",
+  4: "tier-4",
+  5: "tier-5",
 };
+
+export const ALL_TIERS: DifficultyTier[] = [1, 2, 3, 4, 5];
+
+/**
+ * Tiers used when a run does not name any. Tier 1 is excluded: every current
+ * model passes it, so it costs a call and contributes no information. See the
+ * resolution note in README.md.
+ */
+export const DEFAULT_TIERS: DifficultyTier[] = [2, 3, 4, 5];
 
 /**
  * Load the task bank manifest.
@@ -54,7 +65,7 @@ export async function loadTask(
   const categoriesDir = join(fixturesDir, "categories");
 
   // Search across tiers for the task file
-  for (const tier of [1, 2, 3] as DifficultyTier[]) {
+  for (const tier of ALL_TIERS) {
     const tierDir = TIER_DIRS[tier];
     const filePath = join(categoriesDir, catDir, tierDir, `${taskId}.json`);
     try {
@@ -104,8 +115,10 @@ export async function loadAllTasks(
 export interface TaskSelectionConfig {
   /** Categories to include (default: all). */
   categories?: ReasoningCategory[];
-  /** Number of items per category (default: 3). */
+  /** Number of items per category (default: one per selected tier). */
   itemsPerCategory?: number;
+  /** Difficulty tiers to draw from (default: DEFAULT_TIERS). */
+  tiers?: DifficultyTier[];
   /** Preferred difficulty distribution. If null, select evenly across tiers. */
   tierDistribution?: Partial<Record<DifficultyTier, number>>;
   /** Exclude holdout items (default: true). */
@@ -123,7 +136,8 @@ export async function selectTaskSet(
 ): Promise<IntelligenceTask[]> {
   const {
     categories = ["A", "B", "C", "D", "E", "F"] as ReasoningCategory[],
-    itemsPerCategory = 3,
+    tiers = DEFAULT_TIERS,
+    itemsPerCategory = tiers.length,
     excludeHoldouts = true,
     excludeTaskIds = [],
   } = config;
@@ -133,7 +147,7 @@ export async function selectTaskSet(
   const selected: IntelligenceTask[] = [];
 
   for (const cat of categories) {
-    let catTasks = allTasks.filter(t => t.category === cat);
+    let catTasks = allTasks.filter(t => t.category === cat && tiers.includes(t.tier));
 
     if (excludeHoldouts) {
       catTasks = catTasks.filter(t => !t.isHoldout);

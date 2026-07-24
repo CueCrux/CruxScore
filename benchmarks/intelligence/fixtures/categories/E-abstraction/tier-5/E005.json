@@ -1,0 +1,54 @@
+{
+  "taskId": "E005",
+  "version": 2,
+  "category": "E",
+  "categoryLabel": "Abstraction & Transformation",
+  "tier": 5,
+  "chcPrimaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A transformation turns one uppercase word into another. Five worked examples:\n\nCANOE \u2192 GQPCE\nTIGER \u2192 TGIKV\nMOON \u2192 LLKJ\nSPIRAL \u2192 MFOXIP\nGLASS \u2192 UUCNI\n\nApply the same transformation to HARBOUR.",
+  "constraints": [
+    "The alphabet wraps in both directions: after Z comes A, before A comes Z",
+    "The same rule applies to every example and to the answer",
+    "Answer with the transformed word in uppercase letters only"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "TWQDTCJ",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

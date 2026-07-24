@@ -7,10 +7,11 @@
  * produces an IQ-equivalent composite.
  *
  * Usage:
- *   npx tsx run-intelligence.ts --model claude-sonnet-4-20250514
+ *   npx tsx run-intelligence.ts --model claude-opus-5
  *   npx tsx run-intelligence.ts --model gpt-5.4 --mode closed_prompt_only --categories A,B,D
  *   npx tsx run-intelligence.ts --dry-run --verbose
- *   npx tsx run-intelligence.ts --model claude-opus-4-20250514 --items-per-category 2 --output results/run1.json
+ *   npx tsx run-intelligence.ts --model claude-sonnet-5 --items-per-category 2 --output results/run1.json
+ *   npx tsx run-intelligence.ts --model claude-opus-5 --max-tokens 32000   # bigger output budget
  */
 
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -23,14 +24,17 @@ import type {
   ItemScore,
   RunMode,
   ReasoningCategory,
+  DifficultyTier,
   IntelligenceRunResult,
   ParsedOutput,
 } from "./lib/types.js";
-import { selectTaskSet } from "./lib/task-loader.js";
+import { selectTaskSet, DEFAULT_TIERS } from "./lib/task-loader.js";
+import { parseResponse } from "./lib/response-parser.js";
 import { hashTaskSet } from "./lib/anti-contamination.js";
 import { scoreItem } from "./scoring/item-scorer.js";
 import { generateReport } from "./scoring/iq-reporter.js";
 import { mapToCruxFundamentals, computeIntelligenceCruxComposite } from "./scoring/crux-integration.js";
+import { judgeItem, parseJudgeSpec, type JudgeConfig, type ItemJudgement } from "./scoring/judge.js";
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing
@@ -40,13 +44,25 @@ interface CLIArgs {
   model: string;
   mode: RunMode;
   categories: ReasoningCategory[];
-  itemsPerCategory: number;
+  /** Difficulty tiers to draw from. */
+  tiers: DifficultyTier[];
+  /** Undefined = one item per selected tier. */
+  itemsPerCategory?: number;
   dryRun: boolean;
   verbose: boolean;
   interactive: boolean;
   output: string;
   claimCode?: string;
   submitUrl: string;
+  /** Undefined = per-model default (see defaultMaxTokens). */
+  maxTokens?: number;
+  allowTruncated: boolean;
+  /** False drops the (redundant) system prompt — see SYSTEM_PROMPT. */
+  systemPrompt: boolean;
+  /** Judge panel consulted on deterministic misses only (rescue-only). */
+  judges: JudgeConfig[];
+  /** Repeat the whole run this many times and report the stack. */
+  runs: number;
 }
 
 function parseArgs(argv: string[]): CLIArgs {
@@ -54,7 +70,8 @@ function parseArgs(argv: string[]): CLIArgs {
     model: "claude-sonnet-4-20250514",
     mode: "closed_prompt_only",
     categories: ["A", "B", "C", "D", "E", "F"],
-    itemsPerCategory: 3,
+    tiers: [...DEFAULT_TIERS],
+    itemsPerCategory: undefined,
     dryRun: false,
     verbose: false,
     interactive: false,
@@ -62,6 +79,11 @@ function parseArgs(argv: string[]): CLIArgs {
     // Env fallback keeps the code off argv (visible in `ps`); --claim-code overrides.
     claimCode: process.env.SCORECRUX_CLAIM_CODE || undefined,
     submitUrl: "https://scorecrux.com",
+    maxTokens: undefined,
+    allowTruncated: false,
+    systemPrompt: true,
+    judges: [],
+    runs: 1,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -85,6 +107,10 @@ function parseArgs(argv: string[]): CLIArgs {
         args.itemsPerCategory = parseInt(next, 10);
         i++;
         break;
+      case "--tiers":
+        args.tiers = next.split(",").map(t => parseInt(t.trim(), 10)) as DifficultyTier[];
+        i++;
+        break;
       case "--dry-run":
         args.dryRun = true;
         break;
@@ -104,6 +130,32 @@ function parseArgs(argv: string[]): CLIArgs {
         break;
       case "--submit-url":
         args.submitUrl = next;
+        i++;
+        break;
+      case "--max-tokens":
+        args.maxTokens = parseInt(next, 10);
+        i++;
+        break;
+      case "--allow-truncated":
+        args.allowTruncated = true;
+        break;
+      case "--no-system-prompt":
+        args.systemPrompt = false;
+        break;
+      case "--judge":
+        // Default panel: one Claude, one GPT, both off the local Crucible
+        // subscription planes, and neither of them the model under test.
+        args.judges = [
+          parseJudgeSpec("claude-opus-4-8@http://100.75.64.43:10010"),
+          parseJudgeSpec("gpt-5.6@http://100.75.64.43:9992"),
+        ];
+        break;
+      case "--judge-model":
+        args.judges.push(parseJudgeSpec(next));
+        i++;
+        break;
+      case "--runs":
+        args.runs = Math.max(1, parseInt(next, 10));
         i++;
         break;
       default:
@@ -146,31 +198,6 @@ function buildPrompt(task: IntelligenceTask): string {
 }
 
 // ---------------------------------------------------------------------------
-// Response parser
-// ---------------------------------------------------------------------------
-
-function parseResponse(raw: string): ParsedOutput | null {
-  try {
-    // Strip markdown code fences if present
-    let cleaned = raw.trim();
-    if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
-    else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
-    if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
-    cleaned = cleaned.trim();
-
-    const parsed = JSON.parse(cleaned);
-
-    return {
-      final_answer: parsed.final_answer ?? "",
-      confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0,
-      working: Array.isArray(parsed.working) ? parsed.working : [],
-    };
-  } catch {
-    return null;
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Model pricing (USD per 1M tokens)
 // ---------------------------------------------------------------------------
 
@@ -185,6 +212,7 @@ interface PricePerMillion { input: number; output: number; }
 const MODEL_PRICING: Array<{ match: RegExp; price: PricePerMillion }> = [
   { match: /^claude-fable-5/,         price: { input: 10.0, output: 50.0 } }, // Fable 5 tier
   { match: /^claude-mythos-5/,        price: { input: 10.0, output: 50.0 } }, // Mythos 5 (same tier as Fable 5)
+  { match: /^claude-opus-5/,          price: { input: 5.0,  output: 25.0 } }, // Opus 5 — Opus 4.8 list price
   { match: /^claude-sonnet-5/,        price: { input: 3.0,  output: 15.0 } },
   { match: /^claude-opus-4-8/,        price: { input: 5.0,  output: 25.0 } },
   { match: /^claude-opus-4-7/,        price: { input: 5.0,  output: 25.0 } }, // inherits 4-family pricing
@@ -209,11 +237,56 @@ function estimateModelCost(model: string, inputTokens: number, outputTokens: num
 }
 
 // ---------------------------------------------------------------------------
+// Output budget
+// ---------------------------------------------------------------------------
+
+/**
+ * Models whose extended thinking is ON by default. `max_tokens` caps thinking
+ * AND visible text together, so the historical 4096 budget can be spent inside
+ * the thinking block and truncate the JSON answer — scoring a capable model as
+ * wrong. These get a larger default; every other model keeps 4096 so previously
+ * published runs stay comparable. Override either with --max-tokens.
+ */
+/**
+ * Bank version. 1.0 = the original 18 items (tiers 1-3). 1.1 = the 30-item
+ * bank that added tiers 4-5 after the frontier hit the old ceiling. A score is
+ * only meaningful against the bank it was measured on.
+ */
+const BENCHMARK_VERSION = "1.1";
+
+const THINKING_ON_BY_DEFAULT = /^claude-(opus-5|fable-5|mythos-5|sonnet-5)/;
+const DEFAULT_MAX_TOKENS = 4096;
+const THINKING_MAX_TOKENS = 16000;
+
+function defaultMaxTokens(model: string): number {
+  return THINKING_ON_BY_DEFAULT.test(model) ? THINKING_MAX_TOKENS : DEFAULT_MAX_TOKENS;
+}
+
+// ---------------------------------------------------------------------------
 // Model caller
 // ---------------------------------------------------------------------------
 
 import Anthropic from "@anthropic-ai/sdk";
 import { createInterface, type Interface as ReadlineInterface } from "node:readline";
+
+/**
+ * Restates the response contract that buildPrompt() already puts in the user
+ * turn. Redundant by design — it exists to pin the format on providers that
+ * weight the system turn more heavily.
+ *
+ * `--no-system-prompt` drops it. Needed on subscription backends that deliver
+ * it via the Claude CLI's `--append-system-prompt`, where it lands on top of
+ * Claude Code's own agent prompt rather than acting as a plain API system
+ * turn. Measured on claude-opus-5 through Crucible 2026-07-24: with the
+ * system prompt, `final_answer` on B001 came back 15/17/18 across samples
+ * while the same response's `working` array derived the correct 8 — the model
+ * commits to the first field before it reasons. Without it, 8 every time.
+ * claude-sonnet-5, claude-fable-5 and claude-opus-4-8 answer correctly either
+ * way, so this is specific to Opus 5 on that path. Any run that drops it must
+ * say so alongside the score.
+ */
+const SYSTEM_PROMPT =
+  "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text.";
 
 // Shared readline for interactive mode (creating multiple instances on stdin breaks piping)
 let sharedRl: ReadlineInterface | null = null;
@@ -257,7 +330,9 @@ async function callModel(
   prompt: string,
   _mode: RunMode,
   interactive: boolean = false,
-): Promise<{ text: string; inputTokens: number; outputTokens: number; latencyMs: number }> {
+  maxTokens: number = DEFAULT_MAX_TOKENS,
+  sendSystemPrompt: boolean = true,
+): Promise<{ text: string; inputTokens: number; outputTokens: number; latencyMs: number; stopReason: string | null }> {
   const start = Date.now();
 
   // Interactive mode: print prompt, read response from stdin.
@@ -269,16 +344,16 @@ async function callModel(
     console.log("\n── PASTE JSON RESPONSE (end with END_OF_RESPONSE) ──");
 
     const text = await readUntilMarker("END_OF_RESPONSE");
-    return { text, inputTokens: 0, outputTokens: 0, latencyMs: Date.now() - start };
+    return { text, inputTokens: 0, outputTokens: 0, latencyMs: Date.now() - start, stopReason: null };
   }
 
   if (model.startsWith("claude")) {
     const client = new Anthropic();
     const response = await client.messages.create({
       model,
-      max_tokens: 4096,
+      max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
-      system: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text.",
+      ...(sendSystemPrompt ? { system: SYSTEM_PROMPT } : {}),
     });
 
     // response.model is the canonical ID Anthropic actually served
@@ -297,6 +372,7 @@ async function callModel(
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       latencyMs: Date.now() - start,
+      stopReason: (response as any).stop_reason ?? null,
     };
   }
 
@@ -314,14 +390,14 @@ async function callModel(
     //    message entirely.
     const isReasoningModel = /^(gpt-5|o[13])/.test(model);
     const messages: Array<{ role: string; content: string }> = [];
-    if (!isReasoningModel) {
-      messages.push({ role: "system", content: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text." });
+    if (!isReasoningModel && sendSystemPrompt) {
+      messages.push({ role: "system", content: SYSTEM_PROMPT });
     }
     messages.push({ role: "user", content: prompt });
 
     const body: Record<string, unknown> = { model, messages };
-    if (isReasoningModel) body.max_completion_tokens = 4096;
-    else body.max_tokens = 4096;
+    if (isReasoningModel) body.max_completion_tokens = maxTokens;
+    else body.max_tokens = maxTokens;
 
     // OPENAI_BASE_URL lets the harness point at an OpenAI-compatible proxy
     // (e.g. the clawd subscription backend) without changing the model id.
@@ -343,6 +419,7 @@ async function callModel(
       inputTokens: data.usage?.prompt_tokens ?? 0,
       outputTokens: data.usage?.completion_tokens ?? 0,
       latencyMs: Date.now() - start,
+      stopReason: data.choices?.[0]?.finish_reason ?? null,
     };
   }
 
@@ -353,23 +430,38 @@ async function callModel(
 // Main runner
 // ---------------------------------------------------------------------------
 
-async function run(): Promise<void> {
-  const args = parseArgs(process.argv);
+interface RunSummary {
+  runId: string;
+  correct: number;
+  total: number;
+  iq: number;
+  deterministicCorrect: number;
+  deterministicIQ: number;
+  outputPath: string;
+}
+
+async function executeRun(args: CLIArgs, runIndex: number, totalRuns: number): Promise<RunSummary> {
   const runId = randomUUID().slice(0, 8);
   const startedAt = new Date().toISOString();
+  const maxTokens = args.maxTokens ?? defaultMaxTokens(args.model);
 
   console.log(`\n  ScoreCrux Intelligence Benchmark v1.0`);
-  console.log(`  Run ID: ${runId}`);
+  console.log(`  Run ID: ${runId}${totalRuns > 1 ? `  (run ${runIndex} of ${totalRuns})` : ""}`);
   console.log(`  Model: ${args.model}`);
   console.log(`  Mode: ${args.mode}`);
   console.log(`  Categories: ${args.categories.join(", ")}`);
-  console.log(`  Items/category: ${args.itemsPerCategory}`);
+  console.log(`  Tiers: ${args.tiers.join(", ")}${args.tiers.join(",") === DEFAULT_TIERS.join(",") ? " (default)" : ""}`);
+  console.log(`  Items/category: ${args.itemsPerCategory ?? args.tiers.length}`);
+  console.log(`  Max tokens: ${maxTokens}${args.maxTokens === undefined ? " (default)" : " (--max-tokens)"}`);
+  if (!args.systemPrompt) console.log(`  System prompt: OFF (--no-system-prompt) — declare this alongside the score`);
+  if (args.judges.length > 0) console.log(`  Judges: ${args.judges.map(j => `${j.model}@${j.base}`).join(", ")} (rescue-only, unanimous)`);
   if (args.dryRun) console.log(`  ** DRY RUN **`);
   console.log();
 
   // 1. Load task set
   const tasks = await selectTaskSet({
     categories: args.categories,
+    tiers: args.tiers,
     itemsPerCategory: args.itemsPerCategory,
   });
 
@@ -382,6 +474,8 @@ async function run(): Promise<void> {
 
   // 2. Run each task
   const responses: TaskResponse[] = [];
+  const truncatedItems: string[] = [];
+  const declinedItems: string[] = [];
   let totalLatencyMs = 0;
 
   for (const task of tasks) {
@@ -407,9 +501,19 @@ async function run(): Promise<void> {
       continue;
     }
 
-    const result = await callModel(args.model, prompt, args.mode, args.interactive);
+    const result = await callModel(args.model, prompt, args.mode, args.interactive, maxTokens, args.systemPrompt);
     const parsed = parseResponse(result.text);
     totalLatencyMs += result.latencyMs;
+
+    // A truncated or declined item is not a wrong answer — say so loudly rather
+    // than letting it score as a miss and depress the IQ estimate silently.
+    if (result.stopReason === "max_tokens" || result.stopReason === "length") {
+      truncatedItems.push(task.taskId);
+      console.warn(`    ! [${task.taskId}] output budget exhausted (${maxTokens} tokens) — answer truncated. Re-run with a higher --max-tokens.`);
+    } else if (result.stopReason === "refusal" || result.stopReason === "content_filter") {
+      declinedItems.push(task.taskId);
+      console.warn(`    ! [${task.taskId}] model declined the item (stop_reason=${result.stopReason}).`);
+    }
 
     responses.push({
       taskId: task.taskId,
@@ -421,6 +525,7 @@ async function run(): Promise<void> {
       inputTokens: result.inputTokens,
       outputTokens: result.outputTokens,
       timestamp: new Date().toISOString(),
+      stopReason: result.stopReason,
     });
 
     if (args.verbose && parsed) {
@@ -434,8 +539,50 @@ async function run(): Promise<void> {
     scoreItem(task, responses[i]),
   );
 
+  // 3b. Judge panel — consulted only on deterministic misses, and only able to
+  // flip a miss to a hit. An item the string scorer already accepted never
+  // reaches a judge, so passing items stay reproducible. See scoring/judge.ts.
+  const judgements: ItemJudgement[] = [];
+  let judgedScores = itemScores;
+
+  if (args.judges.length > 0 && !args.dryRun) {
+    const disputed = itemScores
+      .map((score, i) => ({ score, i }))
+      .filter(({ score, i }) => !score.correct && responses[i].parsedOutput);
+
+    console.log(`\n  Judging ${disputed.length} deterministic miss(es) with ${args.judges.map(j => j.model).join(" + ")}`);
+    judgedScores = [...itemScores];
+
+    for (const { score, i } of disputed) {
+      const judgement = await judgeItem(tasks[i], responses[i].parsedOutput!, args.judges);
+      judgements.push(judgement);
+
+      if (judgement.rescued) {
+        const w = tasks[i].scoringWeights;
+        judgedScores[i] = {
+          ...score,
+          correct: true,
+          partialCredit: 1,
+          weightedScore:
+            w.correctness * 1 +
+            w.traceConsistency * score.traceConsistencyScore +
+            w.constraintAdherence * score.constraintAdherenceScore +
+            w.outputCompliance * score.outputComplianceScore,
+        };
+      }
+
+      const verdict = judgement.rescued ? "RESCUED" : judgement.split ? "split — kept as miss" : "upheld as miss";
+      console.log(`    [${tasks[i].taskId}] ${verdict}`);
+      for (const v of judgement.verdicts) {
+        console.log(`        ${v.model}: ${v.equivalent} — ${v.reason.slice(0, 120)}`);
+      }
+    }
+  }
+
   // 4. Generate report (IRT + CHC + IQ)
-  const report = generateReport(itemScores);
+  const report = generateReport(judgedScores);
+  // Kept so a judged run can always be read back against the string scorer.
+  const deterministicReport = judgements.length > 0 ? generateReport(itemScores) : null;
 
   // 5. CruxFundamentals integration
   const cruxMappings = mapToCruxFundamentals(report, totalLatencyMs);
@@ -447,7 +594,10 @@ async function run(): Promise<void> {
 
   const runResult: IntelligenceRunResult = {
     runId,
-    benchmarkVersion: "1.0",
+    // 1.1 = the 30-item bank with tiers 4-5 (2026-07-24). Scores are not
+    // comparable across bank versions, so the version travels with the run and
+    // the board stacks the two separately.
+    benchmarkVersion: BENCHMARK_VERSION,
     modelId: args.model,
     runMode: args.mode,
     taskSetId: hashTaskSet(taskIds),
@@ -469,6 +619,20 @@ async function run(): Promise<void> {
       holdoutItemsUsed: 0,
       variantRotation: [],
     },
+    ...(judgements.length > 0
+      ? {
+          judging: {
+            judges: args.judges.map(j => ({ model: j.model, base: j.base })),
+            rescuedTaskIds: judgements.filter(j => j.rescued).map(j => j.taskId),
+            splitTaskIds: judgements.filter(j => j.split).map(j => j.taskId),
+            judgements,
+            deterministic: {
+              fullScaleIQ: deterministicReport!.compositeIQ.fullScaleIQ,
+              totalCorrect: itemScores.filter(s => s.correct).length,
+            },
+          },
+        }
+      : {}),
   };
 
   // 7. Print results
@@ -491,6 +655,22 @@ async function run(): Promise<void> {
   console.log(`    Percentile: ${report.compositeIQ.percentile}`);
   console.log(`    Classification: ${report.compositeIQ.classification}`);
 
+  if (truncatedItems.length > 0) {
+    console.log(`\n  ⚠ ${truncatedItems.length}/${responses.length} items hit the ${maxTokens}-token output budget: ${truncatedItems.join(", ")}`);
+    console.log(`    Those items are scored as failures, so this score understates the model.`);
+  }
+  if (declinedItems.length > 0) {
+    console.log(`\n  ⚠ ${declinedItems.length}/${responses.length} items were declined by the model: ${declinedItems.join(", ")}`);
+  }
+
+  if (judgements.length > 0) {
+    const rescued = judgements.filter(j => j.rescued).length;
+    const split = judgements.filter(j => j.split).length;
+    console.log(`\n  Judged scoring: ${rescued} miss(es) rescued as equivalent, ${split} split verdict(s) kept as misses`);
+    console.log(`    Deterministic (string match only): IQ ${deterministicReport!.compositeIQ.fullScaleIQ}, ${itemScores.filter(s => s.correct).length}/${itemScores.length} correct`);
+    console.log(`    Judged:                            IQ ${report.compositeIQ.fullScaleIQ}, ${judgedScores.filter(s => s.correct).length}/${judgedScores.length} correct`);
+  }
+
   console.log(`\n  CruxScore Composite: ${(cruxComposite * 100).toFixed(1)}%`);
   console.log(
     `  Usage: ${runResult.usage.totalInputTokens} in / ${runResult.usage.totalOutputTokens} out tokens` +
@@ -499,11 +679,15 @@ async function run(): Promise<void> {
   console.log();
 
   // 8. Save results
-  const outputPath = args.output || resolve(
-    dirname(new URL(import.meta.url).pathname),
-    "results",
-    `intelligence-${runId}.json`,
-  );
+  // Repeat runs each get their own file: a stack is only meaningful if every
+  // member survives to be inspected.
+  const outputPath = args.output
+    ? (totalRuns > 1 ? args.output.replace(/\.json$/, `-r${runIndex}.json`) : args.output)
+    : resolve(
+        dirname(new URL(import.meta.url).pathname),
+        "results",
+        `intelligence-${runId}.json`,
+      );
 
   const outputDir = dirname(outputPath);
   if (!existsSync(outputDir)) mkdirSync(outputDir, { recursive: true });
@@ -511,8 +695,12 @@ async function run(): Promise<void> {
   writeFileSync(outputPath, JSON.stringify(runResult, null, 2));
   console.log(`  Results saved to: ${outputPath}`);
 
-  // Auto-submit to ScoreCrux
-  if (args.claimCode) {
+  // Auto-submit to ScoreCrux. A run with truncated items understates the model,
+  // so it does not go to the public board unless the operator says so.
+  if (args.claimCode && truncatedItems.length > 0 && !args.allowTruncated) {
+    console.warn(`\n  Not submitting: ${truncatedItems.length} item(s) were truncated by the output budget.`);
+    console.warn(`  Re-run with a higher --max-tokens, or submit anyway with --allow-truncated.`);
+  } else if (args.claimCode) {
     const submitUrl = `${args.submitUrl}/api/intelligence/submit`;
     console.log(`\n  Submitting to ${args.submitUrl}...`);
     try {
@@ -523,13 +711,15 @@ async function run(): Promise<void> {
         reportedModel: provenance.reportedModel,
         apiBase: provenance.apiBase,
         runMode: runResult.runMode,
-        benchmarkVersion: '1.0',
+        benchmarkVersion: BENCHMARK_VERSION,
         score: runResult.score,
         compositeIQ: runResult.score?.compositeIQ,
         categoryScores: runResult.score?.categoryScores,
         factorScores: runResult.score?.factorScores,
         totalItems: responses.length,
-        totalCorrect: itemScores.filter((s: any) => s.correct).length,
+        totalCorrect: judgedScores.filter((s: any) => s.correct).length,
+        scoringMode: judgements.length > 0 ? "judged" : "deterministic",
+        judges: args.judges.map(j => `${j.model}@${j.base}`),
         usage: runResult.usage,
         durationMs: totalLatencyMs,
         cruxComposite: cruxComposite,
@@ -556,9 +746,57 @@ async function run(): Promise<void> {
   }
 
   console.log();
+
+  return {
+    runId,
+    correct: judgedScores.filter(s => s.correct).length,
+    total: judgedScores.length,
+    iq: report.compositeIQ.fullScaleIQ,
+    deterministicCorrect: itemScores.filter(s => s.correct).length,
+    deterministicIQ: (deterministicReport ?? report).compositeIQ.fullScaleIQ,
+    outputPath,
+  };
 }
 
-run().catch(err => {
+/**
+ * Repeat-run stack. One run of this bank resolves very little — the measured
+ * within-model spread is ~4.3 IQ points, so a single number cannot separate two
+ * close models (see README, "What this bank can and cannot resolve"). Averaging
+ * N runs shrinks the standard error by sqrt(N); the operator chooses N.
+ */
+function reportStack(summaries: RunSummary[]): void {
+  const iqs = summaries.map(s => s.iq);
+  const mean = iqs.reduce((a, b) => a + b, 0) / iqs.length;
+  const sd =
+    iqs.length > 1
+      ? Math.sqrt(iqs.reduce((a, v) => a + (v - mean) ** 2, 0) / (iqs.length - 1))
+      : 0;
+  const se = iqs.length > 1 ? sd / Math.sqrt(iqs.length) : 0;
+
+  console.log(`  ━━━ Stack of ${summaries.length} runs ━━━\n`);
+  for (const [i, s] of summaries.entries()) {
+    console.log(`    run ${i + 1}  ${s.runId}  ${s.correct}/${s.total}  IQ ${s.iq}`);
+  }
+  console.log(`\n    mean IQ ${mean.toFixed(1)}` +
+    (iqs.length > 1
+      ? `  SD ${sd.toFixed(1)}  SE ${se.toFixed(1)}  95% CI ${Math.round(mean - 1.96 * se)}-${Math.round(mean + 1.96 * se)}`
+      : "  (single run — no interval; use --runs 3 or more before comparing models)"));
+  if (iqs.length > 1 && iqs.length < 3) {
+    console.log(`    note: 2 runs is enough to see spread, not enough to trust a mean — 3 is the floor for ranking.`);
+  }
+  console.log();
+}
+
+async function main(): Promise<void> {
+  const args = parseArgs(process.argv);
+  const summaries: RunSummary[] = [];
+  for (let i = 1; i <= args.runs; i++) {
+    summaries.push(await executeRun(args, i, args.runs));
+  }
+  if (args.runs > 1) reportStack(summaries);
+}
+
+main().catch(err => {
   console.error("Fatal:", err);
   process.exit(1);
 });

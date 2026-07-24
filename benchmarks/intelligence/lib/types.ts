@@ -73,8 +73,16 @@ export interface IRTParameters {
 // Difficulty Tiers
 // ---------------------------------------------------------------------------
 
-/** 1 = easy, 2 = medium, 3 = hard. */
-export type DifficultyTier = 1 | 2 | 3;
+/**
+ * 1 = easy, 2 = medium, 3 = hard, 4 = very hard, 5 = extreme.
+ *
+ * Tiers 4 and 5 (IRT b = +2.5 / +3.5) were added 2026-07-24 because the
+ * frontier had run off the top of the bank: every current model scored 15-16
+ * of the 18 tier-1-to-3 items, so the test could not tell them apart. See
+ * tools/generate-hard-items.py, which derives those items' answer keys by
+ * exhaustive solve rather than by hand.
+ */
+export type DifficultyTier = 1 | 2 | 3 | 4 | 5;
 
 // ---------------------------------------------------------------------------
 // Task Definition
@@ -184,6 +192,14 @@ export interface TaskResponse {
   inputTokens: number;
   outputTokens: number;
   timestamp: string;
+  /**
+   * Provider stop reason for this item, when the transport reports one
+   * (Anthropic `stop_reason`, OpenAI `finish_reason`). `max_tokens`/`length`
+   * means the answer was cut off by the output budget rather than answered
+   * wrongly; `refusal`/`content_filter` means the model declined. Null for
+   * interactive and dry runs.
+   */
+  stopReason?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -292,6 +308,35 @@ export interface IntelligenceScore {
 // Full Run Result
 // ---------------------------------------------------------------------------
 
+export interface JudgeVerdictRecord {
+  model: string;
+  base: string;
+  equivalent: boolean | null;
+  reason: string;
+  latencyMs: number;
+}
+
+export interface ItemJudgementRecord {
+  taskId: string;
+  verdicts: JudgeVerdictRecord[];
+  rescued: boolean;
+  split: boolean;
+}
+
+/**
+ * Present only on runs scored with a judge panel (--judge). Judges are
+ * consulted on deterministic misses and can only turn a miss into a hit, so
+ * `deterministic` is always the stricter string-matched score for the same
+ * responses. See scoring/judge.ts.
+ */
+export interface JudgingRecord {
+  judges: Array<{ model: string; base: string }>;
+  rescuedTaskIds: string[];
+  splitTaskIds: string[];
+  judgements: ItemJudgementRecord[];
+  deterministic: { fullScaleIQ: number; totalCorrect: number };
+}
+
 export interface IntelligenceRunResult {
   runId: string;
   benchmarkVersion: string;
@@ -307,6 +352,7 @@ export interface IntelligenceRunResult {
     totalOutputTokens: number;
     estimatedCostUsd: number;
   };
+  judging?: JudgingRecord;
   antiContamination: {
     taskSetHash: string;
     holdoutItemsUsed: number;
