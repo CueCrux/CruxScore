@@ -48,6 +48,36 @@ Scored on M=100, SD=15 (Wechsler convention). Normed against model populations. 
 
 The 95% confidence interval is computed from the standard error of the theta estimate.
 
+## What this bank can and cannot resolve
+
+Measured 2026-07-24 on the Claude 5 generation, judged scoring, four repeat runs
+each of `claude-opus-5` and `claude-sonnet-5` under one configuration:
+
+| | |
+|---|---|
+| Repeat runs, same model, same config | 15/18 or 16/18 — the score oscillates by one item |
+| One item at the top of the scale | **8 IQ points** (15/18 = 132, 16/18 = 140) |
+| Within-model SD across repeats | **4.3 IQ points** |
+| Gap a *single* run can resolve | **~12 IQ points** (~1.5 items) |
+| Gap 3 runs can resolve | ~7 points |
+| Observed opus-5 vs sonnet-5 difference | **2 IQ points** — indistinguishable |
+
+Every model, on every run, misses the same two items (C003, D003) and passes the
+other sixteen. The bank's hardest items sit at IRT difficulty `b = +1.5` while
+the current frontier scores 15–16/18, so these models are **above its ceiling**:
+there is roughly one item of genuine signal separating them, and one item is
+inside the noise.
+
+Consequences for anyone reading a score from this bank:
+
+- **Do not rank models whose intervals overlap.** On single runs, anything under
+  a ~12-point gap is a tie.
+- **Three runs minimum** before treating a difference as real; the board
+  aggregates repeat runs and tightens the interval as the stack grows.
+- **Per-factor IQ equivalents are not usable** for Gc, Gs and Gwm — three items
+  each, SE 0.8–1.4 logits (±25–40 IQ).
+- The fix is harder items (roughly `b ≥ +2.5`), not more runs of the same ones.
+
 ## Run modes
 
 | Mode | Tools | Internet | Memory |
