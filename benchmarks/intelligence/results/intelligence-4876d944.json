@@ -1,0 +1,395 @@
+{
+  "runId": "4876d944",
+  "benchmarkVersion": "1.0",
+  "modelId": "claude-opus-5",
+  "runMode": "closed_prompt_only",
+  "taskSetId": "5832fcbd7db51df8d4045f471cc69e081d95d0f8b44325aeea85cb878ee49427",
+  "startedAt": "2026-07-24T19:58:03.853Z",
+  "completedAt": "2026-07-24T19:58:03.880Z",
+  "responses": [
+    {
+      "taskId": "A001",
+      "modelId": "claude-opus-5",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-07-24T19:58:03.872Z"
+    },
+    {
+      "taskId": "B001",
+      "modelId": "claude-opus-5",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-07-24T19:58:03.872Z"
+    },
+    {
+      "taskId": "C001",
+      "modelId": "claude-opus-5",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-07-24T19:58:03.872Z"
+    },
+    {
+      "taskId": "D001",
+      "modelId": "claude-opus-5",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-07-24T19:58:03.872Z"
+    },
+    {
+      "taskId": "E001",
+      "modelId": "claude-opus-5",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-07-24T19:58:03.872Z"
+    },
+    {
+      "taskId": "F001",
+      "modelId": "claude-opus-5",
+      "runMode": "closed_prompt_only",
+      "rawOutput": "",
+      "parsedOutput": null,
+      "latencyMs": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "timestamp": "2026-07-24T19:58:03.872Z"
+    }
+  ],
+  "score": {
+    "itemScores": [
+      {
+        "taskId": "A001",
+        "category": "A",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "B001",
+        "category": "B",
+        "chcFactor": "Gwm",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "C001",
+        "category": "C",
+        "chcFactor": "Gc",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "D001",
+        "category": "D",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "E001",
+        "category": "E",
+        "chcFactor": "Gf",
+        "chcPrimaryWeight": 1,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      },
+      {
+        "taskId": "F001",
+        "category": "F",
+        "chcFactor": "Gs",
+        "chcSecondaryFactor": "Gf",
+        "chcPrimaryWeight": 0.6,
+        "chcSecondaryWeight": 0.4,
+        "tier": 1,
+        "correct": false,
+        "partialCredit": 0,
+        "weightedScore": 0,
+        "traceConsistencyScore": 0,
+        "constraintAdherenceScore": 0,
+        "outputComplianceScore": 0,
+        "irt": {
+          "model": "2PL",
+          "a": 1,
+          "b": -1,
+          "c": 0
+        }
+      }
+    ],
+    "categoryScores": [
+      {
+        "category": "A",
+        "label": "Deduction & Elimination",
+        "itemCount": 1,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "B",
+        "label": "Stateful Process Reasoning",
+        "itemCount": 1,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "C",
+        "label": "Rule Application",
+        "itemCount": 1,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "D",
+        "label": "Causal & Counterfactual",
+        "itemCount": 1,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "E",
+        "label": "Abstraction & Transformation",
+        "itemCount": 1,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      },
+      {
+        "category": "F",
+        "label": "Planning Under Constraints",
+        "itemCount": 1,
+        "correctCount": 0,
+        "accuracy": 0,
+        "weightedScore": 0
+      }
+    ],
+    "factorScores": [
+      {
+        "factor": "Gc",
+        "factorLabel": "Comprehension-Knowledge",
+        "theta": {
+          "theta": -0.5865203515306925,
+          "se": 0.9101520020226463,
+          "information": 0.2396119183396281,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 1,
+        "iqEquivalent": 91.20219472703961,
+        "confidenceInterval": {
+          "lower": 64,
+          "upper": 118,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "C001",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      },
+      {
+        "factor": "Gf",
+        "factorLabel": "Fluid Reasoning",
+        "theta": {
+          "theta": -1.716750408441884,
+          "se": 0.7015625405364845,
+          "information": 1.1022673623488788,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 5,
+        "iqEquivalent": 74.24874387337174,
+        "confidenceInterval": {
+          "lower": 54,
+          "upper": 95,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "A001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "C001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "D001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "E001",
+            "correct": false,
+            "partialCredit": 0
+          },
+          {
+            "taskId": "F001",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      },
+      {
+        "factor": "Gs",
+        "factorLabel": "Processing Speed",
+        "theta": {
+          "theta": -0.5865203515306925,
+          "se": 0.9101520020226463,
+          "information": 0.2396119183396281,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 1,
+        "iqEquivalent": 91.20219472703961,
+        "confidenceInterval": {
+          "lower": 64,
+          "upper": 118,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "F001",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      },
+      {
+        "factor": "Gwm",
+        "factorLabel": "Working Memory",
+        "theta": {
+          "theta": -0.5865203515306925,
+          "se": 0.9101520020226463,
+          "information": 0.2396119183396281,
+          "method": "EAP",
+          "converged": true,
+          "iterations": 41
+        },
+        "itemCount": 1,
+        "iqEquivalent": 91.20219472703961,
+        "confidenceInterval": {
+          "lower": 64,
+          "upper": 118,
+          "level": 0.95
+        },
+        "itemBreakdown": [
+          {
+            "taskId": "B001",
+            "correct": false,
+            "partialCredit": 0
+          }
+        ]
+      }
+    ],
+    "compositeIQ": {
+      "fullScaleIQ": 72,
+      "confidenceInterval": {
+        "lower": 52,
+        "upper": 92,
+        "level": 0.95
+      },
+      "percentile": 2.4,
+      "classification": "Low"
+    }
+  },
+  "usage": {
+    "totalInputTokens": 0,
+    "totalOutputTokens": 0,
+    "estimatedCostUsd": 0
+  },
+  "antiContamination": {
+    "taskSetHash": "5832fcbd7db51df8d4045f471cc69e081d95d0f8b44325aeea85cb878ee49427",
+    "holdoutItemsUsed": 0,
+    "variantRotation": []
+  }
+}
