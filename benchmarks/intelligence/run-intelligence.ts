@@ -51,6 +51,8 @@ interface CLIArgs {
   /** Undefined = per-model default (see defaultMaxTokens). */
   maxTokens?: number;
   allowTruncated: boolean;
+  /** False drops the (redundant) system prompt — see SYSTEM_PROMPT. */
+  systemPrompt: boolean;
 }
 
 function parseArgs(argv: string[]): CLIArgs {
@@ -68,6 +70,7 @@ function parseArgs(argv: string[]): CLIArgs {
     submitUrl: "https://scorecrux.com",
     maxTokens: undefined,
     allowTruncated: false,
+    systemPrompt: true,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -118,6 +121,9 @@ function parseArgs(argv: string[]): CLIArgs {
         break;
       case "--allow-truncated":
         args.allowTruncated = true;
+        break;
+      case "--no-system-prompt":
+        args.systemPrompt = false;
         break;
       default:
         console.error(`Unknown flag: ${flag}`);
@@ -248,6 +254,25 @@ function defaultMaxTokens(model: string): number {
 import Anthropic from "@anthropic-ai/sdk";
 import { createInterface, type Interface as ReadlineInterface } from "node:readline";
 
+/**
+ * Restates the response contract that buildPrompt() already puts in the user
+ * turn. Redundant by design — it exists to pin the format on providers that
+ * weight the system turn more heavily.
+ *
+ * `--no-system-prompt` drops it. Needed on subscription backends that deliver
+ * it via the Claude CLI's `--append-system-prompt`, where it lands on top of
+ * Claude Code's own agent prompt rather than acting as a plain API system
+ * turn. Measured on claude-opus-5 through Crucible 2026-07-24: with the
+ * system prompt, `final_answer` on B001 came back 15/17/18 across samples
+ * while the same response's `working` array derived the correct 8 — the model
+ * commits to the first field before it reasons. Without it, 8 every time.
+ * claude-sonnet-5, claude-fable-5 and claude-opus-4-8 answer correctly either
+ * way, so this is specific to Opus 5 on that path. Any run that drops it must
+ * say so alongside the score.
+ */
+const SYSTEM_PROMPT =
+  "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text.";
+
 // Shared readline for interactive mode (creating multiple instances on stdin breaks piping)
 let sharedRl: ReadlineInterface | null = null;
 
@@ -291,6 +316,7 @@ async function callModel(
   _mode: RunMode,
   interactive: boolean = false,
   maxTokens: number = DEFAULT_MAX_TOKENS,
+  sendSystemPrompt: boolean = true,
 ): Promise<{ text: string; inputTokens: number; outputTokens: number; latencyMs: number; stopReason: string | null }> {
   const start = Date.now();
 
@@ -312,7 +338,7 @@ async function callModel(
       model,
       max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
-      system: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text.",
+      ...(sendSystemPrompt ? { system: SYSTEM_PROMPT } : {}),
     });
 
     // response.model is the canonical ID Anthropic actually served
@@ -349,8 +375,8 @@ async function callModel(
     //    message entirely.
     const isReasoningModel = /^(gpt-5|o[13])/.test(model);
     const messages: Array<{ role: string; content: string }> = [];
-    if (!isReasoningModel) {
-      messages.push({ role: "system", content: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text." });
+    if (!isReasoningModel && sendSystemPrompt) {
+      messages.push({ role: "system", content: SYSTEM_PROMPT });
     }
     messages.push({ role: "user", content: prompt });
 
@@ -402,6 +428,7 @@ async function run(): Promise<void> {
   console.log(`  Categories: ${args.categories.join(", ")}`);
   console.log(`  Items/category: ${args.itemsPerCategory}`);
   console.log(`  Max tokens: ${maxTokens}${args.maxTokens === undefined ? " (default)" : " (--max-tokens)"}`);
+  if (!args.systemPrompt) console.log(`  System prompt: OFF (--no-system-prompt) — declare this alongside the score`);
   if (args.dryRun) console.log(`  ** DRY RUN **`);
   console.log();
 
@@ -447,7 +474,7 @@ async function run(): Promise<void> {
       continue;
     }
 
-    const result = await callModel(args.model, prompt, args.mode, args.interactive, maxTokens);
+    const result = await callModel(args.model, prompt, args.mode, args.interactive, maxTokens, args.systemPrompt);
     const parsed = parseResponse(result.text);
     totalLatencyMs += result.latencyMs;
 
