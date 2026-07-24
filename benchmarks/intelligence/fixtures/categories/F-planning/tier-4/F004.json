@@ -1,6 +1,6 @@
 {
   "taskId": "F004",
-  "version": 1,
+  "version": 2,
   "category": "F",
   "categoryLabel": "Planning Under Constraints",
   "tier": 4,
@@ -12,11 +12,11 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "Seven tasks must run on two identical machines. Each task runs on exactly one machine, start to finish, without interruption. A machine runs one task at a time.\n\nDurations (hours): T1 = 3, T2 = 2, T3 = 4, T4 = 1, T5 = 5, T6 = 2, T7 = 3.\n\nDependencies \u2014 a task may start only once every task it depends on has finished:\nT3 depends on T1\nT4 depends on T2\nT5 depends on T3\nT6 depends on T4\nT7 depends on T5 and T6\n\nBoth machines are free from hour 0. What is the minimum number of hours in which all seven tasks can be completed?",
+  "statement": "Seven tasks must run on two identical machines. Each task runs on exactly one machine, start to finish, without interruption; a machine runs one task at a time.\n\nDurations (hours): K1 = 5, K2 = 4, K3 = 4, K4 = 3, K5 = 3, K6 = 6, K7 = 2.\n\nDependencies \u2014 a task may start only once every task it depends on has finished:\nK4 depends on K1\nK5 depends on K2\nK6 depends on K3\nK7 depends on K4, K5 and K6\n\nBoth machines are free from hour 0. What is the minimum number of hours in which all seven tasks can be completed?",
   "constraints": [
     "Two machines, each running at most one task at a time",
     "Tasks cannot be split or paused once started",
-    "A task starts no earlier than the finish time of every task it depends on",
+    "The answer is the true minimum, which may be larger than the longest dependency chain and larger than the total work divided by two",
     "Answer with the minimum makespan as a whole number of hours"
   ],
   "answerType": "exact",

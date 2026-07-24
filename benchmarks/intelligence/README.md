@@ -24,6 +24,23 @@ Tier 4 and 5 answer keys are derived by exhaustive solve
 (`tools/generate-hard-items.py`), which refuses to emit an item unless its
 solver finds exactly one solution.
 
+Those tiers are built from what *measurably* defeats frontier models, not from
+intuition. A first attempt failed calibration — claude-opus-5 scored 6/6 on
+tier 4 and 5/6 on tier 5, because long mechanical work (simulating a state
+machine, list-scheduling, inferring a Caesar variant) is not hard for these
+models. Pooling every judged run showed only three items had ever beaten one:
+C003 (11/11 failures), D003 (9/11) and C002 (3/11). What they share is now the
+design rule for tiers 4-5:
+
+1. **Rule interaction** — a later clause retroactively changes an earlier
+   computation, or an exception overrides an exception, so applying the rules in
+   the obvious order yields a different and plausible answer.
+2. **Completeness** — the answer is wrong if anything is omitted.
+3. **Negative or global claims** — what never happens, what the true minimum is.
+   Planning items assert at generation time that the optimum strictly exceeds
+   the critical path, the load average and any single machine's workload, so a
+   model that quotes a bound is wrong.
+
 | Category | Label | CHC Factor | Description |
 |---|---|---|---|
 | A | Deduction & Elimination | Gf (Fluid Reasoning) | Logic grids, process of elimination |

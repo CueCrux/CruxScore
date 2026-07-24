@@ -1,6 +1,6 @@
 {
   "taskId": "E004",
-  "version": 1,
+  "version": 2,
   "category": "E",
   "categoryLabel": "Abstraction & Transformation",
   "tier": 4,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "A transformation turns one uppercase word into another. Three worked examples:\n\nCAB \u2192 CCF\nDOG \u2192 HQG\nFLUTE \u2192 FVXPK\n\nApply the same transformation to MARCH.",
+  "statement": "A transformation turns one uppercase word into another. Four worked examples:\n\nCANDLE \u2192 BDQGOD\nRIVER \u2192 QLYHQ\nBOX \u2192 ARW\nFORTUNE \u2192 ERUWXQD\n\nApply the same transformation to PLANET.",
   "constraints": [
-    "The alphabet wraps: after Z comes A",
+    "The alphabet wraps in both directions: after Z comes A, before A comes Z",
     "The same rule applies to every example and to the answer",
     "Answer with the transformed word in uppercase letters only"
   ],
   "answerType": "exact",
-  "correctAnswer": "IEUER",
+  "correctAnswer": "OODQHS",
   "responseSchema": {
     "type": "object",
     "properties": {

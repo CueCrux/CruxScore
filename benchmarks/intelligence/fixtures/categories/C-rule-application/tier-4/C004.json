@@ -1,6 +1,6 @@
 {
   "taskId": "C004",
-  "version": 1,
+  "version": 2,
   "category": "C",
   "categoryLabel": "Rule Application",
   "tier": 4,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "A courier charges for a parcel using the following rulebook. Later-numbered rules take precedence over earlier ones where they conflict.\n\nR1. Base rate by destination zone: zone A = 5.00, zone B = 8.00, zone C = 12.00.\nR2. Weight surcharge: add 2.00 for every whole kilogram above 10 kg.\nR3. Fragile handling: add 15.00 for any parcel marked fragile.\nR4. Insurance: add 1% of the insured value above 500.00 (nothing for the first 500.00).\nR5. Public-holiday ordering: increase the running total by 20%. This is applied before any membership discount.\nR6. Zone C exception: fragile handling in zone C is capped at 10.00, replacing the R3 amount.\nR7. Membership discount: members receive 10% off, but the discount never applies to the base rate from R1.\n\nA member orders a 14 kg fragile parcel to zone C on a public holiday, insured for 900.00.\n\nWhat is the total charge?",
+  "statement": "An energy supplier bills as follows.\n\nR1. Standing charge: 18.00 per quarter.\nR2. Usage charge: 0.12 per unit for the first 500 units, and 0.09 per unit for every unit above 500.\nR3. Environmental levy: add 5% of the running total (standing charge plus usage charge).\nR4. Prompt-payment credit: subtract a flat 6.00.\nR5. High-usage clause: if the total after R4 exceeds 100.00, the first-500 rate in R2 is 0.15 rather than 0.12, and the bill must be recalculated from R2 onwards using that rate.\nR6. A recalculation triggered by R5 is performed at most once, even if the recalculated total still exceeds 100.00.\n\nA customer uses 900 units in the quarter.\n\nWhat is the final bill?",
   "constraints": [
-    "Later-numbered rules override earlier ones where they conflict",
-    "Rules are otherwise applied in numerical order",
-    "Answer as a number with two decimal places, e.g. \"41.25\""
+    "Rules apply in numerical order, subject to R5 and R6",
+    "The standing charge is not affected by the recalculation",
+    "Answer as a number with two decimal places, e.g. \"123.45\""
   ],
   "answerType": "exact",
-  "correctAnswer": "37.92",
+  "correctAnswer": "129.45",
   "responseSchema": {
     "type": "object",
     "properties": {

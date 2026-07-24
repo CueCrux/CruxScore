@@ -1,6 +1,6 @@
 {
   "taskId": "C005",
-  "version": 1,
+  "version": 2,
   "category": "C",
   "categoryLabel": "Rule Application",
   "tier": 5,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "A company's leave policy reads as follows. Where clauses interact, apply them in the order given unless a later clause states otherwise.\n\nP1. Full-time employees receive 25 days of annual leave. Part-time employees receive this pro-rated by days worked per week, out of a five-day week.\nP2. Long-service bonus: one additional day for each full year of service, capped at 5 additional days.\nP3. Employees who joined after 1 January accrue leave pro-rata for their first calendar year, counted in whole months from their start month inclusive (a 1 March start accrues 10 months of the 12).\nP4. Any entitlement that is not a whole or half day is rounded up to the nearest half day.\nP5. Exception to P1: the long-service bonus from P2 is never pro-rated, for part-time or partial-year employees.\nP6. Carry-over from the previous year is added after all of the above, and is capped at 3 days however many days were carried.\n\nAn employee joined on 1 March of this year, has 4 full years of prior service with the company, works 3 days per week, carried over 4 days from last year, and has already taken 6 days. They now request 5 more days in December.\n\nHow many days of leave would remain after that request is granted?",
+  "statement": "A grant panel scores four applicants.\n\nG1. Every applicant starts from their base score.\nG2. First-time applicants receive +8.\nG3. An applicant who received an award within the last 2 years is penalised 10.\nG4. Applicants from the northern region receive +5.\nG5. Exception to G4: the northern bonus does not apply to first-time applicants.\nG6. Exception to G5: the northern bonus does apply to a first-time applicant whose base score is below 60.\nG7. An applicant is funded if their final score is 62 or more.\n\nApplicants:\n- Amara: base 62, last award 1 year ago, not first-time, northern region.\n- Bruno: base 58, last award 4 years ago, not first-time, southern region.\n- Chen: base 55, no previous award, first-time applicant, northern region.\n- Dara: base 60, last award 3 years ago, not first-time, southern region.\n\nGive every applicant's final score, and say which applicants are funded.",
   "constraints": [
-    "Clauses apply in the order given, except where a later clause overrides an earlier one",
-    "The rounding in P4 applies to the entitlement before carry-over is added",
-    "Answer as a number with one decimal place, e.g. \"7.5\""
+    "Rules apply in numerical order, and each exception overrides the rule it names",
+    "G3 does not apply to an applicant who has never received an award",
+    "Answer in the form \"Amara=<score>, Bruno=<score>, Chen=<score>, Dara=<score>; funded: <names or none>\""
   ],
-  "answerType": "exact",
-  "correctAnswer": "8.0",
+  "answerType": "structured",
+  "correctAnswer": "Amara=57, Bruno=58, Chen=68, Dara=60; funded: Chen",
   "responseSchema": {
     "type": "object",
     "properties": {

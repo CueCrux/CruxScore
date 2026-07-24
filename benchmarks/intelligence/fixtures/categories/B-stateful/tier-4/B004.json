@@ -1,6 +1,6 @@
 {
   "taskId": "B004",
-  "version": 1,
+  "version": 2,
   "category": "B",
   "categoryLabel": "Stateful Process Reasoning",
   "tier": 4,
@@ -12,14 +12,15 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "Three registers start at X=3, Y=7, Z=0.\n\nRounds are numbered 1 to 10. In each round, apply these steps strictly in order:\n\nStep 1. If the round number is divisible by 3, swap the values of X and Y.\nStep 2. If X is greater than Y, add (X \u2212 Y) to Z. Otherwise add 1 to Z.\nStep 3. If the round number is even, add 2 to Y. If it is odd, add 3 to X.\nStep 4. If Z is now greater than 20, subtract 10 from Z and subtract 1 from X.\n\nWhat are the values of X, Y and Z after round 10 completes?",
+  "statement": "Two counters start at P=5 and Q=2.\n\nRounds are numbered 1 to 10. In each round, apply these steps in order:\n\nStep 1. If the round number is odd, add Q's current value to P. If it is even, add 3 to Q.\nStep 2. Compare the values P and Q had at the START of the PREVIOUS round \u2014 not their current values, and not their values at the start of this round. If that previous-round P was greater than that previous-round Q, add 2 to Q; otherwise subtract 1 from P. For round 1, treat the \"previous round\" values as the starting values P=5 and Q=2.\nStep 3. If P + Q is now greater than 40, halve both P and Q, rounding each down to a whole number.\n\nWhat are P and Q after round 10 completes?",
   "constraints": [
-    "Steps are applied strictly in the order given, within each round",
-    "All four steps are evaluated every round, using the values current at that step",
-    "Answer in the form \"X=<value>, Y=<value>, Z=<value>\""
+    "Steps apply in order within each round",
+    "Step 2 always looks at the values as they were at the start of the previous round",
+    "Halving rounds down to the nearest whole number",
+    "Answer in the form \"P=<value>, Q=<value>\""
   ],
   "answerType": "exact",
-  "correctAnswer": "X=20, Y=13, Z=16",
+  "correctAnswer": "P=12, Q=9",
   "responseSchema": {
     "type": "object",
     "properties": {

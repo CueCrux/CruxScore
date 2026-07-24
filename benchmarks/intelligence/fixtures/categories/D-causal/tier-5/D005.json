@@ -1,6 +1,6 @@
 {
   "taskId": "D005",
-  "version": 1,
+  "version": 2,
   "category": "D",
   "categoryLabel": "Causal & Counterfactual",
   "tier": 5,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "A signalling network has nodes S, A, B, C, D and E. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay.\n\nLinks (source \u2192 destination, delay in time steps):\nS \u2192 A, delay 1\nS \u2192 B, delay 3\nA \u2192 C, delay 2\nB \u2192 C, delay 1\nA \u2192 D, delay 4\nC \u2192 D, delay 1\nC \u2192 E, delay 2\nD \u2192 E, delay 1\nB \u2192 E, delay 6\n\nActivation thresholds \u2014 a node fires at the earliest time step at which it has received signals from at least this many distinct sources:\nA: 1, B: 1, C: 2, D: 2, E: 2\n\nOnce a node fires it stays active and sends its signal onward immediately.\n\nQuestion 1: At what time step does E fire?\nQuestion 2: If the link A \u2192 C were removed, at what time step would E fire?\nQuestion 3: If instead the link C \u2192 D were removed (with A \u2192 C intact), at what time step would E fire?",
+  "statement": "A signalling network has nodes S, P, Q, R, T and U. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay. Once a node fires it stays active and sends its signal onward immediately.\n\nLinks (source \u2192 destination, delay):\nS \u2192 P, 1\nS \u2192 Q, 4\nP \u2192 R, 1\nQ \u2192 R, 1\nP \u2192 T, 1\nR \u2192 T, 3\nR \u2192 U, 1\nT \u2192 U, 4\nQ \u2192 U, 2\n\nThresholds \u2014 a node fires when it holds signals from at least this many distinct sources at the same time:\nP: 1, Q: 1, R: 2, T: 2, U: 2\n\nSignals expire. An arrived signal counts towards a node's threshold only during the 3 time steps after it arrives: it counts at its arrival time and at the next two time steps, and from then on it no longer counts. A node therefore fires only if enough signals are live at the same moment.\n\nQuestion 1: At what time step does U fire?\nQuestion 2: Which nodes (of P, Q, R, T, U) never fire at all?\nQuestion 3: If signals did not expire, at what time step would U fire?",
   "constraints": [
-    "A node fires at the earliest time step its threshold is met, never before",
-    "Each counterfactual is evaluated independently, from the original network",
-    "Answer in the form \"E=<t1>, E=<t2> without A->C, E=<t3> without C->D\", using the word never if it never fires"
+    "A signal counts at its arrival time and for the following 2 time steps only",
+    "A node that fires stays active permanently; expiry applies to signals, not to firing",
+    "Answer in the form \"U=<t>; never: <nodes or none>; U=<t> without expiry\", using the word never where a node never fires"
   ],
   "answerType": "exact",
-  "correctAnswer": "E=6, E=never without A->C, E=9 without C->D",
+  "correctAnswer": "U=never; never: R, T, U; U=6 without expiry",
   "responseSchema": {
     "type": "object",
     "properties": {

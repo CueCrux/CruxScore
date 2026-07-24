@@ -1,6 +1,6 @@
 {
   "taskId": "A004",
-  "version": 1,
+  "version": 2,
   "category": "A",
   "categoryLabel": "Deduction & Elimination",
   "tier": 4,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "Five colleagues \u2014 Ada, Ben, Cleo, Dev and Esi \u2014 sit in a row of five desks numbered 1 to 5 from left to right. Each drinks a different beverage (tea, coffee, water, juice, cola) and each holds a different role (analyst, designer, engineer, manager, writer).\n\n1. The engineer sits immediately to the right of Ada.\n2. Cleo drinks water.\n3. The manager sits at desk 1 or desk 5.\n4. Ben sits somewhere to the left of the writer, and the writer is not at desk 5.\n5. The person drinking coffee sits immediately to the left of the analyst.\n6. Dev drinks juice, and Dev does not sit adjacent to Ada.\n7. Esi is the manager.\n8. The person at desk 3 drinks tea.\n9. The designer sits somewhere to the right of the engineer.\n10. The writer drinks water.\n\nWho sits at desk 4, and what do they drink?",
+  "statement": "Four boxes \u2014 red, blue, green and yellow \u2014 sit on a table. Exactly one of them contains a prize. Each box carries a label:\n\nRed box: \"The prize is not in this box.\"\nBlue box: \"The prize is in the green box.\"\nGreen box: \"The prize is not in the green box.\"\nYellow box: \"The prize is in either the blue box or the green box.\"\n\nExactly one of these four labels is true. The other three are false.\n\nWhich box contains the prize?",
   "constraints": [
-    "Every person, drink and role is used exactly once",
-    "Desks are numbered 1 to 5 from left to right",
-    "Answer with the person's name and their drink, e.g. \"Ada, tea\""
+    "Exactly one label is true; the other three are all false",
+    "A label's truth is judged against where the prize actually is",
+    "Answer with the colour of the box only, e.g. \"green\""
   ],
   "answerType": "exact",
-  "correctAnswer": "Cleo, water",
+  "correctAnswer": "red",
   "responseSchema": {
     "type": "object",
     "properties": {

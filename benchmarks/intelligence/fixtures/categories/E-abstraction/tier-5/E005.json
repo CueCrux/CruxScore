@@ -1,6 +1,6 @@
 {
   "taskId": "E005",
-  "version": 1,
+  "version": 2,
   "category": "E",
   "categoryLabel": "Abstraction & Transformation",
   "tier": 5,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "A transformation turns one uppercase word into another. Four worked examples:\n\nBADGE \u2192 ZBCEY\nCHAIR \u2192 AYPGF\nLIME \u2192 JKCG\nSTONE \u2192 QMCLR\n\nApply the same transformation to PRISM.",
+  "statement": "A transformation turns one uppercase word into another. Five worked examples:\n\nCANOE \u2192 GQPCE\nTIGER \u2192 TGIKV\nMOON \u2192 LLKJ\nSPIRAL \u2192 MFOXIP\nGLASS \u2192 UUCNI\n\nApply the same transformation to HARBOUR.",
   "constraints": [
     "The alphabet wraps in both directions: after Z comes A, before A comes Z",
     "The same rule applies to every example and to the answer",
     "Answer with the transformed word in uppercase letters only"
   ],
   "answerType": "exact",
-  "correctAnswer": "NGKQP",
+  "correctAnswer": "TWQDTCJ",
   "responseSchema": {
     "type": "object",
     "properties": {

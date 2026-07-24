@@ -1,6 +1,6 @@
 {
   "taskId": "A005",
-  "version": 1,
+  "version": 2,
   "category": "A",
   "categoryLabel": "Deduction & Elimination",
   "tier": 5,
@@ -12,14 +12,14 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "Six runners \u2014 Isla, Jonas, Kip, Lena, Milo and Nara \u2014 finished a race in places 1 (first) through 6 (last), with no ties. Each runs for a different club: Ardent, Brine, Coast, Dune, Ember or Fjord.\n\n1. Kip finished ahead of Lena but behind Milo.\n2. Isla and Nara finished in adjacent places, with Isla ahead of Nara.\n3. Jonas finished neither first nor last.\n4. Exactly two runners finished between Milo and Lena.\n5. The Ardent runner finished immediately behind the Coast runner.\n6. Milo runs for Dune.\n7. The Brine runner finished ahead of Jonas, and Jonas runs for neither Brine nor Ember.\n8. Nara runs for neither Coast nor Ardent.\n9. The Fjord runner finished last.\n10. The Ember runner finished ahead of the Dune runner.\n11. Kip finished immediately behind the Coast runner.\n12. The Brine runner finished ahead of the Ember runner.\n\nWhich runner finished second, and which club do they run for?",
+  "statement": "On an island, every inhabitant is either a knight, who always tells the truth, or a knave, who always lies. Six islanders speak:\n\nAna: \"Exactly three of us are knights.\"\nBo: \"Ana is a knave.\"\nCy: \"At least five of us are knaves.\"\nDi: \"Bo and Cy are both knaves.\"\nEli: \"An odd number of us are knights.\"\nFen: \"Eli is a knight and Di is a knave.\"\n\nEach statement is about these six islanders only.\n\nHow many knights are there, and which islanders are they?",
   "constraints": [
-    "Six distinct places, no ties; each club is used exactly once",
-    "\"Ahead of\" means a numerically smaller finishing place",
-    "Answer with the runner's name and their club, e.g. \"Isla, Coast\""
+    "Every islander is either a knight (always truthful) or a knave (always lying)",
+    "A knight's statement must be true; a knave's statement must be false",
+    "Answer as the count, a colon, then the knights in the order listed above, e.g. \"2: Bo, Fen\" (use \"0: none\" if there are none)"
   ],
   "answerType": "exact",
-  "correctAnswer": "Nara, Ember",
+  "correctAnswer": "3: Ana, Di, Eli",
   "responseSchema": {
     "type": "object",
     "properties": {

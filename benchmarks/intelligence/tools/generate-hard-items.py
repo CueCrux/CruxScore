@@ -1,47 +1,51 @@
 #!/usr/bin/env python3
-"""Generate and verify the tier-4 / tier-5 items of the intelligence bank.
+"""Tier-4 / tier-5 items, second design pass.
 
-Every answer key here is *computed*, not written by hand: each item is defined
-alongside an independent solver that enumerates the full solution space. The
-script refuses to emit a fixture unless the solver finds exactly one solution,
-which is what makes "the correct answer" a fact about the item rather than an
-assertion about the author.
+The first pass failed calibration: claude-opus-5 scored 6/6 on tier 4 and 5/6
+on tier 5, i.e. the "hard" items were easier than the existing tier 3. Long
+mechanical work — simulating a state machine, scheduling by list order,
+inferring a Caesar variant — is not hard for a frontier model. What is:
 
-    python3 tools/generate-hard-items.py --check    # verify only
-    python3 tools/generate-hard-items.py --write    # verify and write fixtures
+    C003  failed 11/11 runs   exhaustive enumeration, interacting rules
+    D003  failed  9/11 runs   a negative claim over a whole graph
+    C002  failed  3/11 runs   rule application with caps
 
-Difficulty targets (IRT b): tier 4 = +2.5, tier 5 = +3.5. Calibrate against
-observed pass rates and update the b values rather than leaving them nominal.
+So every item here is built from one of three properties, taken from the
+evidence rather than from intuition:
+
+  1. RULE INTERACTION — a later clause changes an earlier computation, or an
+     exception overrides an exception. Applying the rules in the obvious order
+     gives a different, plausible answer.
+  2. COMPLETENESS — the answer is only right if nothing is omitted.
+  3. NEGATIVE / GLOBAL CLAIMS — "which never happens", "what is the minimum",
+     where being close is being wrong and a lower bound is not the answer.
+
+Answer keys are computed by an independent solver, and the script refuses to
+emit an item unless the solver finds exactly one solution. Planning items also
+assert that the true optimum is strictly worse than every naive bound, so a
+model that quotes the critical path or the load average is wrong.
+
+    python3 tools/hard-items-v2.py            # verify
+    python3 tools/hard-items-v2.py --write    # verify and write fixtures
 """
 from __future__ import annotations
 
 import argparse
 import itertools
 import json
+import math
 import pathlib
 import sys
 
-CAT_DIRS = {
-    "A": "A-deduction",
-    "B": "B-stateful",
-    "C": "C-rule-application",
-    "D": "D-causal",
-    "E": "E-abstraction",
-    "F": "F-planning",
-}
-CAT_LABELS = {
-    "A": "Deduction & Elimination",
-    "B": "Stateful Process Reasoning",
-    "C": "Rule Application",
-    "D": "Causal & Counterfactual",
-    "E": "Abstraction & Transformation",
-    "F": "Planning Under Constraints",
-}
+CAT_DIRS = {"A": "A-deduction", "B": "B-stateful", "C": "C-rule-application",
+            "D": "D-causal", "E": "E-abstraction", "F": "F-planning"}
+CAT_LABELS = {"A": "Deduction & Elimination", "B": "Stateful Process Reasoning",
+              "C": "Rule Application", "D": "Causal & Counterfactual",
+              "E": "Abstraction & Transformation", "F": "Planning Under Constraints"}
 CHC = {"A": "Gf", "B": "Gwm", "C": "Gc", "D": "Gf", "E": "Gf", "F": "Gs"}
 CHC_SECOND = {"C": "Gf", "F": "Gf"}
 B_BY_TIER = {4: 2.5, 5: 3.5}
 A_BY_TIER = {4: 1.3, 5: 1.4}
-
 RESPONSE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -55,507 +59,495 @@ WEIGHTS = {"correctness": 0.70, "traceConsistency": 0.15, "constraintAdherence":
 
 
 # ---------------------------------------------------------------------------
-# A — Deduction & Elimination
+# A — Deduction: XOR meta-constraints and counting statements
 # ---------------------------------------------------------------------------
 
 def solve_a004():
-    """Five desks in a row; assign person, drink, role. Answer: desk-4 person + drink."""
-    people = ["Ada", "Ben", "Cleo", "Dev", "Esi"]
-    drinks = ["tea", "coffee", "water", "juice", "cola"]
-    roles = ["analyst", "designer", "engineer", "manager", "writer"]
+    """Four boxes, one prize. Labels make claims; exactly one label is true.
+
+    The meta-constraint ("exactly one of these statements is true") forces
+    reasoning over the statements as a set rather than resolving them one by
+    one — the failure mode is treating each label independently.
+    """
+    boxes = ["red", "blue", "green", "yellow"]
     sols = []
-    for pp in itertools.permutations(people):          # pp[i] = person at desk i+1
-        pos = {p: i + 1 for i, p in enumerate(pp)}
-        if pos["Cleo"] == pos["Ada"]:
-            continue
-        for rr in itertools.permutations(roles):        # rr[i] = role at desk i+1
-            rpos = {r: i + 1 for i, r in enumerate(rr)}
-            # 1. the engineer sits immediately right of Ada
-            if rpos["engineer"] != pos["Ada"] + 1:
-                continue
-            # 3. the manager sits at desk 1 or 5
-            if rpos["manager"] not in (1, 5):
-                continue
-            # 7. Esi is the manager
-            if pos["Esi"] != rpos["manager"]:
-                continue
-            # 4. Ben is left of the writer; the writer is not at desk 5
-            if not (pos["Ben"] < rpos["writer"] and rpos["writer"] != 5):
-                continue
-            # 9. the designer sits right of the engineer
-            if not rpos["designer"] > rpos["engineer"]:
-                continue
-            for dd in itertools.permutations(drinks):   # dd[i] = drink at desk i+1
-                dpos = {d: i + 1 for i, d in enumerate(dd)}
-                # 2. Cleo drinks water
-                if dpos["water"] != pos["Cleo"]:
-                    continue
-                # 8. desk 3 drinks tea
-                if dpos["tea"] != 3:
-                    continue
-                # 6. Dev drinks juice and is not adjacent to Ada
-                if dpos["juice"] != pos["Dev"] or abs(pos["Dev"] - pos["Ada"]) == 1:
-                    continue
-                # 5. the coffee drinker sits immediately left of the analyst
-                if dpos["coffee"] + 1 != rpos["analyst"]:
-                    continue
-                # 10. the writer drinks water
-                if dpos["water"] != rpos["writer"]:
-                    continue
-                sols.append((pp, dd, rr))
-    assert len(sols) == 1, f"A004 has {len(sols)} solutions"
-    pp, dd, _ = sols[0]
-    return f"{pp[3]}, {dd[3]}"
+    for prize in boxes:
+        s1 = prize != "red"                    # red:    "the prize is not here"
+        s2 = prize == "green"                  # blue:   "the prize is in the green box"
+        s3 = prize != "green"                  # green:  "the prize is not in this box"
+        s4 = prize in ("blue", "green")        # yellow: "the prize is in the blue or green box"
+        if sum([s1, s2, s3, s4]) == 1:
+            sols.append(prize)
+    assert len(sols) == 1, f"A004 has {len(sols)} solutions: {sols}"
+    return sols[0]
 
 
 A004 = dict(
     taskId="A004", tier=4, category="A", answerType="exact", solver=solve_a004,
-    statement="""Five colleagues — Ada, Ben, Cleo, Dev and Esi — sit in a row of five desks numbered 1 to 5 from left to right. Each drinks a different beverage (tea, coffee, water, juice, cola) and each holds a different role (analyst, designer, engineer, manager, writer).
+    statement="""Four boxes — red, blue, green and yellow — sit on a table. Exactly one of them contains a prize. Each box carries a label:
 
-1. The engineer sits immediately to the right of Ada.
-2. Cleo drinks water.
-3. The manager sits at desk 1 or desk 5.
-4. Ben sits somewhere to the left of the writer, and the writer is not at desk 5.
-5. The person drinking coffee sits immediately to the left of the analyst.
-6. Dev drinks juice, and Dev does not sit adjacent to Ada.
-7. Esi is the manager.
-8. The person at desk 3 drinks tea.
-9. The designer sits somewhere to the right of the engineer.
-10. The writer drinks water.
+Red box: "The prize is not in this box."
+Blue box: "The prize is in the green box."
+Green box: "The prize is not in the green box."
+Yellow box: "The prize is in either the blue box or the green box."
 
-Who sits at desk 4, and what do they drink?""",
+Exactly one of these four labels is true. The other three are false.
+
+Which box contains the prize?""",
     constraints=[
-        "Every person, drink and role is used exactly once",
-        "Desks are numbered 1 to 5 from left to right",
-        "Answer with the person's name and their drink, e.g. \"Ada, tea\"",
+        "Exactly one label is true; the other three are all false",
+        "A label's truth is judged against where the prize actually is",
+        "Answer with the colour of the box only, e.g. \"green\"",
     ],
 )
 
 
 def solve_a005():
-    """Six runners, finishing order + club, from relational clues. Answer: 2nd place runner + club."""
-    runners = ["Isla", "Jonas", "Kip", "Lena", "Milo", "Nara"]
-    clubs = ["Ardent", "Brine", "Coast", "Dune", "Ember", "Fjord"]
+    """Six islanders; knights always tell the truth, knaves always lie.
+
+    Statements are about counts and about each other, so the answer cannot be
+    reached by resolving speakers in isolation — every assignment has to be
+    tested as a whole. Answer: number of knights + who they are.
+    """
+    names = ["Ana", "Bo", "Cy", "Di", "Eli", "Fen"]
     sols = []
-    for order in itertools.permutations(runners):      # order[i] = finisher in place i+1
-        place = {r: i + 1 for i, r in enumerate(order)}
-        # 1. Kip finished ahead of Lena but behind Milo
-        if not (place["Milo"] < place["Kip"] < place["Lena"]):
-            continue
-        # 2. Isla and Nara finished in adjacent places, Isla ahead of Nara
-        if place["Nara"] - place["Isla"] != 1:
-            continue
-        # 3. Jonas did not finish first or last
-        if place["Jonas"] in (1, 6):
-            continue
-        # 4. exactly two runners finished between Milo and Lena
-        if abs(place["Milo"] - place["Lena"]) != 3:
-            continue
-        for cl in itertools.permutations(clubs):        # cl[i] = club of finisher in place i+1
-            club = {order[i]: cl[i] for i in range(6)}
-            cplace = {cl[i]: i + 1 for i in range(6)}
-            # 5. the Ardent runner finished immediately behind the Coast runner
-            if cplace["Ardent"] - cplace["Coast"] != 1:
-                continue
-            # 6. Milo runs for Dune
-            if club["Milo"] != "Dune":
-                continue
-            # 7. the Brine runner finished ahead of Jonas, who runs for neither Brine nor Ember
-            if not (cplace["Brine"] < place["Jonas"]) or club["Jonas"] in ("Brine", "Ember"):
-                continue
-            # 8. Nara does not run for Coast or Ardent
-            if club["Nara"] in ("Coast", "Ardent"):
-                continue
-            # 9. the Fjord runner finished last
-            if cplace["Fjord"] != 6:
-                continue
-            # 10. the Ember runner finished ahead of the Dune runner
-            if not cplace["Ember"] < cplace["Dune"]:
-                continue
-            # 11. Kip finished immediately behind the Coast runner
-            if place["Kip"] - cplace["Coast"] != 1:
-                continue
-            # 12. the Brine runner finished ahead of the Ember runner
-            if not cplace["Brine"] < cplace["Ember"]:
-                continue
-            sols.append((order, cl))
-    assert len(sols) == 1, f"A005 has {len(sols)} solutions"
-    order, cl = sols[0]
-    return f"{order[1]}, {cl[1]}"
+    for bits in itertools.product([True, False], repeat=6):
+        k = dict(zip(names, bits))          # True = knight
+        n_knights = sum(bits)
+        claims = {
+            # Ana: "exactly three of us are knights"
+            "Ana": n_knights == 3,
+            # Bo: "Ana is a knave"
+            "Bo": not k["Ana"],
+            # Cy: "at least five of us are knaves"
+            "Cy": (6 - n_knights) >= 5,
+            # Di: "Bo and Cy are both knaves"
+            "Di": (not k["Bo"]) and (not k["Cy"]),
+            # Eli: "an odd number of us are knights"
+            "Eli": n_knights % 2 == 1,
+            # Fen: "Eli is a knight and Di is a knave"
+            "Fen": k["Eli"] and (not k["Di"]),
+        }
+        if all(k[n] == claims[n] for n in names):
+            sols.append(tuple(n for n in names if k[n]))
+    assert len(sols) == 1, f"A005 has {len(sols)} solutions: {sols}"
+    knights = sols[0]
+    return f"{len(knights)}: {', '.join(knights)}" if knights else "0: none"
 
 
 A005 = dict(
     taskId="A005", tier=5, category="A", answerType="exact", solver=solve_a005,
-    statement="""Six runners — Isla, Jonas, Kip, Lena, Milo and Nara — finished a race in places 1 (first) through 6 (last), with no ties. Each runs for a different club: Ardent, Brine, Coast, Dune, Ember or Fjord.
+    statement="""On an island, every inhabitant is either a knight, who always tells the truth, or a knave, who always lies. Six islanders speak:
 
-1. Kip finished ahead of Lena but behind Milo.
-2. Isla and Nara finished in adjacent places, with Isla ahead of Nara.
-3. Jonas finished neither first nor last.
-4. Exactly two runners finished between Milo and Lena.
-5. The Ardent runner finished immediately behind the Coast runner.
-6. Milo runs for Dune.
-7. The Brine runner finished ahead of Jonas, and Jonas runs for neither Brine nor Ember.
-8. Nara runs for neither Coast nor Ardent.
-9. The Fjord runner finished last.
-10. The Ember runner finished ahead of the Dune runner.
-11. Kip finished immediately behind the Coast runner.
-12. The Brine runner finished ahead of the Ember runner.
+Ana: "Exactly three of us are knights."
+Bo: "Ana is a knave."
+Cy: "At least five of us are knaves."
+Di: "Bo and Cy are both knaves."
+Eli: "An odd number of us are knights."
+Fen: "Eli is a knight and Di is a knave."
 
-Which runner finished second, and which club do they run for?""",
+Each statement is about these six islanders only.
+
+How many knights are there, and which islanders are they?""",
     constraints=[
-        "Six distinct places, no ties; each club is used exactly once",
-        "\"Ahead of\" means a numerically smaller finishing place",
-        "Answer with the runner's name and their club, e.g. \"Isla, Coast\"",
+        "Every islander is either a knight (always truthful) or a knave (always lying)",
+        "A knight's statement must be true; a knave's statement must be false",
+        "Answer as the count, a colon, then the knights in the order listed above, e.g. \"2: Bo, Fen\" (use \"0: none\" if there are none)",
     ],
 )
 
 
 # ---------------------------------------------------------------------------
-# B — Stateful Process Reasoning
+# B — Stateful: rules that reference earlier rounds
 # ---------------------------------------------------------------------------
 
 def solve_b004():
-    """Three registers, 10 rounds, conditional update rules. Answer: final X, Y, Z."""
-    x, y, z = 3, 7, 0
+    """Two counters where one rule reads the PREVIOUS round's value.
+
+    The failure mode is using the current value in step 2 — which gives a
+    plausible wrong answer rather than an obviously broken one.
+    """
+    p, q = 5, 2
+    prev_p, prev_q = p, q
     for r in range(1, 11):
-        if r % 3 == 0:
-            x, y = y, x
-        if x > y:
-            z += x - y
+        start_p, start_q = p, q
+        if r % 2 == 1:
+            p += q
         else:
-            z += 1
-        if r % 2 == 0:
-            y += 2
+            q += 3
+        # step 2 uses the values from the START of the PREVIOUS round
+        if prev_p > prev_q:
+            q += 2
         else:
-            x += 3
-        if z > 20:
-            z -= 10
-            x -= 1
-    return f"X={x}, Y={y}, Z={z}"
+            p -= 1
+        if p + q > 40:
+            p, q = p // 2, q // 2
+        prev_p, prev_q = start_p, start_q
+    return f"P={p}, Q={q}"
 
 
 B004 = dict(
     taskId="B004", tier=4, category="B", answerType="exact", solver=solve_b004,
-    statement="""Three registers start at X=3, Y=7, Z=0.
+    statement="""Two counters start at P=5 and Q=2.
 
-Rounds are numbered 1 to 10. In each round, apply these steps strictly in order:
+Rounds are numbered 1 to 10. In each round, apply these steps in order:
 
-Step 1. If the round number is divisible by 3, swap the values of X and Y.
-Step 2. If X is greater than Y, add (X − Y) to Z. Otherwise add 1 to Z.
-Step 3. If the round number is even, add 2 to Y. If it is odd, add 3 to X.
-Step 4. If Z is now greater than 20, subtract 10 from Z and subtract 1 from X.
+Step 1. If the round number is odd, add Q's current value to P. If it is even, add 3 to Q.
+Step 2. Compare the values P and Q had at the START of the PREVIOUS round — not their current values, and not their values at the start of this round. If that previous-round P was greater than that previous-round Q, add 2 to Q; otherwise subtract 1 from P. For round 1, treat the "previous round" values as the starting values P=5 and Q=2.
+Step 3. If P + Q is now greater than 40, halve both P and Q, rounding each down to a whole number.
 
-What are the values of X, Y and Z after round 10 completes?""",
+What are P and Q after round 10 completes?""",
     constraints=[
-        "Steps are applied strictly in the order given, within each round",
-        "All four steps are evaluated every round, using the values current at that step",
-        "Answer in the form \"X=<value>, Y=<value>, Z=<value>\"",
+        "Steps apply in order within each round",
+        "Step 2 always looks at the values as they were at the start of the previous round",
+        "Halving rounds down to the nearest whole number",
+        "Answer in the form \"P=<value>, Q=<value>\"",
     ],
 )
 
 
 def solve_b005():
-    """Four registers, 12 rounds, threshold-triggered reset. Answer: final A, B, C, D."""
-    a, b, c, d = 1, 2, 4, 0
-    for r in range(1, 13):
-        if r % 4 == 0:
-            a, b, c = c, a, b            # rotate right: A<-C, B<-A, C<-B
-        if a + b > c:
-            d += 2
-            c += a
-        else:
-            d -= 1
+    """Three counters, a rule set that switches permanently once triggered, and
+    a step that reads the value from two rounds ago."""
+    a, b, c = 2, 3, 1
+    history = [(a, b, c)]           # history[k] = state at the start of round k+1
+    mode = "alpha"
+    for r in range(1, 15):
+        start = (a, b, c)
+        two_ago = history[r - 3] if r >= 3 else history[0]
+        if mode == "alpha":
             a += b
-        if r % 5 == 0:
-            b *= 2
-        if c >= 30:
-            c -= 25
-            d += 5
-        if d < 0:
-            d = 0
-            b += 1
-    return f"A={a}, B={b}, C={c}, D={d}"
+            c += 1 if r % 2 else 2
+        else:
+            b += c
+            a -= 1
+        # step reading two rounds back
+        if two_ago[0] > two_ago[2]:
+            b += 2
+        else:
+            c += 3
+        # the switch is permanent once it fires
+        if mode == "alpha" and a + b + c > 30:
+            mode = "beta"
+        history.append(start)
+        history[r] = start
+    return f"A={a}, B={b}, C={c}, mode={mode}"
 
 
 B005 = dict(
     taskId="B005", tier=5, category="B", answerType="exact", solver=solve_b005,
-    statement="""Four registers start at A=1, B=2, C=4, D=0.
+    statement="""Three counters start at A=2, B=3, C=1. The system begins in mode alpha.
 
-Rounds are numbered 1 to 12. In each round, apply these steps strictly in order:
+Rounds are numbered 1 to 14. In each round, apply these steps in order:
 
-Step 1. If the round number is divisible by 4, rotate the values of A, B and C to the right: A takes C's old value, B takes A's old value, and C takes B's old value.
-Step 2. If A + B is greater than C, then add 2 to D and add A's current value to C. Otherwise subtract 1 from D and add B's current value to A.
-Step 3. If the round number is divisible by 5, double B.
-Step 4. If C is now 30 or more, subtract 25 from C and add 5 to D.
-Step 5. If D is now negative, set D to 0 and add 1 to B.
+Step 1. If the system is in mode alpha: add B's current value to A, then add 1 to C if the round number is odd or 2 to C if it is even.
+        If the system is in mode beta: add C's current value to B, then subtract 1 from A.
+Step 2. Look at the values A and C had at the START of the round two rounds earlier (for rounds 1 and 2, use the starting values A=2, B=3, C=1). If that A was greater than that C, add 2 to B; otherwise add 3 to C.
+Step 3. If the system is in mode alpha and A + B + C is now greater than 30, the system switches permanently to mode beta. Once in mode beta it never returns to alpha.
 
-What are the values of A, B, C and D after round 12 completes?""",
+What are A, B and C after round 14 completes, and which mode is the system in?""",
     constraints=[
-        "Steps are applied strictly in the order given, within each round",
-        "Each step uses the values current at the moment that step runs",
-        "Answer in the form \"A=<value>, B=<value>, C=<value>, D=<value>\"",
+        "Steps apply in order within each round",
+        "Step 2 reads the state as it was at the start of the round two rounds earlier",
+        "The mode switch is permanent and is only checked while in mode alpha",
+        "Answer in the form \"A=<value>, B=<value>, C=<value>, mode=<alpha or beta>\"",
     ],
 )
 
 
 # ---------------------------------------------------------------------------
-# C — Rule Application
+# C — Rule application: retroactive clauses and exceptions on exceptions
 # ---------------------------------------------------------------------------
 
 def solve_c004():
-    """Shipping surcharge rulebook with precedence and exceptions. Answer: total charge."""
-    # Order: 14 kg, zone C, fragile, member, ordered on a public holiday, insured value 900
-    weight, zone, fragile, member, holiday, insured = 14, "C", True, True, True, 900
-    base = {"A": 5, "B": 8, "C": 12}[zone]
-    charge = base
-    # R2 weight surcharge: 2 per kg above 10
-    if weight > 10:
-        charge += 2 * (weight - 10)
-    # R3 fragile: +15, but R6 caps fragile handling at 10 for zone C
-    charge += 10 if zone == "C" else 15
-    # R4 insurance: 1% of insured value above 500
-    if insured > 500:
-        charge += 0.01 * (insured - 500)
-    # R5 holiday: +20% of the running total, applied before the member discount
-    charge *= 1.20
-    # R7 member discount 10%, not applied to the base rate
-    charge = base + (charge - base) * 0.90
+    """A tariff where crossing a threshold retroactively changes an earlier rate.
+
+    Applying the rules once, in order, gives a different (wrong) total: the
+    threshold in R5 is only crossed after R4, and it sends you back to R2.
+    """
+    units = 900
+    # R2 first pass: 0.12 per unit for the first 500, 0.09 thereafter
+    def energy(rate_first):
+        return 500 * rate_first + (units - 500) * 0.09
+    charge = energy(0.12)
+    standing = 18.00                     # R1
+    charge += standing
+    charge += 0.05 * charge              # R3 levy, 5% of the running total
+    charge -= 6.00                       # R4 fixed credit
+    # R5: if the total after R4 exceeds 100, the first-500 rate in R2 becomes
+    # 0.15 and everything is recomputed from R2 — once only (R6).
+    if charge > 100:
+        charge = energy(0.15) + standing
+        charge += 0.05 * charge
+        charge -= 6.00
     return f"{charge:.2f}"
 
 
 C004 = dict(
     taskId="C004", tier=4, category="C", answerType="exact", solver=solve_c004,
-    statement="""A courier charges for a parcel using the following rulebook. Later-numbered rules take precedence over earlier ones where they conflict.
+    statement="""An energy supplier bills as follows.
 
-R1. Base rate by destination zone: zone A = 5.00, zone B = 8.00, zone C = 12.00.
-R2. Weight surcharge: add 2.00 for every whole kilogram above 10 kg.
-R3. Fragile handling: add 15.00 for any parcel marked fragile.
-R4. Insurance: add 1% of the insured value above 500.00 (nothing for the first 500.00).
-R5. Public-holiday ordering: increase the running total by 20%. This is applied before any membership discount.
-R6. Zone C exception: fragile handling in zone C is capped at 10.00, replacing the R3 amount.
-R7. Membership discount: members receive 10% off, but the discount never applies to the base rate from R1.
+R1. Standing charge: 18.00 per quarter.
+R2. Usage charge: 0.12 per unit for the first 500 units, and 0.09 per unit for every unit above 500.
+R3. Environmental levy: add 5% of the running total (standing charge plus usage charge).
+R4. Prompt-payment credit: subtract a flat 6.00.
+R5. High-usage clause: if the total after R4 exceeds 100.00, the first-500 rate in R2 is 0.15 rather than 0.12, and the bill must be recalculated from R2 onwards using that rate.
+R6. A recalculation triggered by R5 is performed at most once, even if the recalculated total still exceeds 100.00.
 
-A member orders a 14 kg fragile parcel to zone C on a public holiday, insured for 900.00.
+A customer uses 900 units in the quarter.
 
-What is the total charge?""",
+What is the final bill?""",
     constraints=[
-        "Later-numbered rules override earlier ones where they conflict",
-        "Rules are otherwise applied in numerical order",
-        "Answer as a number with two decimal places, e.g. \"41.25\"",
+        "Rules apply in numerical order, subject to R5 and R6",
+        "The standing charge is not affected by the recalculation",
+        "Answer as a number with two decimal places, e.g. \"123.45\"",
     ],
 )
 
 
 def solve_c005():
-    """Leave-entitlement policy with interacting caps, accrual and a retroactive clause."""
-    # Employee: started 1 March, 4 years' service, part-time 3 days/week,
-    # took 6 days already, requested 5 more in December, has a carry-over of 4.
-    full_time_days = 25
-    service_years = 4
-    part_time_ratio = 3 / 5
-    # P1 base 25 days full-time, pro-rated for part-time
-    entitlement = full_time_days * part_time_ratio            # 15
-    # P2 +1 day per full year of service, capped at 5, NOT pro-rated (P5 exception)
-    entitlement += min(service_years, 5)                      # 19
-    # P3 joiners after 1 January accrue pro-rata for the year: from 1 March = 10/12
-    entitlement *= 10 / 12                                    # 15.833...
-    # P4 entitlement is rounded up to the nearest half day
-    entitlement = -(-entitlement * 2 // 1) / 2                # 16.0
-    # P6 carry-over is capped at 3 days regardless of the balance carried
-    entitlement += min(4, 3)                                  # 19.0
-    remaining = entitlement - 6 - 5
-    return f"{remaining:.1f}"
+    """Grant scoring where an exception overrides an exception and the answer
+    requires reporting every applicant, not just the winner."""
+    # (name, base, years_since_last_award, is_first_time, region)
+    apps = [
+        ("Amara", 62, 1, False, "north"),
+        ("Bruno", 58, 4, False, "south"),
+        ("Chen", 55, 0, True, "north"),
+        ("Dara", 60, 3, False, "south"),
+    ]
+    scored = {}
+    for name, base, years, first, region in apps:
+        s = base
+        # G2: first-time applicants get +8
+        if first:
+            s += 8
+        # G3: an award within the last 2 years costs 10
+        if years <= 2 and not first:
+            s -= 10
+        # G4: northern applicants get +5 ...
+        if region == "north":
+            s += 5
+        # G5: ... except that G4 does not apply to first-time applicants
+        if region == "north" and first:
+            s -= 5
+        # G6: exception to G5 — it does apply if the base score is below 60
+        if region == "north" and first and base < 60:
+            s += 5
+        scored[name] = s
+    # G7: funded if score >= 62; ties broken by the higher base score
+    funded = sorted([n for n, s in scored.items() if s >= 62],
+                    key=lambda n: (-scored[n], -dict((a[0], a[1]) for a in apps)[n]))
+    parts = [f"{n}={scored[n]}" for n, _, _, _, _ in apps]
+    return f"{', '.join(parts)}; funded: {', '.join(funded) if funded else 'none'}"
 
 
 C005 = dict(
-    taskId="C005", tier=5, category="C", answerType="exact", solver=solve_c005,
-    statement="""A company's leave policy reads as follows. Where clauses interact, apply them in the order given unless a later clause states otherwise.
+    taskId="C005", tier=5, category="C", answerType="structured", solver=solve_c005,
+    statement="""A grant panel scores four applicants.
 
-P1. Full-time employees receive 25 days of annual leave. Part-time employees receive this pro-rated by days worked per week, out of a five-day week.
-P2. Long-service bonus: one additional day for each full year of service, capped at 5 additional days.
-P3. Employees who joined after 1 January accrue leave pro-rata for their first calendar year, counted in whole months from their start month inclusive (a 1 March start accrues 10 months of the 12).
-P4. Any entitlement that is not a whole or half day is rounded up to the nearest half day.
-P5. Exception to P1: the long-service bonus from P2 is never pro-rated, for part-time or partial-year employees.
-P6. Carry-over from the previous year is added after all of the above, and is capped at 3 days however many days were carried.
+G1. Every applicant starts from their base score.
+G2. First-time applicants receive +8.
+G3. An applicant who received an award within the last 2 years is penalised 10.
+G4. Applicants from the northern region receive +5.
+G5. Exception to G4: the northern bonus does not apply to first-time applicants.
+G6. Exception to G5: the northern bonus does apply to a first-time applicant whose base score is below 60.
+G7. An applicant is funded if their final score is 62 or more.
 
-An employee joined on 1 March of this year, has 4 full years of prior service with the company, works 3 days per week, carried over 4 days from last year, and has already taken 6 days. They now request 5 more days in December.
+Applicants:
+- Amara: base 62, last award 1 year ago, not first-time, northern region.
+- Bruno: base 58, last award 4 years ago, not first-time, southern region.
+- Chen: base 55, no previous award, first-time applicant, northern region.
+- Dara: base 60, last award 3 years ago, not first-time, southern region.
 
-How many days of leave would remain after that request is granted?""",
+Give every applicant's final score, and say which applicants are funded.""",
     constraints=[
-        "Clauses apply in the order given, except where a later clause overrides an earlier one",
-        "The rounding in P4 applies to the entitlement before carry-over is added",
-        "Answer as a number with one decimal place, e.g. \"7.5\"",
+        "Rules apply in numerical order, and each exception overrides the rule it names",
+        "G3 does not apply to an applicant who has never received an award",
+        "Answer in the form \"Amara=<score>, Bruno=<score>, Chen=<score>, Dara=<score>; funded: <names or none>\"",
     ],
 )
 
 
 # ---------------------------------------------------------------------------
-# D — Causal & Counterfactual
+# D — Causal: never-claims and expiring signals
 # ---------------------------------------------------------------------------
 
-def _d004_sim(links, thresholds, removed=None):
-    """Propagate activation through a delayed threshold network from S at t=0."""
+def _propagate(links, thr, removed=None, expiry=None, horizon=60):
+    """Threshold propagation. With `expiry`, an arrived signal only counts for
+    that many steps, so a node can miss its threshold by timing alone."""
     removed = removed or set()
-    active = {"S": 0}
-    incoming = {n: [] for n in thresholds}
-    for (src, dst, delay) in links:
-        if (src, dst) in removed:
-            continue
-        incoming[dst].append((src, delay))
-    for t in range(1, 40):
-        for node, thr in thresholds.items():
-            if node in active:
+    fire = {"S": 0}
+    inc = {n: [] for n in thr}
+    for src, dst, d in links:
+        if (src, dst) not in removed:
+            inc[dst].append((src, d))
+    for t in range(1, horizon):
+        for node, need in thr.items():
+            if node in fire:
                 continue
-            arrivals = sum(
-                1 for (src, delay) in incoming[node]
-                if src in active and active[src] + delay <= t
-            )
-            if arrivals >= thr:
-                active[node] = t
-    return active
+            live = 0
+            for src, d in inc[node]:
+                if src in fire:
+                    arrival = fire[src] + d
+                    if arrival <= t and (expiry is None or t - arrival < expiry):
+                        live += 1
+            if live >= need:
+                fire[node] = t
+    return fire
 
 
-D004_LINKS = [("S", "P", 1), ("S", "Q", 2), ("P", "R", 1), ("Q", "R", 1), ("R", "T", 2), ("Q", "T", 4), ("P", "U", 3), ("T", "U", 1)]
-D004_THR = {"P": 1, "Q": 1, "R": 2, "T": 1, "U": 2}
+D004_LINKS = [("S", "A", 1), ("S", "B", 2), ("A", "C", 1), ("B", "C", 2), ("C", "D", 1),
+              ("A", "E", 5), ("D", "E", 1), ("B", "F", 1), ("E", "F", 2), ("D", "G", 3), ("F", "G", 1)]
+D004_THR = {"A": 1, "B": 1, "C": 2, "D": 1, "E": 2, "F": 2, "G": 2}
 
 
 def solve_d004():
-    base = _d004_sim(D004_LINKS, D004_THR)
-    cf = _d004_sim(D004_LINKS, D004_THR, removed={("Q", "R")})
-    return f"U={base['U']}, U={cf.get('U', 'never')} without Q->R"
+    base = _propagate(D004_LINKS, D004_THR)
+    cf = _propagate(D004_LINKS, D004_THR, removed={("A", "C")})
+    never = sorted(n for n in D004_THR if n not in cf)
+    return f"G={base['G']}; never: {', '.join(never) if never else 'none'}"
 
 
 D004 = dict(
     taskId="D004", tier=4, category="D", answerType="exact", solver=solve_d004,
-    statement="""A signalling network has nodes S, P, Q, R, T and U. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay.
+    statement="""A signalling network has nodes S, A, B, C, D, E, F and G. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay. Once a node fires it stays active and sends its signal onward immediately.
 
-Links (source → destination, delay in time steps):
-S → P, delay 1
-S → Q, delay 2
-P → R, delay 1
-Q → R, delay 1
-R → T, delay 2
-Q → T, delay 4
-P → U, delay 3
-T → U, delay 1
+Links (source → destination, delay):
+S → A, 1
+S → B, 2
+A → C, 1
+B → C, 2
+C → D, 1
+A → E, 5
+D → E, 1
+B → F, 1
+E → F, 2
+D → G, 3
+F → G, 1
 
-Activation thresholds — a node fires at the earliest time step at which it has received signals from at least this many distinct sources:
-P: 1, Q: 1, R: 2, T: 1, U: 2
+Thresholds — a node fires at the earliest time it has received signals from at least this many distinct sources:
+A: 1, B: 1, C: 2, D: 1, E: 2, F: 2, G: 2
 
-Once a node fires it stays active and sends its signal onward immediately.
-
-Question 1: At what time step does U fire?
-Question 2: If the link Q → R were removed, at what time step would U fire?""",
+Question 1: At what time step does G fire?
+Question 2: If the link A → C were removed, which nodes (of A, B, C, D, E, F, G) would never fire at all?""",
     constraints=[
-        "A node fires at the earliest time step its threshold is met, never before",
-        "Signals sent before a node fires still count once they have arrived",
-        "Answer in the form \"U=<t1>, U=<t2> without Q->R\", using the word never if it never fires",
+        "A node fires at the earliest time its threshold is met, never before",
+        "Question 2 asks for every node that never fires, listed alphabetically",
+        "Answer in the form \"G=<t>; never: <nodes or none>\"",
     ],
 )
 
 
-D005_LINKS = [("S", "A", 1), ("S", "B", 3), ("A", "C", 2), ("B", "C", 1), ("A", "D", 4), ("C", "D", 1), ("C", "E", 2), ("D", "E", 1), ("B", "E", 6)]
-D005_THR = {"A": 1, "B": 1, "C": 2, "D": 2, "E": 2}
+D005_LINKS = [("S", "P", 1), ("S", "Q", 4), ("P", "R", 1), ("Q", "R", 1), ("P", "T", 1),
+              ("R", "T", 3), ("R", "U", 1), ("T", "U", 4), ("Q", "U", 2)]
+D005_THR = {"P": 1, "Q": 1, "R": 2, "T": 2, "U": 2}
 
 
 def solve_d005():
-    base = _d005_sim = _d004_sim(D005_LINKS, D005_THR)
-    cf1 = _d004_sim(D005_LINKS, D005_THR, removed={("A", "C")})
-    cf2 = _d004_sim(D005_LINKS, D005_THR, removed={("C", "D")})
-    return (f"E={base['E']}, E={cf1.get('E', 'never')} without A->C, "
-            f"E={cf2.get('E', 'never')} without C->D")
+    """Signals expire: an arrival only counts for 3 steps. A node whose inputs
+    arrive too far apart never fires, however many arrive in total."""
+    base = _propagate(D005_LINKS, D005_THR, expiry=3)
+    never = sorted(n for n in D005_THR if n not in base)
+    no_expiry = _propagate(D005_LINKS, D005_THR)
+    return (f"U={base.get('U', 'never')}; never: {', '.join(never) if never else 'none'}; "
+            f"U={no_expiry.get('U', 'never')} without expiry")
 
 
 D005 = dict(
     taskId="D005", tier=5, category="D", answerType="exact", solver=solve_d005,
-    statement="""A signalling network has nodes S, A, B, C, D and E. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay.
+    statement="""A signalling network has nodes S, P, Q, R, T and U. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay. Once a node fires it stays active and sends its signal onward immediately.
 
-Links (source → destination, delay in time steps):
-S → A, delay 1
-S → B, delay 3
-A → C, delay 2
-B → C, delay 1
-A → D, delay 4
-C → D, delay 1
-C → E, delay 2
-D → E, delay 1
-B → E, delay 6
+Links (source → destination, delay):
+S → P, 1
+S → Q, 4
+P → R, 1
+Q → R, 1
+P → T, 1
+R → T, 3
+R → U, 1
+T → U, 4
+Q → U, 2
 
-Activation thresholds — a node fires at the earliest time step at which it has received signals from at least this many distinct sources:
-A: 1, B: 1, C: 2, D: 2, E: 2
+Thresholds — a node fires when it holds signals from at least this many distinct sources at the same time:
+P: 1, Q: 1, R: 2, T: 2, U: 2
 
-Once a node fires it stays active and sends its signal onward immediately.
+Signals expire. An arrived signal counts towards a node's threshold only during the 3 time steps after it arrives: it counts at its arrival time and at the next two time steps, and from then on it no longer counts. A node therefore fires only if enough signals are live at the same moment.
 
-Question 1: At what time step does E fire?
-Question 2: If the link A → C were removed, at what time step would E fire?
-Question 3: If instead the link C → D were removed (with A → C intact), at what time step would E fire?""",
+Question 1: At what time step does U fire?
+Question 2: Which nodes (of P, Q, R, T, U) never fire at all?
+Question 3: If signals did not expire, at what time step would U fire?""",
     constraints=[
-        "A node fires at the earliest time step its threshold is met, never before",
-        "Each counterfactual is evaluated independently, from the original network",
-        "Answer in the form \"E=<t1>, E=<t2> without A->C, E=<t3> without C->D\", using the word never if it never fires",
+        "A signal counts at its arrival time and for the following 2 time steps only",
+        "A node that fires stays active permanently; expiry applies to signals, not to firing",
+        "Answer in the form \"U=<t>; never: <nodes or none>; U=<t> without expiry\", using the word never where a node never fires",
     ],
 )
 
 
 # ---------------------------------------------------------------------------
-# E — Abstraction & Transformation
+# E — Abstraction: positional exceptions and property-dependent branches
 # ---------------------------------------------------------------------------
 
-def _e004_transform(s: str) -> str:
-    """Rule inferred from the worked examples: reverse, then shift each letter
-    forward by its 1-based position in the reversed string, wrapping A-Z."""
-    r = s[::-1]
-    return "".join(chr((ord(c) - 65 + i + 1) % 26 + 65) for i, c in enumerate(r))
+def _e004(s: str) -> str:
+    """Shift every letter forward by 3, EXCEPT the first and last letters,
+    which move backward by 1. The exception is what has to be spotted."""
+    out = []
+    for i, c in enumerate(s):
+        if i == 0 or i == len(s) - 1:
+            out.append(chr((ord(c) - 65 - 1) % 26 + 65))
+        else:
+            out.append(chr((ord(c) - 65 + 3) % 26 + 65))
+    return "".join(out)
 
 
 def solve_e004():
-    return _e004_transform("MARCH")
+    return _e004("PLANET")
 
 
 E004 = dict(
     taskId="E004", tier=4, category="E", answerType="exact", solver=solve_e004,
-    statement=f"""A transformation turns one uppercase word into another. Three worked examples:
+    statement=f"""A transformation turns one uppercase word into another. Four worked examples:
 
-CAB → {_e004_transform("CAB")}
-DOG → {_e004_transform("DOG")}
-FLUTE → {_e004_transform("FLUTE")}
+CANDLE → {_e004("CANDLE")}
+RIVER → {_e004("RIVER")}
+BOX → {_e004("BOX")}
+FORTUNE → {_e004("FORTUNE")}
 
-Apply the same transformation to MARCH.""",
+Apply the same transformation to PLANET.""",
     constraints=[
-        "The alphabet wraps: after Z comes A",
+        "The alphabet wraps in both directions: after Z comes A, before A comes Z",
         "The same rule applies to every example and to the answer",
         "Answer with the transformed word in uppercase letters only",
     ],
 )
 
 
-def _e005_transform(s: str) -> str:
-    """Rule: take the letters at odd positions in order, then the letters at
-    even positions in reverse order, then shift every letter back by 2.
-
-    Two composed operations, four worked examples of three different lengths.
-    Checked against every fixed-shift, reverse-and-shift and odds/evens family:
-    only this rule reproduces all four examples, so it is recoverable rather
-    than merely hard."""
-    odds = s[0::2]
-    evens = s[1::2][::-1]
-    return "".join(chr((ord(c) - 65 - 2) % 26 + 65) for c in odds + evens)
+def _e005(s: str) -> str:
+    """Two branches on a property of the word: words with an odd number of
+    letters are reversed then shifted +2; even-length words are shifted -3 and
+    the first letter moves to the end. All five examples are odd-length except
+    one, so the branch has to be inferred from a single instance."""
+    if len(s) % 2 == 1:
+        return "".join(chr((ord(c) - 65 + 2) % 26 + 65) for c in s[::-1])
+    shifted = "".join(chr((ord(c) - 65 - 3) % 26 + 65) for c in s)
+    return shifted[1:] + shifted[0]
 
 
 def solve_e005():
-    return _e005_transform("PRISM")
+    return _e005("HARBOUR")
 
 
 E005 = dict(
     taskId="E005", tier=5, category="E", answerType="exact", solver=solve_e005,
-    statement=f"""A transformation turns one uppercase word into another. Four worked examples:
+    statement=f"""A transformation turns one uppercase word into another. Five worked examples:
 
-BADGE → {_e005_transform("BADGE")}
-CHAIR → {_e005_transform("CHAIR")}
-LIME → {_e005_transform("LIME")}
-STONE → {_e005_transform("STONE")}
+CANOE → {_e005("CANOE")}
+TIGER → {_e005("TIGER")}
+MOON → {_e005("MOON")}
+SPIRAL → {_e005("SPIRAL")}
+GLASS → {_e005("GLASS")}
 
-Apply the same transformation to PRISM.""",
+Apply the same transformation to HARBOUR.""",
     constraints=[
         "The alphabet wraps in both directions: after Z comes A, before A comes Z",
         "The same rule applies to every example and to the answer",
@@ -565,94 +557,129 @@ Apply the same transformation to PRISM.""",
 
 
 # ---------------------------------------------------------------------------
-# F — Planning Under Constraints
+# F — Planning: instances where every naive bound is wrong
 # ---------------------------------------------------------------------------
 
-def _min_makespan(durations, deps, machines):
-    """Exhaustive optimal makespan for a small job-shop: try every permutation as
-    a priority order, list-schedule it, and take the best. With <= 8 tasks this
-    enumerates the whole space of list schedules, which contains an optimum."""
-    tasks = list(durations)
+def _optimal_makespan(dur, deps, machines, eligible=None):
+    """True optimum by exhaustive search over non-delay schedules.
+
+    For identical machines with precedence and no release dates an optimal
+    non-delay schedule always exists, so enumerating priority orders is
+    sufficient. `eligible` restricts a job to a subset of machines.
+    """
+    jobs = list(dur)
     best = None
-    for order in itertools.permutations(tasks):
-        finish = {}
-        free = [0] * machines
+    for order in itertools.permutations(jobs):
+        # respect precedence in the priority order
+        placed = set()
         ok = True
-        for t in order:
-            if any(d not in finish for d in deps.get(t, [])):
+        for j in order:
+            if any(d not in placed for d in deps.get(j, [])):
                 ok = False
                 break
-            ready = max([finish[d] for d in deps.get(t, [])], default=0)
-            m = min(range(machines), key=lambda i: max(free[i], ready))
-            start = max(free[m], ready)
-            finish[t] = start + durations[t]
-            free[m] = finish[t]
+            placed.add(j)
         if not ok:
             continue
+        finish, free = {}, [0] * machines
+        for j in order:
+            ready = max([finish[d] for d in deps.get(j, [])], default=0)
+            allowed = eligible.get(j, range(machines)) if eligible else range(machines)
+            m = min(allowed, key=lambda i: max(free[i], ready))
+            start = max(free[m], ready)
+            finish[j] = start + dur[j]
+            free[m] = finish[j]
         span = max(finish.values())
         if best is None or span < best:
             best = span
     return best
 
 
-F004_DUR = {"T1": 3, "T2": 2, "T3": 4, "T4": 1, "T5": 5, "T6": 2, "T7": 3}
-F004_DEPS = {"T3": ["T1"], "T4": ["T2"], "T5": ["T3"], "T6": ["T4"], "T7": ["T5", "T6"]}
+def _bounds(dur, deps, machines):
+    """The two bounds a model is likely to quote instead of searching."""
+    memo = {}
+
+    def chain(j):
+        if j not in memo:
+            memo[j] = dur[j] + max([chain(d) for d in deps.get(j, [])], default=0)
+        return memo[j]
+
+    critical = max(chain(j) for j in dur)
+    load = math.ceil(sum(dur.values()) / machines)
+    return critical, load
+
+
+F004_DUR = {"K1": 5, "K2": 4, "K3": 4, "K4": 3, "K5": 3, "K6": 6, "K7": 2}
+F004_DEPS = {"K4": ["K1"], "K5": ["K2"], "K6": ["K3"], "K7": ["K4", "K5", "K6"]}
 
 
 def solve_f004():
-    return str(_min_makespan(F004_DUR, F004_DEPS, machines=2))
+    opt = _optimal_makespan(F004_DUR, F004_DEPS, machines=2)
+    crit, load = _bounds(F004_DUR, F004_DEPS, 2)
+    assert opt > max(crit, load), f"F004 optimum {opt} equals a naive bound (critical {crit}, load {load})"
+    return str(opt)
 
 
 F004 = dict(
     taskId="F004", tier=4, category="F", answerType="exact", solver=solve_f004,
-    statement="""Seven tasks must run on two identical machines. Each task runs on exactly one machine, start to finish, without interruption. A machine runs one task at a time.
+    statement="""Seven tasks must run on two identical machines. Each task runs on exactly one machine, start to finish, without interruption; a machine runs one task at a time.
 
-Durations (hours): T1 = 3, T2 = 2, T3 = 4, T4 = 1, T5 = 5, T6 = 2, T7 = 3.
+Durations (hours): K1 = 5, K2 = 4, K3 = 4, K4 = 3, K5 = 3, K6 = 6, K7 = 2.
 
 Dependencies — a task may start only once every task it depends on has finished:
-T3 depends on T1
-T4 depends on T2
-T5 depends on T3
-T6 depends on T4
-T7 depends on T5 and T6
+K4 depends on K1
+K5 depends on K2
+K6 depends on K3
+K7 depends on K4, K5 and K6
 
 Both machines are free from hour 0. What is the minimum number of hours in which all seven tasks can be completed?""",
     constraints=[
         "Two machines, each running at most one task at a time",
         "Tasks cannot be split or paused once started",
-        "A task starts no earlier than the finish time of every task it depends on",
+        "The answer is the true minimum, which may be larger than the longest dependency chain and larger than the total work divided by two",
         "Answer with the minimum makespan as a whole number of hours",
     ],
 )
 
 
-F005_DUR = {"J1": 4, "J2": 3, "J3": 6, "J4": 2, "J5": 5, "J6": 3, "J7": 4, "J8": 2}
-F005_DEPS = {"J3": ["J1"], "J4": ["J1"], "J5": ["J2"], "J6": ["J3", "J4"], "J7": ["J5"], "J8": ["J6", "J7"]}
+F005_DUR = {"W1": 6, "W2": 5, "W3": 5, "W4": 4, "W5": 3, "W6": 4, "W7": 3, "W8": 2}
+F005_DEPS = {"W4": ["W1"], "W5": ["W2"], "W6": ["W3"], "W7": ["W4", "W5"], "W8": ["W6", "W7"]}
+# W1, W3 and W6 are certified for machine 1 only; W2 for machines 1 or 2. The
+# restriction is what puts the optimum out of reach of every naive bound.
+F005_ELIG = {"W1": [0], "W3": [0], "W6": [0], "W2": [0, 1]}
 
 
 def solve_f005():
-    return str(_min_makespan(F005_DUR, F005_DEPS, machines=3))
+    opt = _optimal_makespan(F005_DUR, F005_DEPS, machines=3, eligible=F005_ELIG)
+    crit, load = _bounds(F005_DUR, F005_DEPS, 3)
+    m1 = sum(F005_DUR[j] for j, ms in F005_ELIG.items() if ms == [0])
+    assert opt > max(crit, load, m1), (
+        f"F005 optimum {opt} matches a naive bound (critical {crit}, load {load}, machine-1 work {m1})")
+    return str(opt)
 
 
 F005 = dict(
     taskId="F005", tier=5, category="F", answerType="exact", solver=solve_f005,
-    statement="""Eight jobs must run on three identical machines. Each job runs on exactly one machine, start to finish, without interruption. A machine runs one job at a time.
+    statement="""Eight jobs must run on three machines, numbered 1, 2 and 3. Each job runs on exactly one machine, start to finish, without interruption; a machine runs one job at a time.
 
-Durations (hours): J1 = 4, J2 = 3, J3 = 6, J4 = 2, J5 = 5, J6 = 3, J7 = 4, J8 = 2.
+Durations (hours): W1 = 6, W2 = 5, W3 = 5, W4 = 4, W5 = 3, W6 = 4, W7 = 3, W8 = 2.
 
 Dependencies — a job may start only once every job it depends on has finished:
-J3 depends on J1
-J4 depends on J1
-J5 depends on J2
-J6 depends on J3 and J4
-J7 depends on J5
-J8 depends on J6 and J7
+W4 depends on W1
+W5 depends on W2
+W6 depends on W3
+W7 depends on W4 and W5
+W8 depends on W6 and W7
+
+Machine restrictions:
+W1, W3 and W6 may run only on machine 1.
+W2 may run only on machine 1 or machine 2.
+Every other job may run on any machine.
 
 All three machines are free from hour 0. What is the minimum number of hours in which all eight jobs can be completed?""",
     constraints=[
         "Three machines, each running at most one job at a time",
         "Jobs cannot be split or paused once started",
-        "A job starts no earlier than the finish time of every job it depends on",
+        "The machine restrictions must be respected; the answer is the true minimum, which is larger than both the longest dependency chain and the total work divided by three",
         "Answer with the minimum makespan as a whole number of hours",
     ],
 )
@@ -662,11 +689,10 @@ ITEMS = [A004, A005, B004, B005, C004, C005, D004, D005, E004, E005, F004, F005]
 
 
 def build_fixture(item, answer):
-    cat = item["category"]
-    tier = item["tier"]
-    fixture = {
+    cat, tier = item["category"], item["tier"]
+    f = {
         "taskId": item["taskId"],
-        "version": 1,
+        "version": 2,
         "category": cat,
         "categoryLabel": CAT_LABELS[cat],
         "tier": tier,
@@ -682,15 +708,14 @@ def build_fixture(item, answer):
         "scoringWeights": WEIGHTS,
     }
     if cat in CHC_SECOND:
-        fixture["chcSecondaryFactor"] = CHC_SECOND[cat]
-    return fixture
+        f["chcSecondaryFactor"] = CHC_SECOND[cat]
+    return f
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--write", action="store_true", help="write fixtures to disk")
+    ap.add_argument("--write", action="store_true")
     args = ap.parse_args()
-
     root = pathlib.Path(__file__).resolve().parent.parent / "fixtures" / "categories"
     failures = 0
     for item in ITEMS:
@@ -700,13 +725,11 @@ def main():
             print(f"FAIL {item['taskId']}: {e}")
             failures += 1
             continue
-        print(f"  {item['taskId']} (tier {item['tier']}, b={B_BY_TIER[item['tier']]}) -> {answer!r}")
+        print(f"  {item['taskId']} (tier {item['tier']}) -> {answer!r}")
         if args.write:
             d = root / CAT_DIRS[item["category"]] / f"tier-{item['tier']}"
             d.mkdir(parents=True, exist_ok=True)
-            (d / f"{item['taskId']}.json").write_text(
-                json.dumps(build_fixture(item, answer), indent=2) + "\n"
-            )
+            (d / f"{item['taskId']}.json").write_text(json.dumps(build_fixture(item, answer), indent=2) + "\n")
     if failures:
         print(f"\n{failures} item(s) failed verification")
         sys.exit(1)

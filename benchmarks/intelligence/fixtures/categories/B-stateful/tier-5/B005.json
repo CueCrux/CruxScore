@@ -1,6 +1,6 @@
 {
   "taskId": "B005",
-  "version": 1,
+  "version": 2,
   "category": "B",
   "categoryLabel": "Stateful Process Reasoning",
   "tier": 5,
@@ -12,14 +12,15 @@
     "c": 0
   },
   "track": "R1",
-  "statement": "Four registers start at A=1, B=2, C=4, D=0.\n\nRounds are numbered 1 to 12. In each round, apply these steps strictly in order:\n\nStep 1. If the round number is divisible by 4, rotate the values of A, B and C to the right: A takes C's old value, B takes A's old value, and C takes B's old value.\nStep 2. If A + B is greater than C, then add 2 to D and add A's current value to C. Otherwise subtract 1 from D and add B's current value to A.\nStep 3. If the round number is divisible by 5, double B.\nStep 4. If C is now 30 or more, subtract 25 from C and add 5 to D.\nStep 5. If D is now negative, set D to 0 and add 1 to B.\n\nWhat are the values of A, B, C and D after round 12 completes?",
+  "statement": "Three counters start at A=2, B=3, C=1. The system begins in mode alpha.\n\nRounds are numbered 1 to 14. In each round, apply these steps in order:\n\nStep 1. If the system is in mode alpha: add B's current value to A, then add 1 to C if the round number is odd or 2 to C if it is even.\n        If the system is in mode beta: add C's current value to B, then subtract 1 from A.\nStep 2. Look at the values A and C had at the START of the round two rounds earlier (for rounds 1 and 2, use the starting values A=2, B=3, C=1). If that A was greater than that C, add 2 to B; otherwise add 3 to C.\nStep 3. If the system is in mode alpha and A + B + C is now greater than 30, the system switches permanently to mode beta. Once in mode beta it never returns to alpha.\n\nWhat are A, B and C after round 14 completes, and which mode is the system in?",
   "constraints": [
-    "Steps are applied strictly in the order given, within each round",
-    "Each step uses the values current at the moment that step runs",
-    "Answer in the form \"A=<value>, B=<value>, C=<value>, D=<value>\""
+    "Steps apply in order within each round",
+    "Step 2 reads the state as it was at the start of the round two rounds earlier",
+    "The mode switch is permanent and is only checked while in mode alpha",
+    "Answer in the form \"A=<value>, B=<value>, C=<value>, mode=<alpha or beta>\""
   ],
   "answerType": "exact",
-  "correctAnswer": "A=32, B=24, C=13, D=38",
+  "correctAnswer": "A=6, B=86, C=5, mode=beta",
   "responseSchema": {
     "type": "object",
     "properties": {
