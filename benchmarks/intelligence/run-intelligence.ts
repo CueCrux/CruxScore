@@ -32,6 +32,7 @@ import { hashTaskSet } from "./lib/anti-contamination.js";
 import { scoreItem } from "./scoring/item-scorer.js";
 import { generateReport } from "./scoring/iq-reporter.js";
 import { mapToCruxFundamentals, computeIntelligenceCruxComposite } from "./scoring/crux-integration.js";
+import { judgeItem, parseJudgeSpec, type JudgeConfig, type ItemJudgement } from "./scoring/judge.js";
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing
@@ -53,6 +54,8 @@ interface CLIArgs {
   allowTruncated: boolean;
   /** False drops the (redundant) system prompt — see SYSTEM_PROMPT. */
   systemPrompt: boolean;
+  /** Judge panel consulted on deterministic misses only (rescue-only). */
+  judges: JudgeConfig[];
 }
 
 function parseArgs(argv: string[]): CLIArgs {
@@ -71,6 +74,7 @@ function parseArgs(argv: string[]): CLIArgs {
     maxTokens: undefined,
     allowTruncated: false,
     systemPrompt: true,
+    judges: [],
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -124,6 +128,18 @@ function parseArgs(argv: string[]): CLIArgs {
         break;
       case "--no-system-prompt":
         args.systemPrompt = false;
+        break;
+      case "--judge":
+        // Default panel: one Claude, one GPT, both off the local Crucible
+        // subscription planes, and neither of them the model under test.
+        args.judges = [
+          parseJudgeSpec("claude-opus-4-8@http://100.75.64.43:10010"),
+          parseJudgeSpec("gpt-5.6@http://100.75.64.43:9992"),
+        ];
+        break;
+      case "--judge-model":
+        args.judges.push(parseJudgeSpec(next));
+        i++;
         break;
       default:
         console.error(`Unknown flag: ${flag}`);
@@ -429,6 +445,7 @@ async function run(): Promise<void> {
   console.log(`  Items/category: ${args.itemsPerCategory}`);
   console.log(`  Max tokens: ${maxTokens}${args.maxTokens === undefined ? " (default)" : " (--max-tokens)"}`);
   if (!args.systemPrompt) console.log(`  System prompt: OFF (--no-system-prompt) — declare this alongside the score`);
+  if (args.judges.length > 0) console.log(`  Judges: ${args.judges.map(j => `${j.model}@${j.base}`).join(", ")} (rescue-only, unanimous)`);
   if (args.dryRun) console.log(`  ** DRY RUN **`);
   console.log();
 
@@ -512,8 +529,50 @@ async function run(): Promise<void> {
     scoreItem(task, responses[i]),
   );
 
+  // 3b. Judge panel — consulted only on deterministic misses, and only able to
+  // flip a miss to a hit. An item the string scorer already accepted never
+  // reaches a judge, so passing items stay reproducible. See scoring/judge.ts.
+  const judgements: ItemJudgement[] = [];
+  let judgedScores = itemScores;
+
+  if (args.judges.length > 0 && !args.dryRun) {
+    const disputed = itemScores
+      .map((score, i) => ({ score, i }))
+      .filter(({ score, i }) => !score.correct && responses[i].parsedOutput);
+
+    console.log(`\n  Judging ${disputed.length} deterministic miss(es) with ${args.judges.map(j => j.model).join(" + ")}`);
+    judgedScores = [...itemScores];
+
+    for (const { score, i } of disputed) {
+      const judgement = await judgeItem(tasks[i], responses[i].parsedOutput!, args.judges);
+      judgements.push(judgement);
+
+      if (judgement.rescued) {
+        const w = tasks[i].scoringWeights;
+        judgedScores[i] = {
+          ...score,
+          correct: true,
+          partialCredit: 1,
+          weightedScore:
+            w.correctness * 1 +
+            w.traceConsistency * score.traceConsistencyScore +
+            w.constraintAdherence * score.constraintAdherenceScore +
+            w.outputCompliance * score.outputComplianceScore,
+        };
+      }
+
+      const verdict = judgement.rescued ? "RESCUED" : judgement.split ? "split — kept as miss" : "upheld as miss";
+      console.log(`    [${tasks[i].taskId}] ${verdict}`);
+      for (const v of judgement.verdicts) {
+        console.log(`        ${v.model}: ${v.equivalent} — ${v.reason.slice(0, 120)}`);
+      }
+    }
+  }
+
   // 4. Generate report (IRT + CHC + IQ)
-  const report = generateReport(itemScores);
+  const report = generateReport(judgedScores);
+  // Kept so a judged run can always be read back against the string scorer.
+  const deterministicReport = judgements.length > 0 ? generateReport(itemScores) : null;
 
   // 5. CruxFundamentals integration
   const cruxMappings = mapToCruxFundamentals(report, totalLatencyMs);
@@ -547,6 +606,20 @@ async function run(): Promise<void> {
       holdoutItemsUsed: 0,
       variantRotation: [],
     },
+    ...(judgements.length > 0
+      ? {
+          judging: {
+            judges: args.judges.map(j => ({ model: j.model, base: j.base })),
+            rescuedTaskIds: judgements.filter(j => j.rescued).map(j => j.taskId),
+            splitTaskIds: judgements.filter(j => j.split).map(j => j.taskId),
+            judgements,
+            deterministic: {
+              fullScaleIQ: deterministicReport!.compositeIQ.fullScaleIQ,
+              totalCorrect: itemScores.filter(s => s.correct).length,
+            },
+          },
+        }
+      : {}),
   };
 
   // 7. Print results
@@ -575,6 +648,14 @@ async function run(): Promise<void> {
   }
   if (declinedItems.length > 0) {
     console.log(`\n  ⚠ ${declinedItems.length}/${responses.length} items were declined by the model: ${declinedItems.join(", ")}`);
+  }
+
+  if (judgements.length > 0) {
+    const rescued = judgements.filter(j => j.rescued).length;
+    const split = judgements.filter(j => j.split).length;
+    console.log(`\n  Judged scoring: ${rescued} miss(es) rescued as equivalent, ${split} split verdict(s) kept as misses`);
+    console.log(`    Deterministic (string match only): IQ ${deterministicReport!.compositeIQ.fullScaleIQ}, ${itemScores.filter(s => s.correct).length}/${itemScores.length} correct`);
+    console.log(`    Judged:                            IQ ${report.compositeIQ.fullScaleIQ}, ${judgedScores.filter(s => s.correct).length}/${judgedScores.length} correct`);
   }
 
   console.log(`\n  CruxScore Composite: ${(cruxComposite * 100).toFixed(1)}%`);
@@ -619,7 +700,9 @@ async function run(): Promise<void> {
         categoryScores: runResult.score?.categoryScores,
         factorScores: runResult.score?.factorScores,
         totalItems: responses.length,
-        totalCorrect: itemScores.filter((s: any) => s.correct).length,
+        totalCorrect: judgedScores.filter((s: any) => s.correct).length,
+        scoringMode: judgements.length > 0 ? "judged" : "deterministic",
+        judges: args.judges.map(j => `${j.model}@${j.base}`),
         usage: runResult.usage,
         durationMs: totalLatencyMs,
         cruxComposite: cruxComposite,

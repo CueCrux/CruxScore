@@ -300,6 +300,35 @@ export interface IntelligenceScore {
 // Full Run Result
 // ---------------------------------------------------------------------------
 
+export interface JudgeVerdictRecord {
+  model: string;
+  base: string;
+  equivalent: boolean | null;
+  reason: string;
+  latencyMs: number;
+}
+
+export interface ItemJudgementRecord {
+  taskId: string;
+  verdicts: JudgeVerdictRecord[];
+  rescued: boolean;
+  split: boolean;
+}
+
+/**
+ * Present only on runs scored with a judge panel (--judge). Judges are
+ * consulted on deterministic misses and can only turn a miss into a hit, so
+ * `deterministic` is always the stricter string-matched score for the same
+ * responses. See scoring/judge.ts.
+ */
+export interface JudgingRecord {
+  judges: Array<{ model: string; base: string }>;
+  rescuedTaskIds: string[];
+  splitTaskIds: string[];
+  judgements: ItemJudgementRecord[];
+  deterministic: { fullScaleIQ: number; totalCorrect: number };
+}
+
 export interface IntelligenceRunResult {
   runId: string;
   benchmarkVersion: string;
@@ -315,6 +344,7 @@ export interface IntelligenceRunResult {
     totalOutputTokens: number;
     estimatedCostUsd: number;
   };
+  judging?: JudgingRecord;
   antiContamination: {
     taskSetHash: string;
     holdoutItemsUsed: number;
