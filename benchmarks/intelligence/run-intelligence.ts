@@ -28,6 +28,7 @@ import type {
   ParsedOutput,
 } from "./lib/types.js";
 import { selectTaskSet } from "./lib/task-loader.js";
+import { parseResponse } from "./lib/response-parser.js";
 import { hashTaskSet } from "./lib/anti-contamination.js";
 import { scoreItem } from "./scoring/item-scorer.js";
 import { generateReport } from "./scoring/iq-reporter.js";
@@ -178,31 +179,6 @@ function buildPrompt(task: IntelligenceTask): string {
   prompt += `Respond ONLY with the JSON object, no other text.\n`;
 
   return prompt;
-}
-
-// ---------------------------------------------------------------------------
-// Response parser
-// ---------------------------------------------------------------------------
-
-function parseResponse(raw: string): ParsedOutput | null {
-  try {
-    // Strip markdown code fences if present
-    let cleaned = raw.trim();
-    if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
-    else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
-    if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
-    cleaned = cleaned.trim();
-
-    const parsed = JSON.parse(cleaned);
-
-    return {
-      final_answer: parsed.final_answer ?? "",
-      confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0,
-      working: Array.isArray(parsed.working) ? parsed.working : [],
-    };
-  } catch {
-    return null;
-  }
 }
 
 // ---------------------------------------------------------------------------
