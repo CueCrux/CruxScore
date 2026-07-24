@@ -247,6 +247,13 @@ function estimateModelCost(model: string, inputTokens: number, outputTokens: num
  * wrong. These get a larger default; every other model keeps 4096 so previously
  * published runs stay comparable. Override either with --max-tokens.
  */
+/**
+ * Bank version. 1.0 = the original 18 items (tiers 1-3). 1.1 = the 30-item
+ * bank that added tiers 4-5 after the frontier hit the old ceiling. A score is
+ * only meaningful against the bank it was measured on.
+ */
+const BENCHMARK_VERSION = "1.1";
+
 const THINKING_ON_BY_DEFAULT = /^claude-(opus-5|fable-5|mythos-5|sonnet-5)/;
 const DEFAULT_MAX_TOKENS = 4096;
 const THINKING_MAX_TOKENS = 16000;
@@ -587,7 +594,10 @@ async function executeRun(args: CLIArgs, runIndex: number, totalRuns: number): P
 
   const runResult: IntelligenceRunResult = {
     runId,
-    benchmarkVersion: "1.0",
+    // 1.1 = the 30-item bank with tiers 4-5 (2026-07-24). Scores are not
+    // comparable across bank versions, so the version travels with the run and
+    // the board stacks the two separately.
+    benchmarkVersion: BENCHMARK_VERSION,
     modelId: args.model,
     runMode: args.mode,
     taskSetId: hashTaskSet(taskIds),
@@ -701,7 +711,7 @@ async function executeRun(args: CLIArgs, runIndex: number, totalRuns: number): P
         reportedModel: provenance.reportedModel,
         apiBase: provenance.apiBase,
         runMode: runResult.runMode,
-        benchmarkVersion: '1.0',
+        benchmarkVersion: BENCHMARK_VERSION,
         score: runResult.score,
         compositeIQ: runResult.score?.compositeIQ,
         categoryScores: runResult.score?.categoryScores,

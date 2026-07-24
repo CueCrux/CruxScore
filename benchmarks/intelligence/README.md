@@ -8,6 +8,22 @@ The benchmark tests **reasoning** — the ability to transform inputs into corre
 
 Six reasoning categories map to four CHC broad cognitive factors:
 
+The bank holds **30 items**: six categories × five difficulty tiers. A default
+run draws 24 of them (tiers 2–5); tier 1 is skipped because every current model
+passes it.
+
+| Tier | IRT difficulty `b` | Intent |
+|---|---|---|
+| 1 | −1.0 | warm-up — excluded from default runs |
+| 2 | 0.0 | routine |
+| 3 | +1.5 | hard for older models |
+| 4 | +2.5 | added 2026-07-24 — separates frontier models |
+| 5 | +3.5 | added 2026-07-24 — most models fail these |
+
+Tier 4 and 5 answer keys are derived by exhaustive solve
+(`tools/generate-hard-items.py`), which refuses to emit an item unless its
+solver finds exactly one solution.
+
 | Category | Label | CHC Factor | Description |
 |---|---|---|---|
 | A | Deduction & Elimination | Gf (Fluid Reasoning) | Logic grids, process of elimination |
@@ -72,11 +88,15 @@ Consequences for anyone reading a score from this bank:
 
 - **Do not rank models whose intervals overlap.** On single runs, anything under
   a ~12-point gap is a tie.
-- **Three runs minimum** before treating a difference as real; the board
-  aggregates repeat runs and tightens the interval as the stack grows.
+- **Three runs minimum** before treating a difference as real. `--runs 3` does
+  this in one command; the board averages repeat runs (`?avg=1|3|5|all`) and
+  marks anything built from fewer than three runs *provisional*, with no rank.
 - **Per-factor IQ equivalents are not usable** for Gc, Gs and Gwm — three items
   each, SE 0.8–1.4 logits (±25–40 IQ).
 - The fix is harder items (roughly `b ≥ +2.5`), not more runs of the same ones.
+  **Done 2026-07-24**: tiers 4 and 5 added, bank 18 → 30 items, default run 24.
+  The numbers in this table were measured on the old 18-item bank (v1.0); runs
+  on the current bank (v1.1) carry their version and are stacked separately.
 
 ## Run modes
 
@@ -192,6 +212,9 @@ npx tsx run-intelligence.ts --model claude-opus-5 --output results/opus-run.json
 
 # Judged scoring (formatting-tolerant; see Scoring modes)
 npx tsx run-intelligence.ts --model claude-opus-5 --judge
+
+# Hard tiers only, three repeat runs, stacked
+npx tsx run-intelligence.ts --model claude-opus-5 --tiers 4,5 --runs 3 --judge
 ```
 
 ### Flags
@@ -201,7 +224,9 @@ npx tsx run-intelligence.ts --model claude-opus-5 --judge
 | `--model` | `claude-sonnet-4-20250514` | Model identifier |
 | `--mode` | `closed_prompt_only` | Run mode |
 | `--categories` | `A,B,C,D,E,F` | Comma-separated category filter |
-| `--items-per-category` | `3` | Items per category |
+| `--items-per-category` | one per selected tier | Items per category |
+| `--tiers` | `2,3,4,5` | Difficulty tiers to draw from. `--tiers 1,2,3 --items-per-category 3` reproduces the original 18-item bank |
+| `--runs` | `1` | Repeat the whole run N times and print the stack (per-run scores, mean, SD, SE, 95% CI). Three runs is the floor for comparing models |
 | `--dry-run` | `false` | Skip API calls |
 | `--verbose` | `false` | Print per-item details |
 | `--output` | `results/intelligence-<id>.json` | Output file path |

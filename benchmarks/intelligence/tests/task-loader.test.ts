@@ -19,8 +19,10 @@ const FIXTURES_DIR = new URL("../fixtures", import.meta.url).pathname;
 describe("loadManifest", () => {
   it("loads the task bank manifest", async () => {
     const manifest = await loadManifest(FIXTURES_DIR);
-    expect(manifest.version).toBe("1.0");
-    expect(manifest.totalTasks).toBe(18);
+    // 1.1 = the 30-item bank (tiers 4-5 added 2026-07-24). Scores are not
+    // comparable across bank versions, so this number is load-bearing.
+    expect(manifest.version).toBe("1.1");
+    expect(manifest.totalTasks).toBe(30);
     expect(Object.keys(manifest.categories)).toHaveLength(6);
   });
 
