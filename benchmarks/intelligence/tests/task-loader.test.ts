@@ -19,11 +19,11 @@ const FIXTURES_DIR = new URL("../fixtures", import.meta.url).pathname;
 describe("loadManifest", () => {
   it("loads the task bank manifest", async () => {
     const manifest = await loadManifest(FIXTURES_DIR);
-    // 1.1 = the 30-item bank (tiers 4-5 added 2026-07-24). Scores are not
-    // comparable across bank versions, so this number is load-bearing.
-    expect(manifest.version).toBe("1.1");
-    expect(manifest.totalTasks).toBe(30);
-    expect(Object.keys(manifest.categories)).toHaveLength(6);
+    // 1.2 = 36 items across 7 categories (G added 2026-07-25). Scores are not
+    // comparable across bank versions, so these numbers are load-bearing.
+    expect(manifest.version).toBe("1.2");
+    expect(manifest.totalTasks).toBe(36);
+    expect(Object.keys(manifest.categories)).toHaveLength(7);
   });
 
   it("has correct category structure", async () => {
@@ -66,19 +66,21 @@ describe("loadTask", () => {
 // ---------------------------------------------------------------------------
 
 describe("loadAllTasks", () => {
-  it("loads all 30 bank items (6 categories x 5 tiers)", async () => {
+  it("loads all 36 bank items (A-F x 5 tiers, plus 6 in category G)", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
-    expect(tasks.length).toBe(30);
+    expect(tasks.length).toBe(36);
   });
 
-  it("has 5 tasks per category, one per tier", async () => {
+  it("has 5 tasks per reasoning category; G carries 6 across its two hard tiers", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
     const byCat = new Map<string, number>();
     for (const t of tasks) {
       byCat.set(t.category, (byCat.get(t.category) ?? 0) + 1);
     }
-    for (const count of byCat.values()) {
-      expect(count).toBe(5);
+    for (const [cat, count] of byCat) {
+      // G is the evidence-sufficiency family: 3 items each at tiers 4 and 5,
+      // mixing undetermined, convergent and fully-specified cases.
+      expect(count).toBe(cat === "G" ? 6 : 5);
     }
   });
 
@@ -96,9 +98,9 @@ describe("loadAllTasks", () => {
 // ---------------------------------------------------------------------------
 
 describe("selectTaskSet", () => {
-  it("selects 24 items by default — tiers 2-5, one per category per tier", async () => {
+  it("selects 28 items by default — tiers 2-5 across A-F, plus 4 from G", async () => {
     const selected = await selectTaskSet({}, FIXTURES_DIR);
-    expect(selected.length).toBe(24);
+    expect(selected.length).toBe(28);
     // Tier 1 is excluded by default: every current model passes it, so it
     // costs a call and contributes no information.
     expect(selected.some(t => t.tier === 1)).toBe(false);
@@ -107,7 +109,7 @@ describe("selectTaskSet", () => {
 
   it("selects only the requested tiers", async () => {
     const hard = await selectTaskSet({ tiers: [4, 5] }, FIXTURES_DIR);
-    expect(hard.length).toBe(12);
+    expect(hard.length).toBe(14);   // 2 each from A-F, 2 from G
     expect(hard.every(t => t.tier === 4 || t.tier === 5)).toBe(true);
   });
 
@@ -131,7 +133,7 @@ describe("selectTaskSet", () => {
       { itemsPerCategory: 2 },
       FIXTURES_DIR,
     );
-    expect(selected.length).toBe(12);
+    expect(selected.length).toBe(14);   // 2 from each of the 7 categories
   });
 
   it("excludes specific task IDs", async () => {

@@ -19,7 +19,7 @@ export const CHC_FACTOR_LABELS: Record<CHCFactor, string> = {
 };
 
 /** The six reasoning categories from the master plan (Part 2, §2.6). */
-export type ReasoningCategory = "A" | "B" | "C" | "D" | "E" | "F";
+export type ReasoningCategory = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
 /** Human-readable labels for reasoning categories. */
 export const CATEGORY_LABELS: Record<ReasoningCategory, string> = {
@@ -29,6 +29,11 @@ export const CATEGORY_LABELS: Record<ReasoningCategory, string> = {
   D: "Causal & Counterfactual",
   E: "Abstraction & Transformation",
   F: "Planning Under Constraints",
+  // G measures whether a model invents a fact it was not given. Added
+  // 2026-07-24 after every well-posed deterministic category hit the frontier
+  // ceiling; an unstated condition gating an optional rule was the only thing
+  // that still produced failures. See tools/generate-underspecified-items.py.
+  G: "Evidence Sufficiency",
 };
 
 /** How a reasoning category loads onto CHC factors. */
@@ -49,6 +54,7 @@ export const CHC_FACTOR_MAP: readonly CHCFactorMapping[] = Object.freeze([
   { category: "D", categoryLabel: "Causal & Counterfactual", primaryFactor: "Gf", primaryWeight: 1.0 },
   { category: "E", categoryLabel: "Abstraction & Transformation", primaryFactor: "Gf", primaryWeight: 1.0 },
   { category: "F", categoryLabel: "Planning Under Constraints", primaryFactor: "Gs", secondaryFactor: "Gf", primaryWeight: 0.6, secondaryWeight: 0.4 },
+  { category: "G", categoryLabel: "Evidence Sufficiency", primaryFactor: "Gc", secondaryFactor: "Gf", primaryWeight: 0.6, secondaryWeight: 0.4 },
 ]);
 
 // ---------------------------------------------------------------------------

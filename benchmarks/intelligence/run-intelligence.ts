@@ -69,7 +69,7 @@ function parseArgs(argv: string[]): CLIArgs {
   const args: CLIArgs = {
     model: "claude-sonnet-4-20250514",
     mode: "closed_prompt_only",
-    categories: ["A", "B", "C", "D", "E", "F"],
+    categories: ["A", "B", "C", "D", "E", "F", "G"],
     tiers: [...DEFAULT_TIERS],
     itemsPerCategory: undefined,
     dryRun: false,
@@ -252,7 +252,7 @@ function estimateModelCost(model: string, inputTokens: number, outputTokens: num
  * bank that added tiers 4-5 after the frontier hit the old ceiling. A score is
  * only meaningful against the bank it was measured on.
  */
-const BENCHMARK_VERSION = "1.1";
+const BENCHMARK_VERSION = "1.2";
 
 const THINKING_ON_BY_DEFAULT = /^claude-(opus-5|fable-5|mythos-5|sonnet-5)/;
 const DEFAULT_MAX_TOKENS = 4096;

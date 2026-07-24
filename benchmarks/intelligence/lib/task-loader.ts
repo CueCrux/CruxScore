@@ -22,6 +22,7 @@ const CATEGORY_DIRS: Record<ReasoningCategory, string> = {
   D: "D-causal",
   E: "E-abstraction",
   F: "F-planning",
+  G: "G-evidence",
 };
 
 const TIER_DIRS: Record<DifficultyTier, string> = {
@@ -135,7 +136,7 @@ export async function selectTaskSet(
   fixturesDir: string = FIXTURES_DIR,
 ): Promise<IntelligenceTask[]> {
   const {
-    categories = ["A", "B", "C", "D", "E", "F"] as ReasoningCategory[],
+    categories = ["A", "B", "C", "D", "E", "F", "G"] as ReasoningCategory[],
     tiers = DEFAULT_TIERS,
     itemsPerCategory = tiers.length,
     excludeHoldouts = true,
