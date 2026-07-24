@@ -7,10 +7,11 @@
  * produces an IQ-equivalent composite.
  *
  * Usage:
- *   npx tsx run-intelligence.ts --model claude-sonnet-4-20250514
+ *   npx tsx run-intelligence.ts --model claude-opus-5
  *   npx tsx run-intelligence.ts --model gpt-5.4 --mode closed_prompt_only --categories A,B,D
  *   npx tsx run-intelligence.ts --dry-run --verbose
- *   npx tsx run-intelligence.ts --model claude-opus-4-20250514 --items-per-category 2 --output results/run1.json
+ *   npx tsx run-intelligence.ts --model claude-sonnet-5 --items-per-category 2 --output results/run1.json
+ *   npx tsx run-intelligence.ts --model claude-opus-5 --max-tokens 32000   # bigger output budget
  */
 
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -47,6 +48,9 @@ interface CLIArgs {
   output: string;
   claimCode?: string;
   submitUrl: string;
+  /** Undefined = per-model default (see defaultMaxTokens). */
+  maxTokens?: number;
+  allowTruncated: boolean;
 }
 
 function parseArgs(argv: string[]): CLIArgs {
@@ -62,6 +66,8 @@ function parseArgs(argv: string[]): CLIArgs {
     // Env fallback keeps the code off argv (visible in `ps`); --claim-code overrides.
     claimCode: process.env.SCORECRUX_CLAIM_CODE || undefined,
     submitUrl: "https://scorecrux.com",
+    maxTokens: undefined,
+    allowTruncated: false,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -105,6 +111,13 @@ function parseArgs(argv: string[]): CLIArgs {
       case "--submit-url":
         args.submitUrl = next;
         i++;
+        break;
+      case "--max-tokens":
+        args.maxTokens = parseInt(next, 10);
+        i++;
+        break;
+      case "--allow-truncated":
+        args.allowTruncated = true;
         break;
       default:
         console.error(`Unknown flag: ${flag}`);
@@ -185,6 +198,7 @@ interface PricePerMillion { input: number; output: number; }
 const MODEL_PRICING: Array<{ match: RegExp; price: PricePerMillion }> = [
   { match: /^claude-fable-5/,         price: { input: 10.0, output: 50.0 } }, // Fable 5 tier
   { match: /^claude-mythos-5/,        price: { input: 10.0, output: 50.0 } }, // Mythos 5 (same tier as Fable 5)
+  { match: /^claude-opus-5/,          price: { input: 5.0,  output: 25.0 } }, // Opus 5 — Opus 4.8 list price
   { match: /^claude-sonnet-5/,        price: { input: 3.0,  output: 15.0 } },
   { match: /^claude-opus-4-8/,        price: { input: 5.0,  output: 25.0 } },
   { match: /^claude-opus-4-7/,        price: { input: 5.0,  output: 25.0 } }, // inherits 4-family pricing
@@ -206,6 +220,25 @@ function estimateModelCost(model: string, inputTokens: number, outputTokens: num
   if (!row) return 0;
   return (inputTokens / 1_000_000) * row.price.input
        + (outputTokens / 1_000_000) * row.price.output;
+}
+
+// ---------------------------------------------------------------------------
+// Output budget
+// ---------------------------------------------------------------------------
+
+/**
+ * Models whose extended thinking is ON by default. `max_tokens` caps thinking
+ * AND visible text together, so the historical 4096 budget can be spent inside
+ * the thinking block and truncate the JSON answer — scoring a capable model as
+ * wrong. These get a larger default; every other model keeps 4096 so previously
+ * published runs stay comparable. Override either with --max-tokens.
+ */
+const THINKING_ON_BY_DEFAULT = /^claude-(opus-5|fable-5|mythos-5|sonnet-5)/;
+const DEFAULT_MAX_TOKENS = 4096;
+const THINKING_MAX_TOKENS = 16000;
+
+function defaultMaxTokens(model: string): number {
+  return THINKING_ON_BY_DEFAULT.test(model) ? THINKING_MAX_TOKENS : DEFAULT_MAX_TOKENS;
 }
 
 // ---------------------------------------------------------------------------
@@ -257,7 +290,8 @@ async function callModel(
   prompt: string,
   _mode: RunMode,
   interactive: boolean = false,
-): Promise<{ text: string; inputTokens: number; outputTokens: number; latencyMs: number }> {
+  maxTokens: number = DEFAULT_MAX_TOKENS,
+): Promise<{ text: string; inputTokens: number; outputTokens: number; latencyMs: number; stopReason: string | null }> {
   const start = Date.now();
 
   // Interactive mode: print prompt, read response from stdin.
@@ -269,14 +303,14 @@ async function callModel(
     console.log("\n── PASTE JSON RESPONSE (end with END_OF_RESPONSE) ──");
 
     const text = await readUntilMarker("END_OF_RESPONSE");
-    return { text, inputTokens: 0, outputTokens: 0, latencyMs: Date.now() - start };
+    return { text, inputTokens: 0, outputTokens: 0, latencyMs: Date.now() - start, stopReason: null };
   }
 
   if (model.startsWith("claude")) {
     const client = new Anthropic();
     const response = await client.messages.create({
       model,
-      max_tokens: 4096,
+      max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
       system: "You are taking a psychometric reasoning test. For each item, respond with a JSON object: { \"final_answer\": \"your answer\", \"confidence\": 0.0-1.0, \"working\": [\"step 1\", \"step 2\", ...] }. Think carefully and show your reasoning in the working array. Give only the JSON, no other text.",
     });
@@ -297,6 +331,7 @@ async function callModel(
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       latencyMs: Date.now() - start,
+      stopReason: (response as any).stop_reason ?? null,
     };
   }
 
@@ -320,8 +355,8 @@ async function callModel(
     messages.push({ role: "user", content: prompt });
 
     const body: Record<string, unknown> = { model, messages };
-    if (isReasoningModel) body.max_completion_tokens = 4096;
-    else body.max_tokens = 4096;
+    if (isReasoningModel) body.max_completion_tokens = maxTokens;
+    else body.max_tokens = maxTokens;
 
     // OPENAI_BASE_URL lets the harness point at an OpenAI-compatible proxy
     // (e.g. the clawd subscription backend) without changing the model id.
@@ -343,6 +378,7 @@ async function callModel(
       inputTokens: data.usage?.prompt_tokens ?? 0,
       outputTokens: data.usage?.completion_tokens ?? 0,
       latencyMs: Date.now() - start,
+      stopReason: data.choices?.[0]?.finish_reason ?? null,
     };
   }
 
@@ -357,6 +393,7 @@ async function run(): Promise<void> {
   const args = parseArgs(process.argv);
   const runId = randomUUID().slice(0, 8);
   const startedAt = new Date().toISOString();
+  const maxTokens = args.maxTokens ?? defaultMaxTokens(args.model);
 
   console.log(`\n  ScoreCrux Intelligence Benchmark v1.0`);
   console.log(`  Run ID: ${runId}`);
@@ -364,6 +401,7 @@ async function run(): Promise<void> {
   console.log(`  Mode: ${args.mode}`);
   console.log(`  Categories: ${args.categories.join(", ")}`);
   console.log(`  Items/category: ${args.itemsPerCategory}`);
+  console.log(`  Max tokens: ${maxTokens}${args.maxTokens === undefined ? " (default)" : " (--max-tokens)"}`);
   if (args.dryRun) console.log(`  ** DRY RUN **`);
   console.log();
 
@@ -382,6 +420,8 @@ async function run(): Promise<void> {
 
   // 2. Run each task
   const responses: TaskResponse[] = [];
+  const truncatedItems: string[] = [];
+  const declinedItems: string[] = [];
   let totalLatencyMs = 0;
 
   for (const task of tasks) {
@@ -407,9 +447,19 @@ async function run(): Promise<void> {
       continue;
     }
 
-    const result = await callModel(args.model, prompt, args.mode, args.interactive);
+    const result = await callModel(args.model, prompt, args.mode, args.interactive, maxTokens);
     const parsed = parseResponse(result.text);
     totalLatencyMs += result.latencyMs;
+
+    // A truncated or declined item is not a wrong answer — say so loudly rather
+    // than letting it score as a miss and depress the IQ estimate silently.
+    if (result.stopReason === "max_tokens" || result.stopReason === "length") {
+      truncatedItems.push(task.taskId);
+      console.warn(`    ! [${task.taskId}] output budget exhausted (${maxTokens} tokens) — answer truncated. Re-run with a higher --max-tokens.`);
+    } else if (result.stopReason === "refusal" || result.stopReason === "content_filter") {
+      declinedItems.push(task.taskId);
+      console.warn(`    ! [${task.taskId}] model declined the item (stop_reason=${result.stopReason}).`);
+    }
 
     responses.push({
       taskId: task.taskId,
@@ -421,6 +471,7 @@ async function run(): Promise<void> {
       inputTokens: result.inputTokens,
       outputTokens: result.outputTokens,
       timestamp: new Date().toISOString(),
+      stopReason: result.stopReason,
     });
 
     if (args.verbose && parsed) {
@@ -491,6 +542,14 @@ async function run(): Promise<void> {
   console.log(`    Percentile: ${report.compositeIQ.percentile}`);
   console.log(`    Classification: ${report.compositeIQ.classification}`);
 
+  if (truncatedItems.length > 0) {
+    console.log(`\n  ⚠ ${truncatedItems.length}/${responses.length} items hit the ${maxTokens}-token output budget: ${truncatedItems.join(", ")}`);
+    console.log(`    Those items are scored as failures, so this score understates the model.`);
+  }
+  if (declinedItems.length > 0) {
+    console.log(`\n  ⚠ ${declinedItems.length}/${responses.length} items were declined by the model: ${declinedItems.join(", ")}`);
+  }
+
   console.log(`\n  CruxScore Composite: ${(cruxComposite * 100).toFixed(1)}%`);
   console.log(
     `  Usage: ${runResult.usage.totalInputTokens} in / ${runResult.usage.totalOutputTokens} out tokens` +
@@ -511,8 +570,12 @@ async function run(): Promise<void> {
   writeFileSync(outputPath, JSON.stringify(runResult, null, 2));
   console.log(`  Results saved to: ${outputPath}`);
 
-  // Auto-submit to ScoreCrux
-  if (args.claimCode) {
+  // Auto-submit to ScoreCrux. A run with truncated items understates the model,
+  // so it does not go to the public board unless the operator says so.
+  if (args.claimCode && truncatedItems.length > 0 && !args.allowTruncated) {
+    console.warn(`\n  Not submitting: ${truncatedItems.length} item(s) were truncated by the output budget.`);
+    console.warn(`  Re-run with a higher --max-tokens, or submit anyway with --allow-truncated.`);
+  } else if (args.claimCode) {
     const submitUrl = `${args.submitUrl}/api/intelligence/submit`;
     console.log(`\n  Submitting to ${args.submitUrl}...`);
     try {

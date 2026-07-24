@@ -184,6 +184,14 @@ export interface TaskResponse {
   inputTokens: number;
   outputTokens: number;
   timestamp: string;
+  /**
+   * Provider stop reason for this item, when the transport reports one
+   * (Anthropic `stop_reason`, OpenAI `finish_reason`). `max_tokens`/`length`
+   * means the answer was cut off by the output budget rather than answered
+   * wrongly; `refusal`/`content_filter` means the model declined. Null for
+   * interactive and dry runs.
+   */
+  stopReason?: string | null;
 }
 
 // ---------------------------------------------------------------------------
