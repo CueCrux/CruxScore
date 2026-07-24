@@ -116,6 +116,20 @@ Judged scoring: 4 miss(es) rescued as equivalent, 0 split verdict(s) kept as mis
 different measurements; publishing them in one ranking without labelling the
 mode makes the ranking meaningless.
 
+### Re-scoring a stored run
+
+A run record keeps every response verbatim, so a scoring fix can be applied to
+runs that already happened without paying for the model again:
+
+```bash
+npx tsx tools/rescore-run.ts results/run.json --judge          # show the delta
+npx tsx tools/rescore-run.ts results/run.json --judge --write  # rewrite the file
+```
+
+It prints the stored score next to the re-scored one. Submitting is opt-in
+(`--submit --claim-code …`), and the board keeps the run id, so withdraw the
+stale record first or the submit endpoint skips it as a duplicate.
+
 ### Calibrating the panel
 
 `tools/validate-judge.ts` runs the panel over two populations: answers that
