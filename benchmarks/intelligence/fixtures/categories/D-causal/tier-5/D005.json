@@ -1,0 +1,54 @@
+{
+  "taskId": "D005",
+  "version": 1,
+  "category": "D",
+  "categoryLabel": "Causal & Counterfactual",
+  "tier": 5,
+  "chcPrimaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A signalling network has nodes S, A, B, C, D and E. Node S fires at time t = 0. A signal sent along a link arrives after the link's delay.\n\nLinks (source \u2192 destination, delay in time steps):\nS \u2192 A, delay 1\nS \u2192 B, delay 3\nA \u2192 C, delay 2\nB \u2192 C, delay 1\nA \u2192 D, delay 4\nC \u2192 D, delay 1\nC \u2192 E, delay 2\nD \u2192 E, delay 1\nB \u2192 E, delay 6\n\nActivation thresholds \u2014 a node fires at the earliest time step at which it has received signals from at least this many distinct sources:\nA: 1, B: 1, C: 2, D: 2, E: 2\n\nOnce a node fires it stays active and sends its signal onward immediately.\n\nQuestion 1: At what time step does E fire?\nQuestion 2: If the link A \u2192 C were removed, at what time step would E fire?\nQuestion 3: If instead the link C \u2192 D were removed (with A \u2192 C intact), at what time step would E fire?",
+  "constraints": [
+    "A node fires at the earliest time step its threshold is met, never before",
+    "Each counterfactual is evaluated independently, from the original network",
+    "Answer in the form \"E=<t1>, E=<t2> without A->C, E=<t3> without C->D\", using the word never if it never fires"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "E=6, E=never without A->C, E=9 without C->D",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

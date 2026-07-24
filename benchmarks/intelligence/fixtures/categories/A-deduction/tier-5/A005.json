@@ -1,0 +1,54 @@
+{
+  "taskId": "A005",
+  "version": 1,
+  "category": "A",
+  "categoryLabel": "Deduction & Elimination",
+  "tier": 5,
+  "chcPrimaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "Six runners \u2014 Isla, Jonas, Kip, Lena, Milo and Nara \u2014 finished a race in places 1 (first) through 6 (last), with no ties. Each runs for a different club: Ardent, Brine, Coast, Dune, Ember or Fjord.\n\n1. Kip finished ahead of Lena but behind Milo.\n2. Isla and Nara finished in adjacent places, with Isla ahead of Nara.\n3. Jonas finished neither first nor last.\n4. Exactly two runners finished between Milo and Lena.\n5. The Ardent runner finished immediately behind the Coast runner.\n6. Milo runs for Dune.\n7. The Brine runner finished ahead of Jonas, and Jonas runs for neither Brine nor Ember.\n8. Nara runs for neither Coast nor Ardent.\n9. The Fjord runner finished last.\n10. The Ember runner finished ahead of the Dune runner.\n11. Kip finished immediately behind the Coast runner.\n12. The Brine runner finished ahead of the Ember runner.\n\nWhich runner finished second, and which club do they run for?",
+  "constraints": [
+    "Six distinct places, no ties; each club is used exactly once",
+    "\"Ahead of\" means a numerically smaller finishing place",
+    "Answer with the runner's name and their club, e.g. \"Isla, Coast\""
+  ],
+  "answerType": "exact",
+  "correctAnswer": "Nara, Ember",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

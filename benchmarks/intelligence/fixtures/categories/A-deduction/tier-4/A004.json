@@ -1,0 +1,54 @@
+{
+  "taskId": "A004",
+  "version": 1,
+  "category": "A",
+  "categoryLabel": "Deduction & Elimination",
+  "tier": 4,
+  "chcPrimaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.3,
+    "b": 2.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "Five colleagues \u2014 Ada, Ben, Cleo, Dev and Esi \u2014 sit in a row of five desks numbered 1 to 5 from left to right. Each drinks a different beverage (tea, coffee, water, juice, cola) and each holds a different role (analyst, designer, engineer, manager, writer).\n\n1. The engineer sits immediately to the right of Ada.\n2. Cleo drinks water.\n3. The manager sits at desk 1 or desk 5.\n4. Ben sits somewhere to the left of the writer, and the writer is not at desk 5.\n5. The person drinking coffee sits immediately to the left of the analyst.\n6. Dev drinks juice, and Dev does not sit adjacent to Ada.\n7. Esi is the manager.\n8. The person at desk 3 drinks tea.\n9. The designer sits somewhere to the right of the engineer.\n10. The writer drinks water.\n\nWho sits at desk 4, and what do they drink?",
+  "constraints": [
+    "Every person, drink and role is used exactly once",
+    "Desks are numbered 1 to 5 from left to right",
+    "Answer with the person's name and their drink, e.g. \"Ada, tea\""
+  ],
+  "answerType": "exact",
+  "correctAnswer": "Cleo, water",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "taskId": "C004",
+  "version": 1,
+  "category": "C",
+  "categoryLabel": "Rule Application",
+  "tier": 4,
+  "chcPrimaryFactor": "Gc",
+  "irt": {
+    "model": "2PL",
+    "a": 1.3,
+    "b": 2.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A courier charges for a parcel using the following rulebook. Later-numbered rules take precedence over earlier ones where they conflict.\n\nR1. Base rate by destination zone: zone A = 5.00, zone B = 8.00, zone C = 12.00.\nR2. Weight surcharge: add 2.00 for every whole kilogram above 10 kg.\nR3. Fragile handling: add 15.00 for any parcel marked fragile.\nR4. Insurance: add 1% of the insured value above 500.00 (nothing for the first 500.00).\nR5. Public-holiday ordering: increase the running total by 20%. This is applied before any membership discount.\nR6. Zone C exception: fragile handling in zone C is capped at 10.00, replacing the R3 amount.\nR7. Membership discount: members receive 10% off, but the discount never applies to the base rate from R1.\n\nA member orders a 14 kg fragile parcel to zone C on a public holiday, insured for 900.00.\n\nWhat is the total charge?",
+  "constraints": [
+    "Later-numbered rules override earlier ones where they conflict",
+    "Rules are otherwise applied in numerical order",
+    "Answer as a number with two decimal places, e.g. \"41.25\""
+  ],
+  "answerType": "exact",
+  "correctAnswer": "37.92",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  },
+  "chcSecondaryFactor": "Gf"
+}

@@ -1,0 +1,56 @@
+{
+  "taskId": "F005",
+  "version": 1,
+  "category": "F",
+  "categoryLabel": "Planning Under Constraints",
+  "tier": 5,
+  "chcPrimaryFactor": "Gs",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "Eight jobs must run on three identical machines. Each job runs on exactly one machine, start to finish, without interruption. A machine runs one job at a time.\n\nDurations (hours): J1 = 4, J2 = 3, J3 = 6, J4 = 2, J5 = 5, J6 = 3, J7 = 4, J8 = 2.\n\nDependencies \u2014 a job may start only once every job it depends on has finished:\nJ3 depends on J1\nJ4 depends on J1\nJ5 depends on J2\nJ6 depends on J3 and J4\nJ7 depends on J5\nJ8 depends on J6 and J7\n\nAll three machines are free from hour 0. What is the minimum number of hours in which all eight jobs can be completed?",
+  "constraints": [
+    "Three machines, each running at most one job at a time",
+    "Jobs cannot be split or paused once started",
+    "A job starts no earlier than the finish time of every job it depends on",
+    "Answer with the minimum makespan as a whole number of hours"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "15",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  },
+  "chcSecondaryFactor": "Gf"
+}

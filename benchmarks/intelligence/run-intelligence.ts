@@ -24,10 +24,11 @@ import type {
   ItemScore,
   RunMode,
   ReasoningCategory,
+  DifficultyTier,
   IntelligenceRunResult,
   ParsedOutput,
 } from "./lib/types.js";
-import { selectTaskSet } from "./lib/task-loader.js";
+import { selectTaskSet, DEFAULT_TIERS } from "./lib/task-loader.js";
 import { parseResponse } from "./lib/response-parser.js";
 import { hashTaskSet } from "./lib/anti-contamination.js";
 import { scoreItem } from "./scoring/item-scorer.js";
@@ -43,7 +44,10 @@ interface CLIArgs {
   model: string;
   mode: RunMode;
   categories: ReasoningCategory[];
-  itemsPerCategory: number;
+  /** Difficulty tiers to draw from. */
+  tiers: DifficultyTier[];
+  /** Undefined = one item per selected tier. */
+  itemsPerCategory?: number;
   dryRun: boolean;
   verbose: boolean;
   interactive: boolean;
@@ -57,6 +61,8 @@ interface CLIArgs {
   systemPrompt: boolean;
   /** Judge panel consulted on deterministic misses only (rescue-only). */
   judges: JudgeConfig[];
+  /** Repeat the whole run this many times and report the stack. */
+  runs: number;
 }
 
 function parseArgs(argv: string[]): CLIArgs {
@@ -64,7 +70,8 @@ function parseArgs(argv: string[]): CLIArgs {
     model: "claude-sonnet-4-20250514",
     mode: "closed_prompt_only",
     categories: ["A", "B", "C", "D", "E", "F"],
-    itemsPerCategory: 3,
+    tiers: [...DEFAULT_TIERS],
+    itemsPerCategory: undefined,
     dryRun: false,
     verbose: false,
     interactive: false,
@@ -76,6 +83,7 @@ function parseArgs(argv: string[]): CLIArgs {
     allowTruncated: false,
     systemPrompt: true,
     judges: [],
+    runs: 1,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -97,6 +105,10 @@ function parseArgs(argv: string[]): CLIArgs {
         break;
       case "--items-per-category":
         args.itemsPerCategory = parseInt(next, 10);
+        i++;
+        break;
+      case "--tiers":
+        args.tiers = next.split(",").map(t => parseInt(t.trim(), 10)) as DifficultyTier[];
         i++;
         break;
       case "--dry-run":
@@ -140,6 +152,10 @@ function parseArgs(argv: string[]): CLIArgs {
         break;
       case "--judge-model":
         args.judges.push(parseJudgeSpec(next));
+        i++;
+        break;
+      case "--runs":
+        args.runs = Math.max(1, parseInt(next, 10));
         i++;
         break;
       default:
@@ -407,18 +423,28 @@ async function callModel(
 // Main runner
 // ---------------------------------------------------------------------------
 
-async function run(): Promise<void> {
-  const args = parseArgs(process.argv);
+interface RunSummary {
+  runId: string;
+  correct: number;
+  total: number;
+  iq: number;
+  deterministicCorrect: number;
+  deterministicIQ: number;
+  outputPath: string;
+}
+
+async function executeRun(args: CLIArgs, runIndex: number, totalRuns: number): Promise<RunSummary> {
   const runId = randomUUID().slice(0, 8);
   const startedAt = new Date().toISOString();
   const maxTokens = args.maxTokens ?? defaultMaxTokens(args.model);
 
   console.log(`\n  ScoreCrux Intelligence Benchmark v1.0`);
-  console.log(`  Run ID: ${runId}`);
+  console.log(`  Run ID: ${runId}${totalRuns > 1 ? `  (run ${runIndex} of ${totalRuns})` : ""}`);
   console.log(`  Model: ${args.model}`);
   console.log(`  Mode: ${args.mode}`);
   console.log(`  Categories: ${args.categories.join(", ")}`);
-  console.log(`  Items/category: ${args.itemsPerCategory}`);
+  console.log(`  Tiers: ${args.tiers.join(", ")}${args.tiers.join(",") === DEFAULT_TIERS.join(",") ? " (default)" : ""}`);
+  console.log(`  Items/category: ${args.itemsPerCategory ?? args.tiers.length}`);
   console.log(`  Max tokens: ${maxTokens}${args.maxTokens === undefined ? " (default)" : " (--max-tokens)"}`);
   if (!args.systemPrompt) console.log(`  System prompt: OFF (--no-system-prompt) — declare this alongside the score`);
   if (args.judges.length > 0) console.log(`  Judges: ${args.judges.map(j => `${j.model}@${j.base}`).join(", ")} (rescue-only, unanimous)`);
@@ -428,6 +454,7 @@ async function run(): Promise<void> {
   // 1. Load task set
   const tasks = await selectTaskSet({
     categories: args.categories,
+    tiers: args.tiers,
     itemsPerCategory: args.itemsPerCategory,
   });
 
@@ -642,11 +669,15 @@ async function run(): Promise<void> {
   console.log();
 
   // 8. Save results
-  const outputPath = args.output || resolve(
-    dirname(new URL(import.meta.url).pathname),
-    "results",
-    `intelligence-${runId}.json`,
-  );
+  // Repeat runs each get their own file: a stack is only meaningful if every
+  // member survives to be inspected.
+  const outputPath = args.output
+    ? (totalRuns > 1 ? args.output.replace(/\.json$/, `-r${runIndex}.json`) : args.output)
+    : resolve(
+        dirname(new URL(import.meta.url).pathname),
+        "results",
+        `intelligence-${runId}.json`,
+      );
 
   const outputDir = dirname(outputPath);
   if (!existsSync(outputDir)) mkdirSync(outputDir, { recursive: true });
@@ -705,9 +736,57 @@ async function run(): Promise<void> {
   }
 
   console.log();
+
+  return {
+    runId,
+    correct: judgedScores.filter(s => s.correct).length,
+    total: judgedScores.length,
+    iq: report.compositeIQ.fullScaleIQ,
+    deterministicCorrect: itemScores.filter(s => s.correct).length,
+    deterministicIQ: (deterministicReport ?? report).compositeIQ.fullScaleIQ,
+    outputPath,
+  };
 }
 
-run().catch(err => {
+/**
+ * Repeat-run stack. One run of this bank resolves very little — the measured
+ * within-model spread is ~4.3 IQ points, so a single number cannot separate two
+ * close models (see README, "What this bank can and cannot resolve"). Averaging
+ * N runs shrinks the standard error by sqrt(N); the operator chooses N.
+ */
+function reportStack(summaries: RunSummary[]): void {
+  const iqs = summaries.map(s => s.iq);
+  const mean = iqs.reduce((a, b) => a + b, 0) / iqs.length;
+  const sd =
+    iqs.length > 1
+      ? Math.sqrt(iqs.reduce((a, v) => a + (v - mean) ** 2, 0) / (iqs.length - 1))
+      : 0;
+  const se = iqs.length > 1 ? sd / Math.sqrt(iqs.length) : 0;
+
+  console.log(`  ━━━ Stack of ${summaries.length} runs ━━━\n`);
+  for (const [i, s] of summaries.entries()) {
+    console.log(`    run ${i + 1}  ${s.runId}  ${s.correct}/${s.total}  IQ ${s.iq}`);
+  }
+  console.log(`\n    mean IQ ${mean.toFixed(1)}` +
+    (iqs.length > 1
+      ? `  SD ${sd.toFixed(1)}  SE ${se.toFixed(1)}  95% CI ${Math.round(mean - 1.96 * se)}-${Math.round(mean + 1.96 * se)}`
+      : "  (single run — no interval; use --runs 3 or more before comparing models)"));
+  if (iqs.length > 1 && iqs.length < 3) {
+    console.log(`    note: 2 runs is enough to see spread, not enough to trust a mean — 3 is the floor for ranking.`);
+  }
+  console.log();
+}
+
+async function main(): Promise<void> {
+  const args = parseArgs(process.argv);
+  const summaries: RunSummary[] = [];
+  for (let i = 1; i <= args.runs; i++) {
+    summaries.push(await executeRun(args, i, args.runs));
+  }
+  if (args.runs > 1) reportStack(summaries);
+}
+
+main().catch(err => {
   console.error("Fatal:", err);
   process.exit(1);
 });

@@ -1,0 +1,54 @@
+{
+  "taskId": "B005",
+  "version": 1,
+  "category": "B",
+  "categoryLabel": "Stateful Process Reasoning",
+  "tier": 5,
+  "chcPrimaryFactor": "Gwm",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 3.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "Four registers start at A=1, B=2, C=4, D=0.\n\nRounds are numbered 1 to 12. In each round, apply these steps strictly in order:\n\nStep 1. If the round number is divisible by 4, rotate the values of A, B and C to the right: A takes C's old value, B takes A's old value, and C takes B's old value.\nStep 2. If A + B is greater than C, then add 2 to D and add A's current value to C. Otherwise subtract 1 from D and add B's current value to A.\nStep 3. If the round number is divisible by 5, double B.\nStep 4. If C is now 30 or more, subtract 25 from C and add 5 to D.\nStep 5. If D is now negative, set D to 0 and add 1 to B.\n\nWhat are the values of A, B, C and D after round 12 completes?",
+  "constraints": [
+    "Steps are applied strictly in the order given, within each round",
+    "Each step uses the values current at the moment that step runs",
+    "Answer in the form \"A=<value>, B=<value>, C=<value>, D=<value>\""
+  ],
+  "answerType": "exact",
+  "correctAnswer": "A=32, B=24, C=13, D=38",
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

@@ -73,8 +73,16 @@ export interface IRTParameters {
 // Difficulty Tiers
 // ---------------------------------------------------------------------------
 
-/** 1 = easy, 2 = medium, 3 = hard. */
-export type DifficultyTier = 1 | 2 | 3;
+/**
+ * 1 = easy, 2 = medium, 3 = hard, 4 = very hard, 5 = extreme.
+ *
+ * Tiers 4 and 5 (IRT b = +2.5 / +3.5) were added 2026-07-24 because the
+ * frontier had run off the top of the bank: every current model scored 15-16
+ * of the 18 tier-1-to-3 items, so the test could not tell them apart. See
+ * tools/generate-hard-items.py, which derives those items' answer keys by
+ * exhaustive solve rather than by hand.
+ */
+export type DifficultyTier = 1 | 2 | 3 | 4 | 5;
 
 // ---------------------------------------------------------------------------
 // Task Definition
