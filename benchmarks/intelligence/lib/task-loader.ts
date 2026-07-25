@@ -36,11 +36,24 @@ const TIER_DIRS: Record<DifficultyTier, string> = {
 export const ALL_TIERS: DifficultyTier[] = [1, 2, 3, 4, 5];
 
 /**
- * Tiers used when a run does not name any. Tier 1 is excluded: every current
- * model passes it, so it costs a call and contributes no information. See the
- * resolution note in README.md.
+ * Tiers used when a run does not name any.
+ *
+ * Only the hard tiers. Measured 2026-07-24/25: claude-opus-5 scored 23/24 on
+ * tiers 2-5 of the reasoning categories, so tiers 1-3 spend calls confirming
+ * that a frontier model can still do arithmetic while contributing nothing to
+ * discrimination — and a near-sweep pushes the IRT extrapolation to absurdity
+ * (one such run scored IQ 179). They remain available with an explicit
+ * `--tiers 1,2,3` for comparability with older runs.
  */
-export const DEFAULT_TIERS: DifficultyTier[] = [2, 3, 4, 5];
+export const DEFAULT_TIERS: DifficultyTier[] = [4, 5];
+
+/**
+ * Per-category item counts for a default run. The reasoning categories give
+ * one item per selected tier; category G supplies its whole family, because
+ * the evidence-sufficiency items are what carry the discrimination and the
+ * mix of undetermined/convergent/specified only works whole.
+ */
+export const DEFAULT_ITEMS_PER_CATEGORY: Partial<Record<ReasoningCategory, number>> = { G: 99 };
 
 /**
  * Load the task bank manifest.
@@ -116,8 +129,11 @@ export async function loadAllTasks(
 export interface TaskSelectionConfig {
   /** Categories to include (default: all). */
   categories?: ReasoningCategory[];
-  /** Number of items per category (default: one per selected tier). */
-  itemsPerCategory?: number;
+  /**
+   * Items per category. A number applies to every category; a map overrides
+   * named categories and leaves the rest at one per selected tier.
+   */
+  itemsPerCategory?: number | Partial<Record<ReasoningCategory, number>>;
   /** Difficulty tiers to draw from (default: DEFAULT_TIERS). */
   tiers?: DifficultyTier[];
   /** Preferred difficulty distribution. If null, select evenly across tiers. */
@@ -138,7 +154,7 @@ export async function selectTaskSet(
   const {
     categories = ["A", "B", "C", "D", "E", "F", "G"] as ReasoningCategory[],
     tiers = DEFAULT_TIERS,
-    itemsPerCategory = tiers.length,
+    itemsPerCategory = DEFAULT_ITEMS_PER_CATEGORY,
     excludeHoldouts = true,
     excludeTaskIds = [],
   } = config;
@@ -161,8 +177,11 @@ export async function selectTaskSet(
     // Sort by tier for even distribution
     catTasks.sort((a, b) => a.tier - b.tier);
 
-    // Take up to itemsPerCategory
-    selected.push(...catTasks.slice(0, itemsPerCategory));
+    const limit =
+      typeof itemsPerCategory === "number"
+        ? itemsPerCategory
+        : itemsPerCategory[cat] ?? tiers.length;
+    selected.push(...catTasks.slice(0, limit));
   }
 
   return selected;

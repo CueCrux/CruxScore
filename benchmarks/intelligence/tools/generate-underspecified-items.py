@@ -194,7 +194,168 @@ What is the fare?""",
 )
 
 
-ITEMS = [G001, G002, G003, G004, G005, G006]
+# ---------------------------------------------------------------------------
+# G007-G016 — bulk of the family. Ten more items, nine MISSING and one
+# CONVERGENT, taking G to 16 with roughly two thirds MISSING. That ratio is
+# what puts a frontier model near 60% on a default run; the anti-gaming
+# property still holds, because a model that always answers UNDETERMINED also
+# fails every convergent, specified and puzzle item in the bank.
+# ---------------------------------------------------------------------------
+
+def _g007(peak):        # gym: unstated whether the session is peak
+    t = 8.00 + (3.50 if peak else 0)
+    return round(t * 0.90, 2)
+
+def _g008(resident):    # parking: unstated whether the driver is a resident
+    t = 2.20 * 4
+    return round(t * (0.5 if resident else 1.0) + 1.10, 2)
+
+def _g009(fragile):     # freight: unstated whether the consignment is fragile
+    t = 41.00 + 0.60 * 12
+    return round(t + (14.00 if fragile else 0), 2)
+
+def _g010(late):        # hotel: unstated whether checkout was late
+    t = 96.00 + 18.00
+    return round(t + (25.00 if late else 0), 2)
+
+def _g011(direct_debit):  # utility: unstated payment method
+    t = 61.00 + 0.14 * 220
+    return round(t - (7.00 if direct_debit else 0), 2)
+
+def _g012(prereq):      # course: unstated whether the prerequisite is held
+    t = 340.00
+    return round(t - (60.00 if prereq else 0) + 25.00, 2)
+
+def _g013(student):     # ticket: unstated whether the buyer is a student
+    t = 32.00 + 2.75
+    return round(t * (0.7 if student else 1.0), 2)
+
+def _g014(weekend):     # workshop hire: unstated whether the booking is weekend
+    t = 55.00 + 12.00 * 3
+    return round(t * (1.25 if weekend else 1.0), 2)
+
+def _g015(certified):   # inspection: unstated whether the installer is certified
+    t = 210.00 + 45.00
+    return round(t - (35.00 if certified else 0), 2)
+
+def _g016(oversize):    # storage: cap makes both branches agree — CONVERGENT
+    t = 74.00 + (30.00 if oversize else 0)
+    return round(min(t, 74.00), 2)
+
+
+G007 = dict(taskId="G007", tier=4, kind="missing", branches=lambda: (_g007(False), _g007(True)),
+    statement="""A gym charges for a single session as follows.
+
+S1. Standard session: 8.00.
+S2. Sessions during peak hours carry a 3.50 supplement.
+S3. All sessions receive a 10% online-booking discount applied to the total after any supplement.
+
+A member books one session online.
+
+What do they pay?""")
+
+G008 = dict(taskId="G008", tier=4, kind="missing", branches=lambda: (_g008(False), _g008(True)),
+    statement="""A car park charges as follows.
+
+C1. 2.20 per hour started.
+C2. Residents of the borough pay half the hourly total.
+C3. A fixed 1.10 card-handling fee is added after any reduction.
+
+A driver parks for 4 hours and pays by card.
+
+What do they pay?""")
+
+G009 = dict(taskId="G009", tier=4, kind="missing", branches=lambda: (_g009(False), _g009(True)),
+    statement="""A freight company prices a consignment as follows.
+
+H1. Base rate: 41.00.
+H2. Add 0.60 for each kilogram.
+H3. Consignments marked fragile carry a 14.00 handling charge.
+
+A consignment weighs 12 kg.
+
+What is the total?""")
+
+G010 = dict(taskId="G010", tier=4, kind="missing", branches=lambda: (_g010(False), _g010(True)),
+    statement="""A hotel bills a stay as follows.
+
+N1. Room rate: 96.00 per night.
+N2. A one-off 18.00 cleaning charge applies to every stay.
+N3. Departures after 11:00 incur a 25.00 late-checkout fee.
+
+A guest stays one night.
+
+What is the bill?""")
+
+G011 = dict(taskId="G011", tier=5, kind="missing", branches=lambda: (_g011(False), _g011(True)),
+    statement="""An energy supplier bills as follows.
+
+E1. Standing charge: 61.00 per quarter.
+E2. Usage: 0.14 per unit.
+E3. Customers paying by direct debit receive a 7.00 discount on the total.
+
+A customer uses 220 units in the quarter.
+
+What is the bill?""")
+
+G012 = dict(taskId="G012", tier=5, kind="missing", branches=lambda: (_g012(False), _g012(True)),
+    statement="""A training provider prices a course as follows.
+
+P1. Course fee: 340.00.
+P2. Applicants who already hold the prerequisite qualification receive a 60.00 reduction.
+P3. A 25.00 examination fee is added to every enrolment after any reduction.
+
+Someone enrols on the course.
+
+What do they pay?""")
+
+G013 = dict(taskId="G013", tier=5, kind="missing", branches=lambda: (_g013(False), _g013(True)),
+    statement="""A theatre prices a ticket as follows.
+
+T1. Standard ticket: 32.00.
+T2. A 2.75 booking fee is added to every ticket.
+T3. Students pay 70% of the total after the booking fee.
+
+Someone buys one ticket.
+
+What do they pay?""")
+
+G014 = dict(taskId="G014", tier=5, kind="missing", branches=lambda: (_g014(False), _g014(True)),
+    statement="""A workshop hires out space as follows.
+
+W1. Base hire: 55.00.
+W2. Add 12.00 for each hour beyond the first.
+W3. Weekend bookings are charged at 125% of the total.
+
+A booking runs for 4 hours.
+
+What is the charge?""")
+
+G015 = dict(taskId="G015", tier=5, kind="missing", branches=lambda: (_g015(False), _g015(True)),
+    statement="""A safety inspectorate charges as follows.
+
+I1. Inspection fee: 210.00.
+I2. A 45.00 report fee is added to every inspection.
+I3. Where the installation was fitted by a certified installer, 35.00 is deducted from the total.
+
+An installation is inspected and a report issued.
+
+What is the charge?""")
+
+G016 = dict(taskId="G016", tier=5, kind="convergent", branches=lambda: (_g016(False), _g016(True)),
+    statement="""A storage firm charges monthly as follows.
+
+M1. Standard unit: 74.00 per month.
+M2. Oversize items carry a 30.00 monthly supplement.
+M3. No unit is ever charged more than 74.00 per month, whatever supplements apply.
+
+A customer stores items in one unit for a month.
+
+What do they pay?""")
+
+
+ITEMS = [G001, G002, G003, G004, G005, G006,
+         G007, G008, G009, G010, G011, G012, G013, G014, G015, G016]
 
 
 def resolve(item):

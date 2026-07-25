@@ -8,9 +8,16 @@ The benchmark tests **reasoning** — the ability to transform inputs into corre
 
 Six reasoning categories map to four CHC broad cognitive factors:
 
-The bank holds **30 items**: six categories × five difficulty tiers. A default
-run draws 24 of them (tiers 2–5); tier 1 is skipped because every current model
-passes it.
+The bank holds **46 items**: six reasoning categories × five difficulty tiers,
+plus a 16-item evidence-sufficiency family (category G).
+
+A default run is **28 items**: the 12 hard-tier reasoning items (tiers 4–5) plus
+the whole G family. Tiers 1–3 are retired from default runs — claude-opus-5
+scored 23/24 across tiers 2–5, so they spend calls confirming a frontier model
+can still do arithmetic while contributing nothing to discrimination, and a
+near-sweep pushes the IRT extrapolation to absurdity (one such run scored
+IQ 179). They remain available with `--tiers 1,2,3` for comparability with
+older runs.
 
 | Tier | IRT difficulty `b` | Intent |
 |---|---|---|
@@ -43,6 +50,7 @@ design rule for tiers 4-5:
 
 | Category | Label | CHC Factor | Description |
 |---|---|---|---|
+| G | Evidence Sufficiency | Gc / Gf (cross-loaded) | Rulebooks whose conditions are sometimes unstated — see below |
 | A | Deduction & Elimination | Gf (Fluid Reasoning) | Logic grids, process of elimination |
 | B | Stateful Process Reasoning | Gwm (Working Memory) | Variables updating each round, state tracking |
 | C | Rule Application | Gc / Gf (cross-loaded) | Apply a policy or rulebook to a scenario |
@@ -125,6 +133,40 @@ Consequences for anyone reading a score from this bank:
 | `custom_harness` | Entrant-declared | Declared | Declared |
 
 Results must always declare the run mode. Different modes are not directly comparable.
+
+## Category G — evidence sufficiency
+
+Every well-posed deterministic category is at the frontier ceiling: two design
+passes and six probe designs produced **zero** failures for claude-opus-5. What
+did beat it was a rulebook containing a conditional clause whose trigger is
+never stated — it silently assumed the condition did not apply and returned a
+confident number.
+
+G turns that into items of three kinds, so it cannot be gamed:
+
+| Kind | Situation | Correct answer |
+|---|---|---|
+| MISSING | a condition gates a rule and the branches differ | `UNDETERMINED` |
+| CONVERGENT | a condition is unstated, but a cap or floor makes both branches agree | the number |
+| SPECIFIED | nothing is missing | the number |
+
+Roughly two thirds are MISSING. A model that always answers `UNDETERMINED`
+scores ~38% on a default run — worse than answering honestly — because it then
+fails every convergent, specified and reasoning item.
+
+Two rules the generator enforces, both learned the hard way:
+
+- **The property is asserted, not assumed.** MISSING items must have branches
+  that differ; CONVERGENT items must have branches that agree. G005 was refused
+  until its floor actually bound in both branches.
+- **The instructions must not prime.** An early draft told the model "some of
+  these problems are not fully determined" and it then answered both probe items
+  correctly. Priming it to look for a missing fact removes the very thing being
+  measured, so G's wording is neutral and identical across all three kinds.
+
+**Category G needs judged scoring.** A model that correctly reports the answer
+is not determined phrases it in its own words, which the string scorer cannot
+recognise.
 
 ## Scoring modes
 

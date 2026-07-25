@@ -21,8 +21,8 @@ describe("loadManifest", () => {
     const manifest = await loadManifest(FIXTURES_DIR);
     // 1.2 = 36 items across 7 categories (G added 2026-07-25). Scores are not
     // comparable across bank versions, so these numbers are load-bearing.
-    expect(manifest.version).toBe("1.2");
-    expect(manifest.totalTasks).toBe(36);
+    expect(manifest.version).toBe("1.3");
+    expect(manifest.totalTasks).toBe(46);
     expect(Object.keys(manifest.categories)).toHaveLength(7);
   });
 
@@ -66,9 +66,9 @@ describe("loadTask", () => {
 // ---------------------------------------------------------------------------
 
 describe("loadAllTasks", () => {
-  it("loads all 36 bank items (A-F x 5 tiers, plus 6 in category G)", async () => {
+  it("loads all 46 bank items (A-F x 5 tiers, plus 16 in category G)", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
-    expect(tasks.length).toBe(36);
+    expect(tasks.length).toBe(46);
   });
 
   it("has 5 tasks per reasoning category; G carries 6 across its two hard tiers", async () => {
@@ -80,7 +80,7 @@ describe("loadAllTasks", () => {
     for (const [cat, count] of byCat) {
       // G is the evidence-sufficiency family: 3 items each at tiers 4 and 5,
       // mixing undetermined, convergent and fully-specified cases.
-      expect(count).toBe(cat === "G" ? 6 : 5);
+      expect(count).toBe(cat === "G" ? 16 : 5);
     }
   });
 
@@ -98,18 +98,19 @@ describe("loadAllTasks", () => {
 // ---------------------------------------------------------------------------
 
 describe("selectTaskSet", () => {
-  it("selects 28 items by default — tiers 2-5 across A-F, plus 4 from G", async () => {
+  it("selects 28 items by default — 12 hard-tier reasoning items plus the whole G family", async () => {
     const selected = await selectTaskSet({}, FIXTURES_DIR);
     expect(selected.length).toBe(28);
-    // Tier 1 is excluded by default: every current model passes it, so it
-    // costs a call and contributes no information.
-    expect(selected.some(t => t.tier === 1)).toBe(false);
-    expect(selected.some(t => t.tier === 5)).toBe(true);
+    // Tiers 1-3 are saturated for frontier models: they spend a call and
+    // contribute nothing to discrimination.
+    expect(selected.every(t => t.tier >= 4)).toBe(true);
+    expect(selected.filter(t => t.category === "G")).toHaveLength(16);
+    expect(selected.filter(t => t.category !== "G")).toHaveLength(12);
   });
 
   it("selects only the requested tiers", async () => {
-    const hard = await selectTaskSet({ tiers: [4, 5] }, FIXTURES_DIR);
-    expect(hard.length).toBe(14);   // 2 each from A-F, 2 from G
+    const hard = await selectTaskSet({ tiers: [4, 5], itemsPerCategory: 2 }, FIXTURES_DIR);
+    expect(hard.length).toBe(14);   // 2 each from A-F and G
     expect(hard.every(t => t.tier === 4 || t.tier === 5)).toBe(true);
   });
 
@@ -124,7 +125,7 @@ describe("selectTaskSet", () => {
       { categories: ["A", "B"] },
       FIXTURES_DIR,
     );
-    expect(selected.length).toBe(8);
+    expect(selected.length).toBe(4);   // tiers 4-5 of A and B
     expect(selected.every(t => t.category === "A" || t.category === "B")).toBe(true);
   });
 
