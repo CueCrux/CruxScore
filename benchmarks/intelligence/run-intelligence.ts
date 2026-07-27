@@ -69,7 +69,7 @@ function parseArgs(argv: string[]): CLIArgs {
   const args: CLIArgs = {
     model: "claude-sonnet-4-20250514",
     mode: "closed_prompt_only",
-    categories: ["A", "B", "C", "D", "E", "F"],
+    categories: ["A", "B", "C", "D", "E", "F", "G"],
     tiers: [...DEFAULT_TIERS],
     itemsPerCategory: undefined,
     dryRun: false,
@@ -252,7 +252,7 @@ function estimateModelCost(model: string, inputTokens: number, outputTokens: num
  * bank that added tiers 4-5 after the frontier hit the old ceiling. A score is
  * only meaningful against the bank it was measured on.
  */
-const BENCHMARK_VERSION = "1.1";
+const BENCHMARK_VERSION = "1.3";
 
 const THINKING_ON_BY_DEFAULT = /^claude-(opus-5|fable-5|mythos-5|sonnet-5)/;
 const DEFAULT_MAX_TOKENS = 4096;
@@ -451,7 +451,7 @@ async function executeRun(args: CLIArgs, runIndex: number, totalRuns: number): P
   console.log(`  Mode: ${args.mode}`);
   console.log(`  Categories: ${args.categories.join(", ")}`);
   console.log(`  Tiers: ${args.tiers.join(", ")}${args.tiers.join(",") === DEFAULT_TIERS.join(",") ? " (default)" : ""}`);
-  console.log(`  Items/category: ${args.itemsPerCategory ?? args.tiers.length}`);
+  console.log(`  Items/category: ${args.itemsPerCategory ?? "default profile (1 per tier; category G whole)"}`);
   console.log(`  Max tokens: ${maxTokens}${args.maxTokens === undefined ? " (default)" : " (--max-tokens)"}`);
   if (!args.systemPrompt) console.log(`  System prompt: OFF (--no-system-prompt) — declare this alongside the score`);
   if (args.judges.length > 0) console.log(`  Judges: ${args.judges.map(j => `${j.model}@${j.base}`).join(", ")} (rescue-only, unanimous)`);

@@ -1,0 +1,55 @@
+{
+  "taskId": "G002",
+  "version": 1,
+  "category": "G",
+  "categoryLabel": "Evidence Sufficiency",
+  "tier": 4,
+  "chcPrimaryFactor": "Gc",
+  "chcSecondaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 2.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A print shop prices an order as follows.\n\nP1. Base rate: 24.00 for the first item.\nP2. Add 4.00 for each additional item.\nP3. Priority orders incur a 15.00 surcharge.\nP4. Whatever the above produces, no order is ever charged more than 36.00.\n\nA customer orders 4 items.\n\nWhat is the total charge?",
+  "constraints": [
+    "Apply the rules exactly as written",
+    "Answer with the total to two decimal places"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "36.00",
+  "acceptableVariants": [],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

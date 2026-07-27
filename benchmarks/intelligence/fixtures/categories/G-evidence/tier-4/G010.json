@@ -1,0 +1,61 @@
+{
+  "taskId": "G010",
+  "version": 1,
+  "category": "G",
+  "categoryLabel": "Evidence Sufficiency",
+  "tier": 4,
+  "chcPrimaryFactor": "Gc",
+  "chcSecondaryFactor": "Gf",
+  "irt": {
+    "model": "2PL",
+    "a": 1.4,
+    "b": 2.5,
+    "c": 0
+  },
+  "track": "R1",
+  "statement": "A hotel bills a stay as follows.\n\nN1. Room rate: 96.00 per night.\nN2. A one-off 18.00 cleaning charge applies to every stay.\nN3. Departures after 11:00 incur a 25.00 late-checkout fee.\n\nA guest stays one night.\n\nWhat is the bill?",
+  "constraints": [
+    "Apply the rules exactly as written",
+    "Answer with the total to two decimal places"
+  ],
+  "answerType": "exact",
+  "correctAnswer": "UNDETERMINED",
+  "acceptableVariants": [
+    "undetermined",
+    "cannot be determined",
+    "insufficient information",
+    "not determinable",
+    "cannot be computed"
+  ],
+  "responseSchema": {
+    "type": "object",
+    "properties": {
+      "final_answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "working": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "final_answer",
+      "confidence",
+      "working"
+    ]
+  },
+  "isHoldout": false,
+  "scoringWeights": {
+    "correctness": 0.7,
+    "traceConsistency": 0.15,
+    "constraintAdherence": 0.1,
+    "outputCompliance": 0.05
+  }
+}

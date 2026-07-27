@@ -280,12 +280,12 @@ export function scoreItem(task: IntelligenceTask, response: TaskResponse): ItemS
 }
 
 function getCHCPrimaryWeight(task: IntelligenceTask): number {
-  // C and F have cross-loading
-  if (task.category === "C" || task.category === "F") return 0.6;
+  // C, F and G have cross-loading
+  if (task.category === "C" || task.category === "F" || task.category === "G") return 0.6;
   return 1.0;
 }
 
 function getCHCSecondaryWeight(task: IntelligenceTask): number | undefined {
-  if (task.category === "C" || task.category === "F") return 0.4;
+  if (task.category === "C" || task.category === "F" || task.category === "G") return 0.4;
   return undefined;
 }
