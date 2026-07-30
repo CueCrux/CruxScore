@@ -254,4 +254,24 @@ describe("scoreItem — CHC factor mapping", () => {
     expect(result.chcPrimaryWeight).toBe(0.6);
     expect(result.chcSecondaryWeight).toBe(0.4);
   });
+
+  it("maps evidence sufficiency to its Gc/Gf cross-loading", () => {
+    const gTask: IntelligenceTask = {
+      ...baseTask,
+      category: "G",
+      categoryLabel: "Evidence Sufficiency",
+      chcPrimaryFactor: "Gc",
+      chcSecondaryFactor: "Gf",
+    };
+    const result = scoreItem(gTask, makeResponse({
+      final_answer: "Alice",
+      confidence: 0.9,
+      working: ["The available evidence fixes the answer"],
+    }));
+
+    expect(result.chcFactor).toBe("Gc");
+    expect(result.chcSecondaryFactor).toBe("Gf");
+    expect(result.chcPrimaryWeight).toBe(0.6);
+    expect(result.chcSecondaryWeight).toBe(0.4);
+  });
 });
