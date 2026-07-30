@@ -19,7 +19,7 @@ const FIXTURES_DIR = new URL("../fixtures", import.meta.url).pathname;
 describe("loadManifest", () => {
   it("loads the task bank manifest", async () => {
     const manifest = await loadManifest(FIXTURES_DIR);
-    // 1.2 = 36 items across 7 categories (G added 2026-07-25). Scores are not
+    // 1.3 = 46 items across 7 categories (G added 2026-07-25). Scores are not
     // comparable across bank versions, so these numbers are load-bearing.
     expect(manifest.version).toBe("1.3");
     expect(manifest.totalTasks).toBe(46);
@@ -51,9 +51,10 @@ describe("loadTask", () => {
     const tasks = await Promise.all([
       loadTask("A001", FIXTURES_DIR),
       loadTask("B001", FIXTURES_DIR),
-      loadTask("C001", FIXTURES_DIR),
+      loadTask("G016", FIXTURES_DIR),
     ]);
-    expect(tasks.map(t => t.category)).toEqual(["A", "B", "C"]);
+    expect(tasks.map(t => t.category)).toEqual(["A", "B", "G"]);
+    expect(tasks[2].correctAnswer).toBe("74.00");
   });
 
   it("throws for unknown task ID", async () => {
@@ -71,14 +72,14 @@ describe("loadAllTasks", () => {
     expect(tasks.length).toBe(46);
   });
 
-  it("has 5 tasks per reasoning category; G carries 6 across its two hard tiers", async () => {
+  it("has 5 tasks per reasoning category; G carries 16 across its two hard tiers", async () => {
     const tasks = await loadAllTasks(FIXTURES_DIR);
     const byCat = new Map<string, number>();
     for (const t of tasks) {
       byCat.set(t.category, (byCat.get(t.category) ?? 0) + 1);
     }
     for (const [cat, count] of byCat) {
-      // G is the evidence-sufficiency family: 3 items each at tiers 4 and 5,
+      // G is the evidence-sufficiency family: 7 tier-4 and 9 tier-5 items,
       // mixing undetermined, convergent and fully-specified cases.
       expect(count).toBe(cat === "G" ? 16 : 5);
     }
@@ -137,13 +138,32 @@ describe("selectTaskSet", () => {
     expect(selected.length).toBe(14);   // 2 from each of the 7 categories
   });
 
-  it("excludes specific task IDs", async () => {
+  it("applies per-category item limits while retaining the tier-based fallback", async () => {
     const selected = await selectTaskSet(
-      { excludeTaskIds: ["A001", "B001"] },
+      { itemsPerCategory: { G: 3 } },
       FIXTURES_DIR,
     );
-    expect(selected.find(t => t.taskId === "A001")).toBeUndefined();
-    expect(selected.find(t => t.taskId === "B001")).toBeUndefined();
+    const counts = Object.fromEntries(
+      ["A", "B", "C", "D", "E", "F", "G"].map(category => [
+        category,
+        selected.filter(task => task.category === category).length,
+      ]),
+    );
+
+    expect(counts).toEqual({ A: 2, B: 2, C: 2, D: 2, E: 2, F: 2, G: 3 });
+  });
+
+  it("excludes task IDs that would otherwise be selected", async () => {
+    const excluded = ["A004", "B004", "G001"];
+    const baseline = await selectTaskSet({}, FIXTURES_DIR);
+    expect(excluded.every(taskId => baseline.some(task => task.taskId === taskId))).toBe(true);
+
+    const selected = await selectTaskSet(
+      { excludeTaskIds: excluded },
+      FIXTURES_DIR,
+    );
+    expect(selected).toHaveLength(baseline.length - excluded.length);
+    expect(excluded.every(taskId => selected.every(task => task.taskId !== taskId))).toBe(true);
   });
 });
 

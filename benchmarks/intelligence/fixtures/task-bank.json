@@ -80,8 +80,8 @@
       "chcSecondary": "Gf",
       "taskCount": 16,
       "tiers": {
-        "4": 6,
-        "5": 10
+        "4": 7,
+        "5": 9
       }
     }
   },
@@ -94,7 +94,7 @@
     "4": 2.5,
     "5": 3.5
   },
-  "notes": "Tiers 4-5 added 2026-07-24: the frontier scored 15-16/18 on tiers 1-3, above the bank's ceiling, so it could not separate models. Their answer keys are derived by exhaustive solve in tools/generate-hard-items.py. 1.2 adds category G (evidence sufficiency): rulebooks whose conditions are sometimes unstated. Frontier models solve every well-posed deterministic item in this bank, but silently default an unstated condition rather than reporting it \u2014 G measures that, with convergent and fully-specified controls so a model cannot game it by always answering UNDETERMINED.",
+  "notes": "Tiers 4-5 added 2026-07-24: the frontier scored 15-16/18 on tiers 1-3, above the bank's ceiling, so it could not separate models. Their answer keys are derived by exhaustive solve in tools/generate-hard-items.py. 1.3 adds category G (evidence sufficiency): rulebooks whose conditions are sometimes unstated. Frontier models solve every well-posed deterministic item in this bank, but silently default an unstated condition rather than reporting it \u2014 G measures that, with convergent and fully-specified controls so a model cannot game it by always answering UNDETERMINED.",
   "defaultRun": {
     "tiers": [
       4,
