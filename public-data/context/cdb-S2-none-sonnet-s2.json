@@ -2,7 +2,7 @@
   "id": "cdb-S2-none-sonnet-s2",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Arbitrary decisions",
+  "benchmark_name": "Context Dependence — Arbitrary decisions",
   "section": "S2",
   "section_hypothesis": "high-lift",
   "backend": "none",
@@ -15,14 +15,14 @@
   "seed": 2,
   "n_probes": 6,
   "correct": 0,
-  "recall": 0.0,
+  "recall": 0,
   "delta_vs_none": 0,
   "delta_vs_vendor_native": -6,
   "mcnemar_vs_none": {
     "b": 0,
     "c": 0
   },
-  "cx_em": 0.0,
+  "cx_em": 0,
   "s_gate": 1,
   "c_tokens_usd": null,
   "submitter": "Myles Bryning",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "94fe3801374ae55cacaac91a0cf6893dfa034fd0475408d65ddaebb1d0a9aa36",
-  "cost_basis": "unmeasured-subagent"
+  "cost_basis": "unmeasured-subagent",
+  "rig": {
+    "model": "sonnet",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

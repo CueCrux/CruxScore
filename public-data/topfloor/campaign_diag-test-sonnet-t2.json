@@ -7910,5 +7910,10 @@
   ],
   "amendmentCount": 12,
   "campaignNumber": 1,
-  "totalCostUsd": 9.02202
+  "totalCostUsd": 9.02202,
+  "rig": {
+    "model": "claude-sonnet-4-6",
+    "memory_backend": "crux",
+    "effort_tier": null
+  }
 }

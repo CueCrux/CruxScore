@@ -95,5 +95,10 @@
   "durationMs": 165875,
   "cruxComposite": 0.8241674035465417,
   "date": "2026-07-24",
-  "submittedAt": "2026-07-24T21:23:35.666Z"
+  "submittedAt": "2026-07-24T21:23:35.666Z",
+  "rig": {
+    "model": "claude-opus-4-8",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

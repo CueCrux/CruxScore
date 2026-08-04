@@ -35,5 +35,10 @@
   },
   "date": "2026-07-16",
   "metrics_version": "1.3",
-  "submittedAt": "2026-07-16T21:01:58.560Z"
+  "submittedAt": "2026-07-16T21:01:58.560Z",
+  "rig": {
+    "model": "claude-fable-5",
+    "memory_backend": "crux",
+    "effort_tier": null
+  }
 }

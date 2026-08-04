@@ -2,7 +2,7 @@
   "id": "cdb-S8-none-claude-sonnet-5-s1-v11",
   "type": "context",
   "suite_version": "CDB-v1.1",
-  "benchmark_name": "Context Dependence \u2014 Provenance / trust",
+  "benchmark_name": "Context Dependence — Provenance / trust",
   "section": "S8",
   "section_hypothesis": "provenance-earns-tokens",
   "scored": true,
@@ -16,14 +16,14 @@
   "seed": 1,
   "n_probes": 20,
   "correct": 0,
-  "recall": 0.0,
+  "recall": 0,
   "delta_vs_none": 0,
   "delta_vs_vendor_native": 0,
   "mcnemar_vs_none": {
     "b": 0,
     "c": 0
   },
-  "cx_em": 0.0,
+  "cx_em": 0,
   "s_gate": 1,
   "c_tokens_usd": 1.180984,
   "probes": [
@@ -203,5 +203,10 @@
   "metrics_version": "1.6",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "axis": "provenance",
-  "in_composite": false
+  "in_composite": false,
+  "rig": {
+    "model": "claude-sonnet-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

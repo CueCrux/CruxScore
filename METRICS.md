@@ -234,6 +234,35 @@ T_human is the most sensitive input to the Crux Score. Calibration rules:
 3. **Recorded once, used for all runs:** T_human does not change between runs of the same fixture. If recalibrated, a new fixture version is created.
 4. **Excludes setup:** T_human measures task execution time, not environment setup or context reading that the human already has.
 
+### 4.3.1 Difficulty Tier Ladder
+
+Rule 2 above leaves T_human to per-fixture judgement, and author discretion is where drift lives: two fixtures of equal difficulty can carry baselines an order of magnitude apart, which makes Em incomparable across suites.
+
+A fixture instead declares a **difficulty tier**, and the tier maps to a published anchor. `difficulty_tier` is a mandatory field on new fixtures; `T_human_s` is then a lookup, not a judgement.
+
+| Tier | T_human | Anchor description |
+|---|---|---|
+| **D1** | 5 min | Single-hop lookup in a known location |
+| **D2** | 15 min | 2–3 hops within one document set |
+| **D3** | 45 min | 3–5 hops, cross-document synthesis |
+| **D4** | 2 h | 5–7 hops plus one adversarial control |
+| **D5** | 6 h | 8–12 hops, conflicting sources |
+| **D6** | 18 h | 13–20 hops, multi-session continuity |
+| **D7+** | ×3 per tier | Open — added as the frontier moves |
+
+Anchors are rounded to human-legible durations because that is how a calibration panel is briefed. The ratio between adjacent tiers is approximately 3.
+
+**Two properties follow:**
+
+- **Standardised.** A D4 context fixture and a D4 coding fixture are worth the same Em, because both resolve to the same baseline through the same table.
+- **Open-ended.** Cx scales linearly with T_human (§3.1), so adding D7, D8, … raises the ceiling *without rescaling any existing score*. A saturating benchmark is extended by adding tiers, never by recalibrating the scale — which is what forces a reset and breaks longitudinal comparability.
+
+**Derivation.** Where a fixture declares structural parameters, the tier is derived rather than assigned — hop count sets the base tier, and each additional capability demand (code execution, memory recovery after a wipe, multi-session span) adds one. See `src/tiers.ts` (`deriveTier`).
+
+**Anchor status: PROVISIONAL.** The values above are expert estimates, not yet panel-measured. Any result computed from them must be labelled provisional. Replacing an anchor with a measured value creates a new fixture version per rule 3 — anchors are never edited in place, because that would silently move every previously published score.
+
+Adding this table does not change any v1.0 formula and is not a new metric, so `metrics_version` is unaffected.
+
 ### 4.4 Aggregation
 
 When reporting across multiple runs:
@@ -317,3 +346,15 @@ To add a metric:
 | 1.0 | 2026-03-26 | Initial publication of the canonical core metric set. |
 | 1.1 | 2026-03-29 | Extension: +5 fundamentals (I6 Temporal Accuracy, I7 Supersession Accuracy, I8 Abstention Precision, I9 Retrieval Recall, K4 Cross-Session Synthesis), +2 derived (Q5 Abstention Quality, V4 Retrieval Efficiency). Motivated by memory benchmark ability-coverage gaps. No v1.0 formula changes. |
 | 1.2 | 2026-03-31 | Extension: +2 fundamentals (I10 Proposition Recall, I11 Contradiction Rate), +1 derived (Q6 Proposition Quality). Enables proposition-level partial credit for model-vs-model comparison. No v1.0/v1.1 formula changes. |
+| 1.3 | — | **Implemented, undocumented.** `src/types.ts` carries v1.3 extension fields (I_provenance, I_premise_rejection, K_novel_synthesis) but no changelog entry was written. The fields are live; this row records the gap rather than inventing the history. |
+| 1.4–1.6 | — | **Emitted, not implemented.** `benchmarks/context/run_matrix.py` stamps `metrics_version: "1.6"` on published records (and older records carry `"1.5"`), ahead of anything the package implements. No fundamentals or derived metrics were added under these numbers. |
+
+> **Known drift.** `computeCruxScore` stamps `"1.2"` — the highest version the reference
+> implementation actually implements. Records in `public-data/context/` carry `"1.5"` and
+> `"1.6"` because the Python suite sets the field itself. The numbers are therefore not
+> comparable as versions, and `metrics_version` on a Context record does not mean what it
+> means on a package-computed one.
+>
+> This is recorded, not silently corrected: rewriting the field on published records would
+> restate history. The fix is for the Context suite to stop stamping its own version and
+> re-run, at which point its records carry the package value like every other suite.

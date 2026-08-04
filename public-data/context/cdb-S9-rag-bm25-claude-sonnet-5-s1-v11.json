@@ -2,7 +2,7 @@
   "id": "cdb-S9-rag-bm25-claude-sonnet-5-s1-v11",
   "type": "context",
   "suite_version": "CDB-v1.1",
-  "benchmark_name": "Context Dependence \u2014 Drift / longitudinal",
+  "benchmark_name": "Context Dependence — Drift / longitudinal",
   "section": "S9",
   "section_hypothesis": "resolve-vs-drift",
   "scored": true,
@@ -18,14 +18,14 @@
   "seed": 1,
   "n_probes": 20,
   "correct": 20,
-  "recall": 1.0,
+  "recall": 1,
   "delta_vs_none": 20,
   "delta_vs_vendor_native": 0,
   "mcnemar_vs_none": {
     "b": 20,
     "c": 0
   },
-  "cx_em": 15.0,
+  "cx_em": 15,
   "s_gate": 1,
   "c_tokens_usd": 1.051048,
   "probes": [
@@ -203,5 +203,10 @@
   "cost_basis": "measured",
   "date": "2026-07-03",
   "metrics_version": "1.6",
-  "submittedAt": "2026-07-03T00:00:00.000Z"
+  "submittedAt": "2026-07-03T00:00:00.000Z",
+  "rig": {
+    "model": "claude-sonnet-5",
+    "memory_backend": "rag-bm25",
+    "effort_tier": null
+  }
 }

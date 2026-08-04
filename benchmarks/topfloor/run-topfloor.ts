@@ -19,7 +19,21 @@ import {
 } from "./scoring/floor-rubric.js";
 import type { FloorScore, FloorObjectiveResult, FloorEvidenceResult, FloorWipeResult } from "./scoring/floor-rubric.js";
 import { analyseProgression, buildLeaderboard, formatLeaderboard } from "./scoring/aggregate.js";
-import { computeCruxScore } from "./scoring/crux-integration.js";
+import { scoreTopFloorRun } from "./scoring/crux-integration.js";
+import { EffortLedger, suggestedAllocation } from "./lib/effort-budget.js";
+import {
+  deriveTier,
+  tierToHumanSeconds,
+  isEffortTier,
+  EFFORT_TIERS,
+  backendForArm,
+} from "../../src/index.js";
+import type {
+  DifficultyTier,
+  TierDerivationParams,
+  EffortTier,
+  Rig,
+} from "../../src/index.js";
 import type { FloorBlueprint, CorpusDocument } from "./generators/document-factory.js";
 import { executeFloor, type FloorExecutionOptions } from "./lib/orchestrator.js";
 import {
@@ -46,6 +60,8 @@ interface RunManifest {
   floors: number[];
   arm: Arm;
   model: string;
+  /** Declared reasoning effort. Null when not declared — never inferred. */
+  effortTier: EffortTier | null;
   maxTurns: number;
   dryRun: boolean;
   verbose: boolean;
@@ -62,13 +78,21 @@ interface FloorRunResult {
   turnsUsed: number;
   tokensUsed: number;
   durationMs: number;
+  /** Tool calls made on this floor — feeds N_tools. */
+  toolCalls: number;
+  /** Latency of the agent's first turn, ms. Null if no turns ran. Feeds T_orient_s. */
+  firstActionMs: number | null;
 }
 
 interface RunResult {
   manifest: RunManifest;
+  /** Rig identity — what the board ranks on. */
+  rig: Rig;
   floorResults: FloorRunResult[];
   aggregate: ReturnType<typeof aggregateScores>;
-  crux: ReturnType<typeof computeCruxScore>;
+  scored: ReturnType<typeof scoreTopFloorRun>;
+  /** Published effort ledger — how the reasoning budget was actually used. */
+  effort: ReturnType<EffortLedger["snapshot"]>;
   progression: ReturnType<typeof analyseProgression>;
   completedAt: string;
 }
@@ -95,10 +119,20 @@ function parseArgs(argv: string[]): RunManifest {
     floors = [Number(floorStr)];
   }
 
+  // Effort is part of the rig identity, so an undeclared effort stays null
+  // rather than defaulting to a tier the run did not actually use.
+  const effortRaw = get("--effort", "");
+  if (effortRaw && !isEffortTier(effortRaw)) {
+    throw new Error(
+      `--effort must be one of ${EFFORT_TIERS.join(", ")}; got ${JSON.stringify(effortRaw)}`,
+    );
+  }
+
   return {
     floors,
     arm: get("--arm", "C0") as Arm,
     model: get("--model", "claude-sonnet-4-20250514"),
+    effortTier: effortRaw ? (effortRaw as EffortTier) : null,
     maxTurns: Number(get("--max-turns", "100")),
     dryRun: has("--dry-run"),
     verbose: has("--verbose"),
@@ -118,6 +152,48 @@ function loadFloorBlueprint(floorNum: number): FloorBlueprint | null {
   const manifestPath = resolve(dir, "manifest.json");
   if (!existsSync(manifestPath)) return null;
   return JSON.parse(readFileSync(manifestPath, "utf-8")) as FloorBlueprint;
+}
+
+/**
+ * Difficulty tier for a floor, derived from its blueprint parameters.
+ *
+ * Derived, never hand-assigned: a hand-assigned baseline is the same author
+ * discretion the ladder exists to remove. Note this is the ScoreCrux D-ladder
+ * (`difficulty_tier`), distinct from the blueprint's narrative
+ * `difficulty.tier` ("orientation", "intermediate", ...).
+ *
+ * Returns null when the blueprint is missing, so an absent floor produces a
+ * null baseline — and therefore `Cx_em: null` — rather than a fabricated one.
+ */
+function floorDifficultyTier(floorNum: number): DifficultyTier | null {
+  const blueprint = loadFloorBlueprint(floorNum) as
+    | (FloorBlueprint & { difficulty?: TierDerivationParams })
+    | null;
+  if (!blueprint?.difficulty) return null;
+
+  return deriveTier({
+    reasoningHops: blueprint.difficulty.reasoningHops,
+    requiresCoding: blueprint.difficulty.requiresCoding,
+    requiresMemoryRecovery: blueprint.difficulty.requiresMemoryRecovery,
+    requiresMultiSession: blueprint.difficulty.requiresMultiSession,
+  });
+}
+
+/**
+ * Human baseline for the floors attempted, in seconds.
+ *
+ * Summed across floors: a run that clears three floors replaced three floors'
+ * worth of expert work. Returns null if any floor's tier cannot be derived —
+ * a partial baseline would understate Em without saying so.
+ */
+function runHumanSeconds(floors: number[]): number | null {
+  let total = 0;
+  for (const floor of floors) {
+    const tier = floorDifficultyTier(floor);
+    if (tier === null) return null;
+    total += tierToHumanSeconds(tier);
+  }
+  return total;
 }
 
 function loadFloorCorpus(floorNum: number): CorpusDocument[] {
@@ -277,6 +353,8 @@ async function executeFloorRange(
       turnsUsed,
       tokensUsed,
       durationMs: Date.now() - startMs,
+      toolCalls: session.turns.reduce((s, t) => s + t.toolCalls.length, 0),
+      firstActionMs: session.turns.length > 0 ? session.turns[0].latencyMs : null,
     });
   }
 
@@ -424,8 +502,36 @@ if (floorResults.length === 0) {
 // Score
 const floorScores = floorResults.map((r) => r.score);
 const aggregate = aggregateScores(floorScores);
+// Effort ledger — accounted against the declared tier's allowance. A floor that
+// burned more than it was granted keeps its result at reduced credit rather
+// than losing it: one bad allocation should cost what it cost, not erase the
+// climb.
+const ledger = new EffortLedger(manifest.effortTier);
+for (const r of floorResults) {
+  const tier = floorDifficultyTier(r.floor);
+  const remaining = floorResults
+    .filter((x) => x.floor > r.floor)
+    .map((x) => floorDifficultyTier(x.floor))
+    .filter((t): t is DifficultyTier => t !== null);
+  if (tier) ledger.allocate(r.floor, suggestedAllocation(ledger, tier, remaining));
+  ledger.openFloor(r.floor);
+  ledger.spend(r.floor, r.tokensUsed);
+}
+
 const cruxMappings = mapToCruxFundamentals(floorScores, aggregate);
-const crux = computeCruxScore(cruxMappings);
+const scored = scoreTopFloorRun(cruxMappings, {
+  taskSeconds: floorResults.reduce((s, r) => s + r.durationMs, 0) / 1000,
+  orientSeconds:
+    floorResults[0]?.firstActionMs != null ? floorResults[0].firstActionMs / 1000 : null,
+  // From the difficulty-tier ladder. Null if any floor's tier cannot be
+  // derived, which makes the package return Cx_em: null rather than
+  // inventing a baseline.
+  humanSeconds: runHumanSeconds(floorResults.map((r) => r.floor)),
+  toolCalls: floorResults.reduce((s, r) => s + r.toolCalls, 0),
+  turns: floorResults.reduce((s, r) => s + r.turnsUsed, 0),
+  costUsd: 0, // orchestrator does not estimate cost per model yet
+});
+const { rubric, crux } = scored;
 const progression = analyseProgression(floorScores);
 
 // Print
@@ -438,14 +544,43 @@ console.log(`  Cumulative score: ${aggregate.cumulativeScore}`);
 console.log(`  Efficiency: ${aggregate.efficiency.toFixed(6)}`);
 console.log(`  Resilience: ${aggregate.resilience.toFixed(3)}`);
 
-console.log("\n--- ScoreCrux Composite ---");
-console.log(`  Composite: ${crux.composite.toFixed(4)}`);
-console.log(`  Safety gated: ${crux.safetyGated}`);
+console.log("\n--- Floor Rubric (benchmark-local) ---");
+console.log(`  Rubric score: ${rubric.rubricScore.toFixed(4)}`);
+console.log(`  Safety gated: ${rubric.safetyGated}`);
 if (manifest.verbose) {
   console.log("  Breakdown:");
-  for (const b of crux.breakdown) {
+  for (const b of rubric.breakdown) {
     console.log(`    ${b.fundamental}: ${b.raw.toFixed(3)} x ${b.weight} = ${b.weighted.toFixed(4)}`);
   }
+}
+
+console.log("\n--- ScoreCrux Composite (canonical) ---");
+console.log(
+  `  Cx_em: ${
+    crux.composite.Cx_em === null
+      ? "null (no T_human baseline — declare a difficulty tier)"
+      : `${crux.composite.Cx_em} Em`
+  }`,
+);
+console.log(`  metrics_version: ${crux.metrics_version}`);
+console.log(
+  `  Difficulty tiers: ${
+    floorResults
+      .map((r) => `F${r.floor}=${floorDifficultyTier(r.floor) ?? "?"}`)
+      .join(" ") || "none"
+  }`,
+);
+console.log(
+  `  T_human: ${
+    crux.fundamentals.T_human_s === null
+      ? "null"
+      : `${(crux.fundamentals.T_human_s / 60).toFixed(0)} min (PROVISIONAL anchors)`
+  }`,
+);
+if (manifest.verbose) {
+  console.log(`  Q_info:       ${crux.derived.Q_info ?? "null"}`);
+  console.log(`  Q_context:    ${crux.derived.Q_context ?? "null"}`);
+  console.log(`  Q_continuity: ${crux.derived.Q_continuity ?? "null"}`);
 }
 
 if (progression.difficultyCliff !== null) {
@@ -491,9 +626,17 @@ if (save) {
 mkdirSync(manifest.output, { recursive: true });
 const result: RunResult = {
   manifest,
+  rig: {
+    model: manifest.model,
+    // Arms are a preset over the rig's memory axis; an unrecognised arm must
+    // not silently become "none".
+    memory_backend: backendForArm(manifest.arm) ?? "unknown",
+    effort_tier: manifest.effortTier,
+  },
   floorResults,
   aggregate,
-  crux,
+  scored,
+  effort: ledger.snapshot(),
   progression,
   completedAt: new Date().toISOString(),
 };

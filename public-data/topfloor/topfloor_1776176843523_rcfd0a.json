@@ -61,5 +61,10 @@
     "composite": 0.3848,
     "safetyGated": false
   },
-  "submittedAt": "2026-04-14T14:27:23.523Z"
+  "submittedAt": "2026-04-14T14:27:23.523Z",
+  "rig": {
+    "model": "claude-sonnet-4-6",
+    "memory_backend": "crux",
+    "effort_tier": null
+  }
 }

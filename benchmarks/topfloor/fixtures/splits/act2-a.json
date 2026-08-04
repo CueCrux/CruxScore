@@ -1,0 +1,48 @@
+{
+  "id": "split-act2-a",
+  "act": 2,
+  "entryFloor": 15,
+  "landingFloor": 19,
+  "note": "First split. Act I (floors 1-15) is the linear trunk; the tower branches from the Lazarus wipe onward. All three branches are 4 hops with a code requirement, deriving D4 — route choice changes the skill demanded, never the difficulty.",
+  "branches": [
+    {
+      "id": "S2A-service-risers",
+      "archetype": "service-risers",
+      "floors": [16, 17, 18],
+      "active": true,
+      "narrative": "Plant rooms and maintenance ducts between the trading floors. Sentinel Shield's physical layer is documented nowhere except in contractor snag lists and forty thousand pages of commissioning paperwork.",
+      "difficulty": {
+        "reasoningHops": 4,
+        "requiresCoding": true,
+        "requiresMemoryRecovery": false,
+        "requiresMultiSession": false
+      }
+    },
+    {
+      "id": "S2A-executive-lifts",
+      "archetype": "executive-lifts",
+      "floors": [16, 17, 18],
+      "active": true,
+      "narrative": "The directors' lift bank and the meetings it carries. Everyone in the minutes has a reason to shade the record, and two of them are lying about the same afternoon.",
+      "difficulty": {
+        "reasoningHops": 4,
+        "requiresCoding": true,
+        "requiresMemoryRecovery": false,
+        "requiresMultiSession": false
+      }
+    },
+    {
+      "id": "S2A-archive-stacks",
+      "archetype": "archive-stacks",
+      "floors": [16, 17, 18],
+      "active": true,
+      "narrative": "Cold storage for everything Meridian was required to keep and would rather forget. The index was corrupted in 2019 and never rebuilt; what remains is recoverable only by reading the format itself.",
+      "difficulty": {
+        "reasoningHops": 4,
+        "requiresCoding": true,
+        "requiresMemoryRecovery": false,
+        "requiresMultiSession": false
+      }
+    }
+  ]
+}

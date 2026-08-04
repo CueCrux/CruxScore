@@ -73,5 +73,10 @@
   "estimatedCostUsd": 0.484695,
   "durationMs": 157452,
   "date": "2026-07-17",
-  "submittedAt": "2026-07-17T00:43:44.383Z"
+  "submittedAt": "2026-07-17T00:43:44.383Z",
+  "rig": {
+    "model": "claude-sonnet-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

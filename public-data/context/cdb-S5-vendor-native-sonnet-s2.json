@@ -2,7 +2,7 @@
   "id": "cdb-S5-vendor-native-sonnet-s2",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Supersession (control)",
+  "benchmark_name": "Context Dependence — Supersession (control)",
   "section": "S5",
   "section_hypothesis": "naive-fails-control",
   "backend": "vendor-native",
@@ -15,14 +15,14 @@
   "seed": 2,
   "n_probes": 3,
   "correct": 3,
-  "recall": 1.0,
+  "recall": 1,
   "delta_vs_none": 3,
   "delta_vs_vendor_native": 0,
   "mcnemar_vs_none": {
     "b": 3,
     "c": 0
   },
-  "cx_em": 15.0,
+  "cx_em": 15,
   "s_gate": 1,
   "c_tokens_usd": null,
   "submitter": "Myles Bryning",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "a5e8a1858c2501610566308d24d8fb9f1fa0f313420a220a071f4d7f7dfd8e7f",
-  "cost_basis": "unmeasured-subagent"
+  "cost_basis": "unmeasured-subagent",
+  "rig": {
+    "model": "sonnet",
+    "memory_backend": "vendor-native",
+    "effort_tier": null
+  }
 }

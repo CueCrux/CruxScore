@@ -12,12 +12,17 @@
   "arm_detail": "Crux wizard profile body (Crux PR #426), paired same-day baseline",
   "model": "claude-fable-5",
   "n": 2,
-  "loc_delta_pct": -61.0,
+  "loc_delta_pct": -61,
   "tokens_delta_pct": -24.1,
-  "cost_delta_pct": -29.0,
+  "cost_delta_pct": -29,
   "time_delta_pct": -32.4,
   "correct": "1.00 both arms (48 cells); cruxmin<=baseline LOC on all 12 tasks",
   "measured_by": "cuecrux",
   "run_id": "cruxmin-vs-baseline-fable-5-n2-20260717-123819",
-  "date": "2026-07-17"
+  "date": "2026-07-17",
+  "rig": {
+    "model": "claude-fable-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

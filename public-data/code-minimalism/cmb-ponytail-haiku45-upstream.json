@@ -19,5 +19,10 @@
   "correct": "20/20 safety tier",
   "measured_by": "upstream",
   "attribution": "https://github.com/DietrichGebert/ponytail/blob/main/benchmarks/results/2026-06-18-agentic.md",
-  "date": "2026-06-18"
+  "date": "2026-06-18",
+  "rig": {
+    "model": "claude-haiku-4-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

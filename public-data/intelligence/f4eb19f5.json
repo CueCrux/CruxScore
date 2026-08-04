@@ -90,5 +90,10 @@
   "durationMs": 193346,
   "cruxComposite": 0.7186822330724632,
   "date": "2026-07-16",
-  "submittedAt": "2026-07-16T12:02:49.577Z"
+  "submittedAt": "2026-07-16T12:02:49.577Z",
+  "rig": {
+    "model": "claude-fable-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

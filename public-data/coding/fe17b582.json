@@ -73,5 +73,10 @@
   "estimatedCostUsd": 0.7176,
   "durationMs": 65537,
   "date": "2026-04-19",
-  "submittedAt": "2026-04-19T00:21:23.373Z"
+  "submittedAt": "2026-04-19T00:21:23.373Z",
+  "rig": {
+    "model": "claude-opus-4-7",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

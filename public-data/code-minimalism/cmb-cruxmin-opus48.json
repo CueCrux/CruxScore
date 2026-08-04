@@ -19,5 +19,10 @@
   "correct": "1.00 both arms (48 cells, 1 degraded telemetry cell)",
   "measured_by": "cuecrux",
   "run_id": "cruxmin-vs-baseline-opus-4-8-n2-20260717-125325",
-  "date": "2026-07-17"
+  "date": "2026-07-17",
+  "rig": {
+    "model": "claude-opus-4-8",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

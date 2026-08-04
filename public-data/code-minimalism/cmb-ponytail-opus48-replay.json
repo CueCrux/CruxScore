@@ -19,5 +19,10 @@
   "correct": "1.00 both arms (48 cells)",
   "measured_by": "cuecrux",
   "run_id": "ponytail-replay-opus-4-8-n2-20260716-142605",
-  "date": "2026-07-16"
+  "date": "2026-07-16",
+  "rig": {
+    "model": "claude-opus-4-8",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

@@ -90,5 +90,10 @@
   "durationMs": 56183,
   "cruxComposite": 0.6593037354351876,
   "date": "2026-04-19",
-  "submittedAt": "2026-04-19T00:28:18.257Z"
+  "submittedAt": "2026-04-19T00:28:18.257Z",
+  "rig": {
+    "model": "gpt-4.1-mini",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

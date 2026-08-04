@@ -90,5 +90,10 @@
   "durationMs": 87497,
   "cruxComposite": 0.6433237924354305,
   "date": "2026-04-17",
-  "submittedAt": "2026-04-17T21:09:31.332Z"
+  "submittedAt": "2026-04-17T21:09:31.332Z",
+  "rig": {
+    "model": "claude-haiku-4-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

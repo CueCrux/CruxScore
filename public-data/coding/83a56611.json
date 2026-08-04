@@ -73,5 +73,10 @@
   "estimatedCostUsd": 0.0369688,
   "durationMs": 33308,
   "date": "2026-04-19",
-  "submittedAt": "2026-04-19T00:20:57.657Z"
+  "submittedAt": "2026-04-19T00:20:57.657Z",
+  "rig": {
+    "model": "claude-haiku-4-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

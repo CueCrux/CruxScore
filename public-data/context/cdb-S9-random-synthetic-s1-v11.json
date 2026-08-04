@@ -2,7 +2,7 @@
   "id": "cdb-S9-random-synthetic-s1-v11",
   "type": "context",
   "suite_version": "CDB-v1.1",
-  "benchmark_name": "Context Dependence \u2014 Drift / longitudinal",
+  "benchmark_name": "Context Dependence — Drift / longitudinal",
   "section": "S9",
   "section_hypothesis": "resolve-vs-drift",
   "scored": true,
@@ -18,16 +18,16 @@
   "seed": 1,
   "n_probes": 20,
   "correct": 0,
-  "recall": 0.0,
+  "recall": 0,
   "delta_vs_none": 0,
   "delta_vs_vendor_native": -20,
   "mcnemar_vs_none": {
     "b": 0,
     "c": 0
   },
-  "cx_em": 0.0,
+  "cx_em": 0,
   "s_gate": 1,
-  "c_tokens_usd": 0.0,
+  "c_tokens_usd": 0,
   "probes": [
     {
       "id": "P1",
@@ -203,5 +203,10 @@
   "cost_basis": "measured",
   "date": "2026-07-03",
   "metrics_version": "1.6",
-  "submittedAt": "2026-07-03T00:00:00.000Z"
+  "submittedAt": "2026-07-03T00:00:00.000Z",
+  "rig": {
+    "model": "synthetic",
+    "memory_backend": "random",
+    "effort_tier": null
+  }
 }
