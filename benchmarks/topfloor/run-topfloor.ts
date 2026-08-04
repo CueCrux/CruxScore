@@ -20,6 +20,7 @@ import {
 import type { FloorScore, FloorObjectiveResult, FloorEvidenceResult, FloorWipeResult } from "./scoring/floor-rubric.js";
 import { analyseProgression, buildLeaderboard, formatLeaderboard } from "./scoring/aggregate.js";
 import { scoreTopFloorRun } from "./scoring/crux-integration.js";
+import { EffortLedger, suggestedAllocation } from "./lib/effort-budget.js";
 import {
   deriveTier,
   tierToHumanSeconds,
@@ -90,6 +91,8 @@ interface RunResult {
   floorResults: FloorRunResult[];
   aggregate: ReturnType<typeof aggregateScores>;
   scored: ReturnType<typeof scoreTopFloorRun>;
+  /** Published effort ledger — how the reasoning budget was actually used. */
+  effort: ReturnType<EffortLedger["snapshot"]>;
   progression: ReturnType<typeof analyseProgression>;
   completedAt: string;
 }
@@ -499,6 +502,22 @@ if (floorResults.length === 0) {
 // Score
 const floorScores = floorResults.map((r) => r.score);
 const aggregate = aggregateScores(floorScores);
+// Effort ledger — accounted against the declared tier's allowance. A floor that
+// burned more than it was granted keeps its result at reduced credit rather
+// than losing it: one bad allocation should cost what it cost, not erase the
+// climb.
+const ledger = new EffortLedger(manifest.effortTier);
+for (const r of floorResults) {
+  const tier = floorDifficultyTier(r.floor);
+  const remaining = floorResults
+    .filter((x) => x.floor > r.floor)
+    .map((x) => floorDifficultyTier(x.floor))
+    .filter((t): t is DifficultyTier => t !== null);
+  if (tier) ledger.allocate(r.floor, suggestedAllocation(ledger, tier, remaining));
+  ledger.openFloor(r.floor);
+  ledger.spend(r.floor, r.tokensUsed);
+}
+
 const cruxMappings = mapToCruxFundamentals(floorScores, aggregate);
 const scored = scoreTopFloorRun(cruxMappings, {
   taskSeconds: floorResults.reduce((s, r) => s + r.durationMs, 0) / 1000,
@@ -617,6 +636,7 @@ const result: RunResult = {
   floorResults,
   aggregate,
   scored,
+  effort: ledger.snapshot(),
   progression,
   completedAt: new Date().toISOString(),
 };
