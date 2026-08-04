@@ -158,7 +158,15 @@ export interface CruxRunMetadata {
  * Complete Crux Score output for a single run.
  */
 export interface CruxScore {
-  metrics_version: "1.0" | "1.1" | "1.2" | "1.3";
+  /**
+   * Metric-spec version this result was computed against.
+   *
+   * 1.4-1.6 exist in published records because `benchmarks/context/run_matrix.py`
+   * stamps its own value, ahead of anything the package implements or METRICS.md
+   * documents. They are listed here so the type describes what is actually in the
+   * corpus rather than what it ought to contain; see METRICS.md Appendix B.
+   */
+  metrics_version: "1.0" | "1.1" | "1.2" | "1.3" | "1.4" | "1.5" | "1.6";
   fundamentals: CruxFundamentals;
   derived: CruxDerived;
   composite: CruxComposite;

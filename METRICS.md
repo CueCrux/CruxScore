@@ -346,3 +346,15 @@ To add a metric:
 | 1.0 | 2026-03-26 | Initial publication of the canonical core metric set. |
 | 1.1 | 2026-03-29 | Extension: +5 fundamentals (I6 Temporal Accuracy, I7 Supersession Accuracy, I8 Abstention Precision, I9 Retrieval Recall, K4 Cross-Session Synthesis), +2 derived (Q5 Abstention Quality, V4 Retrieval Efficiency). Motivated by memory benchmark ability-coverage gaps. No v1.0 formula changes. |
 | 1.2 | 2026-03-31 | Extension: +2 fundamentals (I10 Proposition Recall, I11 Contradiction Rate), +1 derived (Q6 Proposition Quality). Enables proposition-level partial credit for model-vs-model comparison. No v1.0/v1.1 formula changes. |
+| 1.3 | — | **Implemented, undocumented.** `src/types.ts` carries v1.3 extension fields (I_provenance, I_premise_rejection, K_novel_synthesis) but no changelog entry was written. The fields are live; this row records the gap rather than inventing the history. |
+| 1.4–1.6 | — | **Emitted, not implemented.** `benchmarks/context/run_matrix.py` stamps `metrics_version: "1.6"` on published records (and older records carry `"1.5"`), ahead of anything the package implements. No fundamentals or derived metrics were added under these numbers. |
+
+> **Known drift.** `computeCruxScore` stamps `"1.2"` — the highest version the reference
+> implementation actually implements. Records in `public-data/context/` carry `"1.5"` and
+> `"1.6"` because the Python suite sets the field itself. The numbers are therefore not
+> comparable as versions, and `metrics_version` on a Context record does not mean what it
+> means on a package-computed one.
+>
+> This is recorded, not silently corrected: rewriting the field on published records would
+> restate history. The fix is for the Context suite to stop stamping its own version and
+> re-run, at which point its records carry the package value like every other suite.

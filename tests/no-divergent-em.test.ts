@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { computeCruxScore } from "../src/index.js";
 
 /**
  * Architectural guard: Effective Minutes has exactly one implementation.
@@ -82,5 +83,23 @@ describe("Em has one implementation", () => {
   it("keeps the canonical implementation in src/score.ts", () => {
     const score = readFileSync(join(ROOT, "src", "score.ts"), "utf8");
     expect(score).toMatch(/export\s+function\s+computeCruxScore\b/);
+  });
+});
+
+describe("metrics_version is documented", () => {
+  it("stamps a version that appears in the METRICS.md changelog", () => {
+    // The package must never publish a version number the spec has no row for.
+    // Suites stamping their own value is tracked as known drift in Appendix B.
+    const stamped = computeCruxScore({
+      T_orient_s: 1, T_task_s: 10, T_human_s: 600,
+      R_decision: 1, R_constraint: 1, R_incident: null,
+      P_context: 1, A_coverage: null,
+      K_decision: 1, K_causal: null, K_checkpoint: null,
+      S_gate: 1, S_detect: 1, S_stale: null,
+      C_tokens_usd: 0, N_tools: 0, N_turns: 1, N_corrections: 0,
+    }).metrics_version;
+
+    const spec = readFileSync(join(ROOT, "METRICS.md"), "utf8");
+    expect(spec).toMatch(new RegExp(`^\\|\\s*${stamped.replace(".", "\\.")}\\s*\\|`, "m"));
   });
 });
