@@ -19,7 +19,7 @@ import {
 } from "./scoring/floor-rubric.js";
 import type { FloorScore, FloorObjectiveResult, FloorEvidenceResult, FloorWipeResult } from "./scoring/floor-rubric.js";
 import { analyseProgression, buildLeaderboard, formatLeaderboard } from "./scoring/aggregate.js";
-import { computeCruxScore } from "./scoring/crux-integration.js";
+import { scoreTopFloorRun } from "./scoring/crux-integration.js";
 import type { FloorBlueprint, CorpusDocument } from "./generators/document-factory.js";
 import { executeFloor, type FloorExecutionOptions } from "./lib/orchestrator.js";
 import {
@@ -62,13 +62,17 @@ interface FloorRunResult {
   turnsUsed: number;
   tokensUsed: number;
   durationMs: number;
+  /** Tool calls made on this floor — feeds N_tools. */
+  toolCalls: number;
+  /** Latency of the agent's first turn, ms. Null if no turns ran. Feeds T_orient_s. */
+  firstActionMs: number | null;
 }
 
 interface RunResult {
   manifest: RunManifest;
   floorResults: FloorRunResult[];
   aggregate: ReturnType<typeof aggregateScores>;
-  crux: ReturnType<typeof computeCruxScore>;
+  scored: ReturnType<typeof scoreTopFloorRun>;
   progression: ReturnType<typeof analyseProgression>;
   completedAt: string;
 }
@@ -277,6 +281,8 @@ async function executeFloorRange(
       turnsUsed,
       tokensUsed,
       durationMs: Date.now() - startMs,
+      toolCalls: session.turns.reduce((s, t) => s + t.toolCalls.length, 0),
+      firstActionMs: session.turns.length > 0 ? session.turns[0].latencyMs : null,
     });
   }
 
@@ -425,7 +431,18 @@ if (floorResults.length === 0) {
 const floorScores = floorResults.map((r) => r.score);
 const aggregate = aggregateScores(floorScores);
 const cruxMappings = mapToCruxFundamentals(floorScores, aggregate);
-const crux = computeCruxScore(cruxMappings);
+const scored = scoreTopFloorRun(cruxMappings, {
+  taskSeconds: floorResults.reduce((s, r) => s + r.durationMs, 0) / 1000,
+  orientSeconds:
+    floorResults[0]?.firstActionMs != null ? floorResults[0].firstActionMs / 1000 : null,
+  // Supplied by the difficulty-tier ladder (M1). Null until then, which makes
+  // the package return Cx_em: null rather than inventing a baseline.
+  humanSeconds: null,
+  toolCalls: floorResults.reduce((s, r) => s + r.toolCalls, 0),
+  turns: floorResults.reduce((s, r) => s + r.turnsUsed, 0),
+  costUsd: 0, // orchestrator does not estimate cost per model yet
+});
+const { rubric, crux } = scored;
 const progression = analyseProgression(floorScores);
 
 // Print
@@ -438,14 +455,29 @@ console.log(`  Cumulative score: ${aggregate.cumulativeScore}`);
 console.log(`  Efficiency: ${aggregate.efficiency.toFixed(6)}`);
 console.log(`  Resilience: ${aggregate.resilience.toFixed(3)}`);
 
-console.log("\n--- ScoreCrux Composite ---");
-console.log(`  Composite: ${crux.composite.toFixed(4)}`);
-console.log(`  Safety gated: ${crux.safetyGated}`);
+console.log("\n--- Floor Rubric (benchmark-local) ---");
+console.log(`  Rubric score: ${rubric.rubricScore.toFixed(4)}`);
+console.log(`  Safety gated: ${rubric.safetyGated}`);
 if (manifest.verbose) {
   console.log("  Breakdown:");
-  for (const b of crux.breakdown) {
+  for (const b of rubric.breakdown) {
     console.log(`    ${b.fundamental}: ${b.raw.toFixed(3)} x ${b.weight} = ${b.weighted.toFixed(4)}`);
   }
+}
+
+console.log("\n--- ScoreCrux Composite (canonical) ---");
+console.log(
+  `  Cx_em: ${
+    crux.composite.Cx_em === null
+      ? "null (no T_human baseline — declare a difficulty tier)"
+      : `${crux.composite.Cx_em} Em`
+  }`,
+);
+console.log(`  metrics_version: ${crux.metrics_version}`);
+if (manifest.verbose) {
+  console.log(`  Q_info:       ${crux.derived.Q_info ?? "null"}`);
+  console.log(`  Q_context:    ${crux.derived.Q_context ?? "null"}`);
+  console.log(`  Q_continuity: ${crux.derived.Q_continuity ?? "null"}`);
 }
 
 if (progression.difficultyCliff !== null) {
@@ -493,7 +525,7 @@ const result: RunResult = {
   manifest,
   floorResults,
   aggregate,
-  crux,
+  scored,
   progression,
   completedAt: new Date().toISOString(),
 };
