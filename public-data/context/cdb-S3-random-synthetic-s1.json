@@ -2,7 +2,7 @@
   "id": "cdb-S3-random-synthetic-s1",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Cross-session continuity",
+  "benchmark_name": "Context Dependence — Cross-session continuity",
   "section": "S3",
   "section_hypothesis": "high-lift",
   "backend": "random",
@@ -15,16 +15,16 @@
   "seed": 1,
   "n_probes": 3,
   "correct": 0,
-  "recall": 0.0,
+  "recall": 0,
   "delta_vs_none": 0,
   "delta_vs_vendor_native": -3,
   "mcnemar_vs_none": {
     "b": 0,
     "c": 0
   },
-  "cx_em": 0.0,
+  "cx_em": 0,
   "s_gate": 1,
-  "c_tokens_usd": 0.0,
+  "c_tokens_usd": 0,
   "submitter": "Myles Bryning",
   "organization": "CueCrux Labs",
   "githubLogin": "CueCrux-Myles",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "7f3e5dd29809aa5df498cc4e963608f6ab9a821c7a569d79caeda3d7b11284e0",
-  "cost_basis": "measured"
+  "cost_basis": "measured",
+  "rig": {
+    "model": "synthetic",
+    "memory_backend": "random",
+    "effort_tier": null
+  }
 }

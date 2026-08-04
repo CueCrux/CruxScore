@@ -31,5 +31,10 @@
   },
   "date": "2026-03-27",
   "metrics_version": "1.5",
-  "submittedAt": "2026-04-14T19:00:38.123Z"
+  "submittedAt": "2026-04-14T19:00:38.123Z",
+  "rig": {
+    "model": "gpt-5.4",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

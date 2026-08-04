@@ -2,7 +2,7 @@
   "id": "cdb-S8-compaction-claude-haiku-4-5-s1-v11",
   "type": "context",
   "suite_version": "CDB-v1.1",
-  "benchmark_name": "Context Dependence \u2014 Provenance / trust",
+  "benchmark_name": "Context Dependence — Provenance / trust",
   "section": "S8",
   "section_hypothesis": "provenance-earns-tokens",
   "scored": true,
@@ -18,14 +18,14 @@
   "seed": 1,
   "n_probes": 20,
   "correct": 0,
-  "recall": 0.0,
+  "recall": 0,
   "delta_vs_none": -5,
   "delta_vs_vendor_native": -5,
   "mcnemar_vs_none": {
     "b": 0,
     "c": 5
   },
-  "cx_em": 0.0,
+  "cx_em": 0,
   "s_gate": 1,
   "c_tokens_usd": 0.362085,
   "probes": [
@@ -192,7 +192,7 @@
   ],
   "context_tokens": 333,
   "context_tokens_method": "char4-estimate",
-  "correct_per_1k_ctx": 0.0,
+  "correct_per_1k_ctx": 0,
   "latency_ms": 178605,
   "submitter": "Myles Bryning",
   "organization": "CueCrux Labs",
@@ -203,5 +203,10 @@
   "cost_basis": "measured",
   "date": "2026-07-03",
   "metrics_version": "1.6",
-  "submittedAt": "2026-07-03T00:00:00.000Z"
+  "submittedAt": "2026-07-03T00:00:00.000Z",
+  "rig": {
+    "model": "claude-haiku-4-5",
+    "memory_backend": "compaction",
+    "effort_tier": null
+  }
 }

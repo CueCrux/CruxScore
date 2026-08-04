@@ -20,8 +20,19 @@ import {
 import type { FloorScore, FloorObjectiveResult, FloorEvidenceResult, FloorWipeResult } from "./scoring/floor-rubric.js";
 import { analyseProgression, buildLeaderboard, formatLeaderboard } from "./scoring/aggregate.js";
 import { scoreTopFloorRun } from "./scoring/crux-integration.js";
-import { deriveTier, tierToHumanSeconds } from "../../src/index.js";
-import type { DifficultyTier, TierDerivationParams } from "../../src/index.js";
+import {
+  deriveTier,
+  tierToHumanSeconds,
+  isEffortTier,
+  EFFORT_TIERS,
+  backendForArm,
+} from "../../src/index.js";
+import type {
+  DifficultyTier,
+  TierDerivationParams,
+  EffortTier,
+  Rig,
+} from "../../src/index.js";
 import type { FloorBlueprint, CorpusDocument } from "./generators/document-factory.js";
 import { executeFloor, type FloorExecutionOptions } from "./lib/orchestrator.js";
 import {
@@ -48,6 +59,8 @@ interface RunManifest {
   floors: number[];
   arm: Arm;
   model: string;
+  /** Declared reasoning effort. Null when not declared — never inferred. */
+  effortTier: EffortTier | null;
   maxTurns: number;
   dryRun: boolean;
   verbose: boolean;
@@ -72,6 +85,8 @@ interface FloorRunResult {
 
 interface RunResult {
   manifest: RunManifest;
+  /** Rig identity — what the board ranks on. */
+  rig: Rig;
   floorResults: FloorRunResult[];
   aggregate: ReturnType<typeof aggregateScores>;
   scored: ReturnType<typeof scoreTopFloorRun>;
@@ -101,10 +116,20 @@ function parseArgs(argv: string[]): RunManifest {
     floors = [Number(floorStr)];
   }
 
+  // Effort is part of the rig identity, so an undeclared effort stays null
+  // rather than defaulting to a tier the run did not actually use.
+  const effortRaw = get("--effort", "");
+  if (effortRaw && !isEffortTier(effortRaw)) {
+    throw new Error(
+      `--effort must be one of ${EFFORT_TIERS.join(", ")}; got ${JSON.stringify(effortRaw)}`,
+    );
+  }
+
   return {
     floors,
     arm: get("--arm", "C0") as Arm,
     model: get("--model", "claude-sonnet-4-20250514"),
+    effortTier: effortRaw ? (effortRaw as EffortTier) : null,
     maxTurns: Number(get("--max-turns", "100")),
     dryRun: has("--dry-run"),
     verbose: has("--verbose"),
@@ -582,6 +607,13 @@ if (save) {
 mkdirSync(manifest.output, { recursive: true });
 const result: RunResult = {
   manifest,
+  rig: {
+    model: manifest.model,
+    // Arms are a preset over the rig's memory axis; an unrecognised arm must
+    // not silently become "none".
+    memory_backend: backendForArm(manifest.arm) ?? "unknown",
+    effort_tier: manifest.effortTier,
+  },
   floorResults,
   aggregate,
   scored,

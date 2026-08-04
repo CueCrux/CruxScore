@@ -73,5 +73,10 @@
   "estimatedCostUsd": 1.3239100000000001,
   "durationMs": 233143,
   "date": "2026-07-16",
-  "submittedAt": "2026-07-16T12:40:00.822Z"
+  "submittedAt": "2026-07-16T12:40:00.822Z",
+  "rig": {
+    "model": "claude-fable-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

@@ -19,5 +19,10 @@
   "correct": "1.00 both arms (48 cells)",
   "measured_by": "cuecrux",
   "run_id": "ponytail-replay-fable-5-n2-20260716-140404",
-  "date": "2026-07-16"
+  "date": "2026-07-16",
+  "rig": {
+    "model": "claude-fable-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

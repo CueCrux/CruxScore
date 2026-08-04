@@ -28,5 +28,10 @@
   },
   "date": "2026-04-11",
   "metrics_version": "1.5",
-  "submittedAt": "2026-04-14T19:11:10.729Z"
+  "submittedAt": "2026-04-14T19:11:10.729Z",
+  "rig": {
+    "model": "claude-opus-4-6",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

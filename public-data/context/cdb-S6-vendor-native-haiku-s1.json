@@ -2,7 +2,7 @@
   "id": "cdb-S6-vendor-native-haiku-s1",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Scale / needle",
+  "benchmark_name": "Context Dependence — Scale / needle",
   "section": "S6",
   "section_hypothesis": "retrieval-vs-stuffing",
   "backend": "vendor-native",
@@ -15,14 +15,14 @@
   "seed": 1,
   "n_probes": 3,
   "correct": 3,
-  "recall": 1.0,
+  "recall": 1,
   "delta_vs_none": 3,
   "delta_vs_vendor_native": 0,
   "mcnemar_vs_none": {
     "b": 3,
     "c": 0
   },
-  "cx_em": 15.0,
+  "cx_em": 15,
   "s_gate": 1,
   "c_tokens_usd": null,
   "submitter": "Myles Bryning",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "159ce658b7c890d67705184997b6bb871739e0b3877ce498d312e76d3e78ac0d",
-  "cost_basis": "unmeasured-subagent"
+  "cost_basis": "unmeasured-subagent",
+  "rig": {
+    "model": "haiku",
+    "memory_backend": "vendor-native",
+    "effort_tier": null
+  }
 }

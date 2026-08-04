@@ -73,5 +73,10 @@
   "estimatedCostUsd": 0.0099436,
   "durationMs": 19764,
   "date": "2026-04-19",
-  "submittedAt": "2026-04-19T00:20:49.110Z"
+  "submittedAt": "2026-04-19T00:20:49.110Z",
+  "rig": {
+    "model": "gpt-5.4-mini",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

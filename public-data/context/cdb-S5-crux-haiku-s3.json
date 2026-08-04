@@ -2,7 +2,7 @@
   "id": "cdb-S5-crux-haiku-s3",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Supersession (control)",
+  "benchmark_name": "Context Dependence — Supersession (control)",
   "section": "S5",
   "section_hypothesis": "naive-fails-control",
   "backend": "crux",
@@ -15,14 +15,14 @@
   "seed": 3,
   "n_probes": 3,
   "correct": 3,
-  "recall": 1.0,
+  "recall": 1,
   "delta_vs_none": 3,
   "delta_vs_vendor_native": 2,
   "mcnemar_vs_none": {
     "b": 3,
     "c": 0
   },
-  "cx_em": 15.0,
+  "cx_em": 15,
   "s_gate": 1,
   "c_tokens_usd": null,
   "submitter": "Myles Bryning",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "4a8f34c02ca45290d130e608095cd7e31093d7c66eaf90991673383618eb5183",
-  "cost_basis": "unmeasured-subagent"
+  "cost_basis": "unmeasured-subagent",
+  "rig": {
+    "model": "haiku",
+    "memory_backend": "crux",
+    "effort_tier": null
+  }
 }

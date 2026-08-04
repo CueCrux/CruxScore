@@ -2,7 +2,7 @@
   "id": "cdb-S4-none-claude-sonnet-4-6-s1",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Causal / why-chains",
+  "benchmark_name": "Context Dependence — Causal / why-chains",
   "section": "S4",
   "section_hypothesis": "high-lift",
   "backend": "none",
@@ -22,7 +22,7 @@
     "b": 0,
     "c": 0
   },
-  "cx_em": 10.0,
+  "cx_em": 10,
   "s_gate": 1,
   "c_tokens_usd": 0.14060925,
   "submitter": "Myles Bryning",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "8f97c0b3e2f10eb61cefdc077958267da980828bb0c0c974e6f61d7f850e6616",
-  "cost_basis": "measured"
+  "cost_basis": "measured",
+  "rig": {
+    "model": "claude-sonnet-4-6",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

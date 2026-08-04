@@ -22,6 +22,17 @@ export {
   deriveTier,
 } from "./tiers.js";
 export type { DifficultyTier, TierDerivationParams } from "./tiers.js";
+export {
+  EFFORT_TIERS,
+  isEffortTier,
+  VENDOR_NATIVE,
+  rigKey,
+  baselineKey,
+  computeLift,
+  ARM_TO_BACKEND,
+  backendForArm,
+} from "./rig.js";
+export type { EffortTier, Rig, RigResult } from "./rig.js";
 export { computeDerived } from "./derived.js";
 export { computeComposite } from "./composite.js";
 export { computeCruxScore } from "./score.js";

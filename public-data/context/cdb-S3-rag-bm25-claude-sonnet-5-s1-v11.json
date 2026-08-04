@@ -2,7 +2,7 @@
   "id": "cdb-S3-rag-bm25-claude-sonnet-5-s1-v11",
   "type": "context",
   "suite_version": "CDB-v1.1",
-  "benchmark_name": "Context Dependence \u2014 Cross-session continuity",
+  "benchmark_name": "Context Dependence — Cross-session continuity",
   "section": "S3",
   "section_hypothesis": "high-lift",
   "scored": true,
@@ -29,7 +29,7 @@
   "probes": [
     {
       "id": "P1",
-      "question": "Continuing the prior session \u2014 internal service codename decided by the prior team?",
+      "question": "Continuing the prior session — internal service codename decided by the prior team?",
       "gold": "Project Verdigris",
       "gold_pattern": "verdigris",
       "answer": "Project Verdigris",
@@ -37,7 +37,7 @@
     },
     {
       "id": "P2",
-      "question": "Continuing the prior session \u2014 internal port assigned (no derivable pattern)?",
+      "question": "Continuing the prior session — internal port assigned (no derivable pattern)?",
       "gold": "9980",
       "gold_pattern": "(?<!\\d)9980(?!\\d)",
       "answer": "9980",
@@ -45,7 +45,7 @@
     },
     {
       "id": "P3",
-      "question": "Continuing the prior session \u2014 log-line prefix standardised on?",
+      "question": "Continuing the prior session — log-line prefix standardised on?",
       "gold": "VERDI",
       "gold_pattern": "VERDI",
       "answer": "VERDI",
@@ -53,7 +53,7 @@
     },
     {
       "id": "P4",
-      "question": "Continuing the prior session \u2014 on-call rotation name agreed?",
+      "question": "Continuing the prior session — on-call rotation name agreed?",
       "gold": "tide-callers",
       "gold_pattern": "tide[- ]?callers",
       "answer": "tide-callers",
@@ -61,7 +61,7 @@
     },
     {
       "id": "P5",
-      "question": "Continuing the prior session \u2014 feature flag gating the new path?",
+      "question": "Continuing the prior session — feature flag gating the new path?",
       "gold": "ff_verdigris_v5",
       "gold_pattern": "ff_verdigris_v5",
       "answer": "ff_verdigris_v5",
@@ -69,7 +69,7 @@
     },
     {
       "id": "P6",
-      "question": "Continuing the prior session \u2014 agreed monthly error budget (percent)?",
+      "question": "Continuing the prior session — agreed monthly error budget (percent)?",
       "gold": "2.5",
       "gold_pattern": "(?<!\\d)2\\.5(?!\\d)",
       "answer": "2.5",
@@ -77,7 +77,7 @@
     },
     {
       "id": "P7",
-      "question": "Continuing the prior session \u2014 cache TTL in seconds configured?",
+      "question": "Continuing the prior session — cache TTL in seconds configured?",
       "gold": "722",
       "gold_pattern": "(?<!\\d)722(?!\\d)",
       "answer": "722",
@@ -85,7 +85,7 @@
     },
     {
       "id": "P8",
-      "question": "Continuing the prior session \u2014 number of shards provisioned?",
+      "question": "Continuing the prior session — number of shards provisioned?",
       "gold": "31",
       "gold_pattern": "(?<!\\d)31(?!\\d)",
       "answer": "31",
@@ -93,7 +93,7 @@
     },
     {
       "id": "P9",
-      "question": "Continuing the prior session \u2014 internal API version pinned?",
+      "question": "Continuing the prior session — internal API version pinned?",
       "gold": "v9",
       "gold_pattern": "(?<!\\d)v9(?!\\d)",
       "answer": "v9",
@@ -101,7 +101,7 @@
     },
     {
       "id": "P10",
-      "question": "Continuing the prior session \u2014 maximum retry attempts set?",
+      "question": "Continuing the prior session — maximum retry attempts set?",
       "gold": "5",
       "gold_pattern": "(?<!\\d)5(?!\\d)",
       "answer": "5",
@@ -109,7 +109,7 @@
     },
     {
       "id": "P11",
-      "question": "Continuing the prior session \u2014 primary region code chosen?",
+      "question": "Continuing the prior session — primary region code chosen?",
       "gold": "sa-salt-4",
       "gold_pattern": "sa\\-salt\\-4",
       "answer": "sa-salt-4",
@@ -117,7 +117,7 @@
     },
     {
       "id": "P12",
-      "question": "Continuing the prior session \u2014 rate limit in requests-per-second?",
+      "question": "Continuing the prior session — rate limit in requests-per-second?",
       "gold": "1457",
       "gold_pattern": "(?<!\\d)1457(?!\\d)",
       "answer": "1457",
@@ -125,7 +125,7 @@
     },
     {
       "id": "P13",
-      "question": "Continuing the prior session \u2014 gRPC port assigned?",
+      "question": "Continuing the prior session — gRPC port assigned?",
       "gold": "6115",
       "gold_pattern": "(?<!\\d)6115(?!\\d)",
       "answer": "6115",
@@ -133,7 +133,7 @@
     },
     {
       "id": "P14",
-      "question": "Continuing the prior session \u2014 distributed-lock TTL in milliseconds?",
+      "question": "Continuing the prior session — distributed-lock TTL in milliseconds?",
       "gold": "6775",
       "gold_pattern": "(?<!\\d)6775(?!\\d)",
       "answer": "6775",
@@ -141,7 +141,7 @@
     },
     {
       "id": "P15",
-      "question": "Continuing the prior session \u2014 canary rollout percentage?",
+      "question": "Continuing the prior session — canary rollout percentage?",
       "gold": "10",
       "gold_pattern": "(?<!\\d)10(?!\\d)",
       "answer": "10",
@@ -149,7 +149,7 @@
     },
     {
       "id": "P16",
-      "question": "Continuing the prior session \u2014 metrics namespace prefix?",
+      "question": "Continuing the prior session — metrics namespace prefix?",
       "gold": "verdigris_harbor",
       "gold_pattern": "verdigris_harbor",
       "answer": "verdigris_harbor",
@@ -157,7 +157,7 @@
     },
     {
       "id": "P17",
-      "question": "Continuing the prior session \u2014 backup bucket name?",
+      "question": "Continuing the prior session — backup bucket name?",
       "gold": "halcyon-foundry-bkp",
       "gold_pattern": "halcyon\\-foundry\\-bkp",
       "answer": "halcyon-foundry-bkp",
@@ -165,7 +165,7 @@
     },
     {
       "id": "P18",
-      "question": "Continuing the prior session \u2014 work queue name?",
+      "question": "Continuing the prior session — work queue name?",
       "gold": "tessellate.harbor.q",
       "gold_pattern": "tessellate\\.harbor\\.q",
       "answer": "tessellate.harbor.q",
@@ -173,7 +173,7 @@
     },
     {
       "id": "P19",
-      "question": "Continuing the prior session \u2014 alert channel decided?",
+      "question": "Continuing the prior session — alert channel decided?",
       "gold": "#verdigris-relay",
       "gold_pattern": "\\#verdigris\\-relay",
       "answer": "#verdigris-relay",
@@ -181,7 +181,7 @@
     },
     {
       "id": "P20",
-      "question": "Continuing the prior session \u2014 approved deploy window (start time)?",
+      "question": "Continuing the prior session — approved deploy window (start time)?",
       "gold": "02:00-04:00 UTC",
       "gold_pattern": "02:00\\-04:00",
       "answer": "02:00 UTC",
@@ -203,5 +203,10 @@
   "metrics_version": "1.6",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "axis": null,
-  "in_composite": true
+  "in_composite": true,
+  "rig": {
+    "model": "claude-sonnet-5",
+    "memory_backend": "rag-bm25",
+    "effort_tier": null
+  }
 }

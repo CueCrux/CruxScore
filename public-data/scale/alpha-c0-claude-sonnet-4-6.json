@@ -31,5 +31,10 @@
   },
   "date": "2026-03-26",
   "metrics_version": "1.5",
-  "submittedAt": "2026-04-14T19:04:51.701Z"
+  "submittedAt": "2026-04-14T19:04:51.701Z",
+  "rig": {
+    "model": "claude-sonnet-4-6",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

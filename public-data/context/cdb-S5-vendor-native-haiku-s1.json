@@ -2,7 +2,7 @@
   "id": "cdb-S5-vendor-native-haiku-s1",
   "type": "context",
   "suite_version": "CDB-v1",
-  "benchmark_name": "Context Dependence \u2014 Supersession (control)",
+  "benchmark_name": "Context Dependence — Supersession (control)",
   "section": "S5",
   "section_hypothesis": "naive-fails-control",
   "backend": "vendor-native",
@@ -22,7 +22,7 @@
     "b": 1,
     "c": 0
   },
-  "cx_em": 5.0,
+  "cx_em": 5,
   "s_gate": 1,
   "c_tokens_usd": null,
   "submitter": "Myles Bryning",
@@ -33,5 +33,10 @@
   "metrics_version": "1.5",
   "submittedAt": "2026-07-03T00:00:00.000Z",
   "gold_sha256": "ab84b8faa4cae58016bbcb5f3da2e0b6219812c6533bbc3e60c76ce9215a74af",
-  "cost_basis": "unmeasured-subagent"
+  "cost_basis": "unmeasured-subagent",
+  "rig": {
+    "model": "haiku",
+    "memory_backend": "vendor-native",
+    "effort_tier": null
+  }
 }

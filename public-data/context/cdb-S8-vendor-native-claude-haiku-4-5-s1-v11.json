@@ -2,7 +2,7 @@
   "id": "cdb-S8-vendor-native-claude-haiku-4-5-s1-v11",
   "type": "context",
   "suite_version": "CDB-v1.1",
-  "benchmark_name": "Context Dependence \u2014 Provenance / trust",
+  "benchmark_name": "Context Dependence — Provenance / trust",
   "section": "S8",
   "section_hypothesis": "provenance-earns-tokens",
   "scored": true,
@@ -203,5 +203,10 @@
   "cost_basis": "measured",
   "date": "2026-07-03",
   "metrics_version": "1.6",
-  "submittedAt": "2026-07-03T00:00:00.000Z"
+  "submittedAt": "2026-07-03T00:00:00.000Z",
+  "rig": {
+    "model": "claude-haiku-4-5",
+    "memory_backend": "vendor-native",
+    "effort_tier": null
+  }
 }

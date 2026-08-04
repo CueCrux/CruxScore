@@ -12,12 +12,17 @@
   "arm_detail": "plugin v4.8.4, our replay",
   "model": "claude-sonnet-4-6",
   "n": 2,
-  "loc_delta_pct": -48.0,
+  "loc_delta_pct": -48,
   "tokens_delta_pct": -38.6,
-  "cost_delta_pct": -30.0,
+  "cost_delta_pct": -30,
   "time_delta_pct": -34.7,
   "correct": "1.00 both arms (48 cells, 1 degraded telemetry cell)",
   "measured_by": "cuecrux",
   "run_id": "ponytail-replay-sonnet-4-6-n2-20260716-133637",
-  "date": "2026-07-16"
+  "date": "2026-07-16",
+  "rig": {
+    "model": "claude-sonnet-4-6",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

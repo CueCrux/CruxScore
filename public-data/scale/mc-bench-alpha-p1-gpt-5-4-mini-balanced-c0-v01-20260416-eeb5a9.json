@@ -33,5 +33,10 @@
   },
   "date": "2026-04-16",
   "metrics_version": "1.3",
-  "submittedAt": "2026-04-16T22:31:11.306Z"
+  "submittedAt": "2026-04-16T22:31:11.306Z",
+  "rig": {
+    "model": "gpt-5.4-mini",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

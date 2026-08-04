@@ -28,5 +28,10 @@
   },
   "date": "2026-04-14",
   "metrics_version": "1.5",
-  "submittedAt": "2026-04-14T19:10:07.861Z"
+  "submittedAt": "2026-04-14T19:10:07.861Z",
+  "rig": {
+    "model": "claude-haiku-4-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }

@@ -95,5 +95,10 @@
   "durationMs": 171367,
   "cruxComposite": 0.853963969677336,
   "date": "2026-07-24",
-  "submittedAt": "2026-07-24T21:17:27.426Z"
+  "submittedAt": "2026-07-24T21:17:27.426Z",
+  "rig": {
+    "model": "claude-sonnet-5",
+    "memory_backend": "none",
+    "effort_tier": null
+  }
 }
