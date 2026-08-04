@@ -20,6 +20,8 @@ import {
 import type { FloorScore, FloorObjectiveResult, FloorEvidenceResult, FloorWipeResult } from "./scoring/floor-rubric.js";
 import { analyseProgression, buildLeaderboard, formatLeaderboard } from "./scoring/aggregate.js";
 import { scoreTopFloorRun } from "./scoring/crux-integration.js";
+import { deriveTier, tierToHumanSeconds } from "../../src/index.js";
+import type { DifficultyTier, TierDerivationParams } from "../../src/index.js";
 import type { FloorBlueprint, CorpusDocument } from "./generators/document-factory.js";
 import { executeFloor, type FloorExecutionOptions } from "./lib/orchestrator.js";
 import {
@@ -122,6 +124,48 @@ function loadFloorBlueprint(floorNum: number): FloorBlueprint | null {
   const manifestPath = resolve(dir, "manifest.json");
   if (!existsSync(manifestPath)) return null;
   return JSON.parse(readFileSync(manifestPath, "utf-8")) as FloorBlueprint;
+}
+
+/**
+ * Difficulty tier for a floor, derived from its blueprint parameters.
+ *
+ * Derived, never hand-assigned: a hand-assigned baseline is the same author
+ * discretion the ladder exists to remove. Note this is the ScoreCrux D-ladder
+ * (`difficulty_tier`), distinct from the blueprint's narrative
+ * `difficulty.tier` ("orientation", "intermediate", ...).
+ *
+ * Returns null when the blueprint is missing, so an absent floor produces a
+ * null baseline — and therefore `Cx_em: null` — rather than a fabricated one.
+ */
+function floorDifficultyTier(floorNum: number): DifficultyTier | null {
+  const blueprint = loadFloorBlueprint(floorNum) as
+    | (FloorBlueprint & { difficulty?: TierDerivationParams })
+    | null;
+  if (!blueprint?.difficulty) return null;
+
+  return deriveTier({
+    reasoningHops: blueprint.difficulty.reasoningHops,
+    requiresCoding: blueprint.difficulty.requiresCoding,
+    requiresMemoryRecovery: blueprint.difficulty.requiresMemoryRecovery,
+    requiresMultiSession: blueprint.difficulty.requiresMultiSession,
+  });
+}
+
+/**
+ * Human baseline for the floors attempted, in seconds.
+ *
+ * Summed across floors: a run that clears three floors replaced three floors'
+ * worth of expert work. Returns null if any floor's tier cannot be derived —
+ * a partial baseline would understate Em without saying so.
+ */
+function runHumanSeconds(floors: number[]): number | null {
+  let total = 0;
+  for (const floor of floors) {
+    const tier = floorDifficultyTier(floor);
+    if (tier === null) return null;
+    total += tierToHumanSeconds(tier);
+  }
+  return total;
 }
 
 function loadFloorCorpus(floorNum: number): CorpusDocument[] {
@@ -435,9 +479,10 @@ const scored = scoreTopFloorRun(cruxMappings, {
   taskSeconds: floorResults.reduce((s, r) => s + r.durationMs, 0) / 1000,
   orientSeconds:
     floorResults[0]?.firstActionMs != null ? floorResults[0].firstActionMs / 1000 : null,
-  // Supplied by the difficulty-tier ladder (M1). Null until then, which makes
-  // the package return Cx_em: null rather than inventing a baseline.
-  humanSeconds: null,
+  // From the difficulty-tier ladder. Null if any floor's tier cannot be
+  // derived, which makes the package return Cx_em: null rather than
+  // inventing a baseline.
+  humanSeconds: runHumanSeconds(floorResults.map((r) => r.floor)),
   toolCalls: floorResults.reduce((s, r) => s + r.toolCalls, 0),
   turns: floorResults.reduce((s, r) => s + r.turnsUsed, 0),
   costUsd: 0, // orchestrator does not estimate cost per model yet
@@ -474,6 +519,20 @@ console.log(
   }`,
 );
 console.log(`  metrics_version: ${crux.metrics_version}`);
+console.log(
+  `  Difficulty tiers: ${
+    floorResults
+      .map((r) => `F${r.floor}=${floorDifficultyTier(r.floor) ?? "?"}`)
+      .join(" ") || "none"
+  }`,
+);
+console.log(
+  `  T_human: ${
+    crux.fundamentals.T_human_s === null
+      ? "null"
+      : `${(crux.fundamentals.T_human_s / 60).toFixed(0)} min (PROVISIONAL anchors)`
+  }`,
+);
 if (manifest.verbose) {
   console.log(`  Q_info:       ${crux.derived.Q_info ?? "null"}`);
   console.log(`  Q_context:    ${crux.derived.Q_context ?? "null"}`);
