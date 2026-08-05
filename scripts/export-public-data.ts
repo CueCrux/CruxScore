@@ -108,11 +108,37 @@ function isEmbargoed(submittedAt: string | undefined, embargoMs: number): boolea
   return Date.now() - t < embargoMs;
 }
 
+/** Context-token and cost fields, in the several spellings the suites use. */
+const CTX_TOKEN_FIELDS = ["context_tokens", "corpus_tokens"];
+const COST_FIELDS = ["c_tokens_usd", "estimatedCostUsd", "totalCostUsd"];
+
+function hasMeasure(record: any, fields: string[]): boolean {
+  return fields.some((f) => typeof record?.[f] === "number" && Number.isFinite(record[f]));
+}
+
+/**
+ * Whether a leaderboard row carries its token bill.
+ *
+ * A result with no recorded context-token count and cost cannot be ranked on
+ * Efficiency or compared on cost against anything else, so it occupies a row
+ * without supporting the claim the row makes.
+ *
+ * This must stay in step with `scripts/clean-uninstrumented.ts`. Without it the
+ * exporter reinstates on its next daily run exactly what that script removed,
+ * because the records are still present and publishable in the source store.
+ */
+function isInstrumented(record: any): boolean {
+  // Not a leaderboard row — scorecards, bundles, manifests are out of scope.
+  if (!record || typeof record !== "object" || !("rig" in record)) return true;
+  return hasMeasure(record, CTX_TOKEN_FIELDS) && hasMeasure(record, COST_FIELDS);
+}
+
 function isPublishable(record: any, embargoMs: number): boolean {
   if (record?.leaderboard_visible === false) return false;
   if (record?.fixture_tier === "practice") return false;
   if (record?.hidden === true) return false;
   if (record?.scope === "private") return false;
+  if (!isInstrumented(record)) return false;
   // `type === 'scale'` records use `date` (no `submittedAt`); accept either
   const when = record?.submittedAt ?? record?.updatedAt ?? record?.createdAt ?? record?.date;
   if (isEmbargoed(when, embargoMs)) return false;

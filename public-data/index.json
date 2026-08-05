@@ -4,19 +4,19 @@
   "embargoHours": 48,
   "surfaces": {
     "intelligence": {
-      "published": 41,
+      "published": 0,
       "embargoed": 0
     },
     "coding": {
-      "published": 12,
+      "published": 0,
       "embargoed": 0
     },
     "scale": {
-      "published": 141,
+      "published": 79,
       "embargoed": 0
     },
     "topfloor": {
-      "published": 3,
+      "published": 0,
       "embargoed": 0
     },
     "glassbox": {
@@ -24,7 +24,7 @@
       "embargoed": 0
     },
     "context": {
-      "published": 144,
+      "published": 82,
       "embargoed": 0
     },
     "pendingModels": {
@@ -52,5 +52,10 @@
       "token"
     ],
     "notes": "Pending model observations are aggregated to counts; per-observation submitter IDs and orgs are never published."
+  },
+  "cleaning": {
+    "rule": "either",
+    "removed": 186,
+    "note": "Records without both a context-token count and a measured cost were removed: a result with no token bill cannot be ranked on Efficiency or compared on cost."
   }
 }
