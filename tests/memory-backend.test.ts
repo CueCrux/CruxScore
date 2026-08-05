@@ -120,3 +120,19 @@ describe("LEGACY_ARM_MAP", () => {
     }
   });
 });
+
+describe("published taxonomy stays in step with the source", () => {
+  it("public-data/memory-backends.json matches src/memory-backend.ts", async () => {
+    // The site reads the JSON, not the package. If they drift, the boards
+    // describe backends by a definition nothing computes against.
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
+    const published = JSON.parse(
+      readFileSync(resolve(root, "public-data", "memory-backends.json"), "utf8"),
+    );
+    expect(published.baseline).toBe(BASELINE_BACKEND);
+    expect(published.backends).toEqual(MEMORY_BACKENDS);
+  });
+});

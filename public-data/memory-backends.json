@@ -1,0 +1,79 @@
+{
+  "generatedFrom": "src/memory-backend.ts",
+  "baseline": "vendor-native",
+  "note": "Canonical vocabulary for how an agent obtained its information. Replaces the per-suite treatment-arm labels, which were ambiguous across suites: 'C0' meant a bare model in Scale and full context-stuffing in Top Floor.",
+  "backends": {
+    "none": {
+      "id": "none",
+      "label": "None",
+      "description": "Bare model. No corpus, no tools — answers from training knowledge alone.",
+      "isBaseline": false,
+      "isControl": false,
+      "retrieval": false
+    },
+    "vendor-native": {
+      "id": "vendor-native",
+      "label": "Vendor-native",
+      "description": "The vendor's own context handling: the full corpus injected into the context window, no retrieval layer. O(N) tokens, unresolved history. This is the baseline every memory system is measured against.",
+      "isBaseline": true,
+      "isControl": false,
+      "retrieval": false
+    },
+    "raw-tools": {
+      "id": "raw-tools",
+      "label": "Raw tools",
+      "description": "Direct search/read tools with no memory abstraction — the agent retrieves on demand but nothing persists between sessions.",
+      "isBaseline": false,
+      "isControl": false,
+      "retrieval": true
+    },
+    "compaction": {
+      "id": "compaction",
+      "label": "Compaction",
+      "description": "Current-value-only summary. Reduced tokens, history discarded.",
+      "isBaseline": false,
+      "isControl": false,
+      "retrieval": false
+    },
+    "rag-bm25": {
+      "id": "rag-bm25",
+      "label": "RAG (BM25)",
+      "description": "In-process BM25 retrieval over the corpus. O(k) tokens.",
+      "isBaseline": false,
+      "isControl": false,
+      "retrieval": true
+    },
+    "sqlite-fts": {
+      "id": "sqlite-fts",
+      "label": "SQLite FTS",
+      "description": "SQLite FTS5 retrieval — the reference retrieval implementation.",
+      "isBaseline": false,
+      "isControl": false,
+      "retrieval": true
+    },
+    "crux": {
+      "id": "crux",
+      "label": "Crux",
+      "description": "Freshness-resolved daemon retrieval with persistent memory across sessions.",
+      "isBaseline": false,
+      "isControl": false,
+      "retrieval": true
+    },
+    "oracle": {
+      "id": "oracle",
+      "label": "Oracle (control)",
+      "description": "Synthetic perfect answers. The ceiling — bounds the scale, never ranked.",
+      "isBaseline": false,
+      "isControl": true,
+      "retrieval": false
+    },
+    "random": {
+      "id": "random",
+      "label": "Random (control)",
+      "description": "Synthetic wrong answers. The floor — bounds the scale, never ranked.",
+      "isBaseline": false,
+      "isControl": true,
+      "retrieval": false
+    }
+  }
+}
