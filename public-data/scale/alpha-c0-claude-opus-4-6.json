@@ -1,0 +1,32 @@
+{
+  "id": "alpha-c0-claude-opus-4-6",
+  "type": "scale",
+  "project": "alpha",
+  "benchmark_name": "Decision Recall (3-phase, single session)",
+  "model": "claude-opus-4-6",
+  "arm": "C0",
+  "arm_name": "Bare (no context, no tools)",
+  "agent": "claude-opus-4-6 (C0)",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "cx_em": 28.89,
+  "s_gate": 1,
+  "q_info": 0.875,
+  "core_recall": 0.875,
+  "needle_recall": null,
+  "overall_recall": 0.875,
+  "unsafe_actions": null,
+  "c_tokens_usd": 0.56,
+  "duration_s": 196,
+  "t_human_s": 4200,
+  "v_time": 21.4,
+  "corpus_tokens": 27118,
+  "corpus_docs": 3,
+  "memory_system": {
+    "used": false
+  },
+  "date": "2026-04-11",
+  "metrics_version": "1.5",
+  "submittedAt": "2026-04-14T19:11:10.323Z"
+}

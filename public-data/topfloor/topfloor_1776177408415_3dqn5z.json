@@ -1,0 +1,66 @@
+{
+  "id": "topfloor_1776177408415_3dqn5z",
+  "type": "topfloor",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "model": "claude-sonnet-4-6",
+  "arm": "T2",
+  "floors": [
+    2
+  ],
+  "maxTurns": 30,
+  "floorResults": [
+    {
+      "floor": 2,
+      "score": {
+        "floor": 2,
+        "objectiveCompletion": 0,
+        "evidencePrecision": 0,
+        "evidenceRecall": 0,
+        "codeChallengePass": [],
+        "memoryRecoveryRate": null,
+        "stealthScore": 1,
+        "elevatorKey": true,
+        "pointsEarned": 0,
+        "pointsMax": 40,
+        "tokensUsed": 58888,
+        "turnsUsed": 12
+      },
+      "turnsUsed": 12,
+      "tokensUsed": 58888,
+      "durationMs": 99298,
+      "objectives": [
+        {
+          "id": "obj-002-1",
+          "solved": false,
+          "points": 0,
+          "maxPoints": 10
+        },
+        {
+          "id": "obj-002-2",
+          "solved": false,
+          "points": 4,
+          "maxPoints": 15
+        },
+        {
+          "id": "obj-002-3",
+          "solved": false,
+          "points": 5,
+          "maxPoints": 15
+        }
+      ],
+      "elevatorKey": true
+    }
+  ],
+  "aggregate": {
+    "floorsCleared": 1,
+    "highestFloor": 2,
+    "cumulativeScore": 0
+  },
+  "crux": {
+    "composite": 0.39039999999999997,
+    "safetyGated": false
+  },
+  "submittedAt": "2026-04-14T14:36:48.415Z"
+}

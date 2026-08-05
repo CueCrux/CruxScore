@@ -1,0 +1,77 @@
+{
+  "id": "9864fc2c",
+  "type": "coding",
+  "runId": "9864fc2c",
+  "benchmarkVersion": "1.0",
+  "model": "gpt-4.1-mini",
+  "reportedModel": "gpt-4.1-mini-2025-04-14",
+  "apiBase": "https://api.openai.com",
+  "attribution": "verified",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.8043345201390986,
+  "testPassRate": 0.7633333333333333,
+  "qualityScore": 0.8466904657035471,
+  "designScore": 0.766,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8768636363636365,
+      "c1Score": 0.9350000000000002,
+      "c2Score": 0.9431818181818183,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 11,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9718255813953489,
+      "c1Score": 1,
+      "c2Score": 0.9709302325581397,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.8678472222222222,
+      "c1Score": 1,
+      "c2Score": 0.7652777777777777,
+      "c3Score": 0.75,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8581361607142857,
+      "c1Score": 0.9071428571428571,
+      "c2Score": 0.7140625,
+      "c3Score": 1,
+      "testsPassed": 9,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.44699999999999995,
+      "c1Score": 0.1,
+      "c2Score": 0.8400000000000001,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 5927,
+  "totalOutputTokens": 4413,
+  "estimatedCostUsd": 0.009431600000000002,
+  "durationMs": 35292,
+  "date": "2026-04-19",
+  "submittedAt": "2026-04-19T00:28:10.217Z"
+}

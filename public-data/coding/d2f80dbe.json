@@ -1,0 +1,77 @@
+{
+  "id": "d2f80dbe",
+  "type": "coding",
+  "runId": "d2f80dbe",
+  "benchmarkVersion": "1.0",
+  "model": "claude-sonnet-5",
+  "reportedModel": "claude-sonnet-5",
+  "apiBase": "http://100.75.64.43:10010",
+  "attribution": "first_party",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.7334602305422692,
+  "testPassRate": 0.5833333333333333,
+  "qualityScore": 0.949029230120769,
+  "designScore": 0.724,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8196329787234043,
+      "c1Score": 0.805,
+      "c2Score": 0.946808510638298,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 11,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9133255813953489,
+      "c1Score": 0.87,
+      "c2Score": 0.9709302325581397,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.503,
+      "c1Score": 0.1,
+      "c2Score": 1,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 0
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8810925925925925,
+      "c1Score": 0.87,
+      "c2Score": 0.8274074074074076,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.55025,
+      "c1Score": 0.20500000000000002,
+      "c2Score": 1,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 63345,
+  "totalOutputTokens": 19644,
+  "estimatedCostUsd": 0.484695,
+  "durationMs": 157452,
+  "date": "2026-07-17",
+  "submittedAt": "2026-07-17T00:43:44.383Z"
+}

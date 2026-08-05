@@ -1,0 +1,77 @@
+{
+  "id": "b42996fe",
+  "type": "coding",
+  "runId": "b42996fe",
+  "benchmarkVersion": "1.0",
+  "model": "claude-opus-4-8",
+  "reportedModel": "claude-opus-4-8",
+  "apiBase": "http://100.75.64.43:10010",
+  "attribution": "first_party",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.7854704319189467,
+  "testPassRate": 0.8,
+  "qualityScore": 0.8394869483398478,
+  "designScore": 0.8,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8488829787234043,
+      "c1Score": 0.87,
+      "c2Score": 0.946808510638298,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 12,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9133255813953489,
+      "c1Score": 0.87,
+      "c2Score": 0.9709302325581397,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.8275744680851065,
+      "c1Score": 0.87,
+      "c2Score": 0.7202127659574469,
+      "c3Score": 0.9200000000000002,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8387897196261682,
+      "c1Score": 0.87,
+      "c2Score": 0.7065420560747664,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.49877941176470586,
+      "c1Score": 0.20500000000000002,
+      "c2Score": 0.8529411764705883,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 35241,
+  "totalOutputTokens": 20421,
+  "estimatedCostUsd": 0.6867300000000001,
+  "durationMs": 224906,
+  "date": "2026-07-16",
+  "submittedAt": "2026-07-16T12:44:38.290Z"
+}

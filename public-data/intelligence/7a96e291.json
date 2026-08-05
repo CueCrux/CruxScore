@@ -1,0 +1,94 @@
+{
+  "id": "7a96e291",
+  "type": "intelligence",
+  "runId": "7a96e291",
+  "benchmarkVersion": "1.0",
+  "model": "gpt-5.4",
+  "reportedModel": "gpt-5.4-2026-03-05",
+  "apiBase": "https://api.openai.com",
+  "attribution": "verified",
+  "runMode": "closed_prompt_only",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "fullScaleIQ": 111,
+  "iqCILower": null,
+  "iqCIUpper": null,
+  "percentile": 80.4,
+  "classification": "High Average",
+  "categoryScores": [
+    {
+      "category": "A",
+      "label": "Deduction & Elimination",
+      "accuracy": 1,
+      "correctCount": 3,
+      "itemCount": 3
+    },
+    {
+      "category": "B",
+      "label": "Stateful Process Reasoning",
+      "accuracy": 0.6666666666666666,
+      "correctCount": 2,
+      "itemCount": 3
+    },
+    {
+      "category": "C",
+      "label": "Rule Application",
+      "accuracy": 0.3333333333333333,
+      "correctCount": 1,
+      "itemCount": 3
+    },
+    {
+      "category": "D",
+      "label": "Causal & Counterfactual",
+      "accuracy": 0.3333333333333333,
+      "correctCount": 1,
+      "itemCount": 3
+    },
+    {
+      "category": "E",
+      "label": "Abstraction & Transformation",
+      "accuracy": 1,
+      "correctCount": 3,
+      "itemCount": 3
+    },
+    {
+      "category": "F",
+      "label": "Planning Under Constraints",
+      "accuracy": 0.3333333333333333,
+      "correctCount": 1,
+      "itemCount": 3
+    }
+  ],
+  "factorScores": [
+    {
+      "factor": "Gc",
+      "factorLabel": "Comprehension-Knowledge",
+      "iqEquivalent": 89.3378055650066
+    },
+    {
+      "factor": "Gf",
+      "factorLabel": "Fluid Reasoning",
+      "iqEquivalent": 109.87279005470938
+    },
+    {
+      "factor": "Gs",
+      "factorLabel": "Processing Speed",
+      "iqEquivalent": 89.3378055650066
+    },
+    {
+      "factor": "Gwm",
+      "factorLabel": "Working Memory",
+      "iqEquivalent": 115.29703182110431
+    }
+  ],
+  "totalItems": 18,
+  "totalCorrect": 11,
+  "totalInputTokens": 4690,
+  "totalOutputTokens": 4746,
+  "estimatedCostUsd": 0.059185,
+  "durationMs": 75212,
+  "cruxComposite": 0.7338226029233268,
+  "date": "2026-04-17",
+  "submittedAt": "2026-04-17T21:28:44.114Z"
+}

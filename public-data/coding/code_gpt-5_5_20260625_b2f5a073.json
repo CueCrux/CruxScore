@@ -1,0 +1,77 @@
+{
+  "id": "code_gpt-5_5_20260625_b2f5a073",
+  "type": "coding",
+  "runId": "code_gpt-5.5_20260625_b2f5a073",
+  "benchmarkVersion": "1.0",
+  "model": "gpt-5.5",
+  "reportedModel": "gpt-5.5",
+  "apiBase": null,
+  "attribution": "first_party",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.7974347609575765,
+  "testPassRate": 0.7833333333333333,
+  "qualityScore": 0.8812421741645042,
+  "designScore": 0.8160000000000001,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.7933782051282051,
+      "c1Score": 0.805,
+      "c2Score": 0.8717948717948718,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 11,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9130833333333332,
+      "c1Score": 0.87,
+      "c2Score": 0.9702380952380953,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.905004854368932,
+      "c1Score": 0.87,
+      "c2Score": 0.895728155339806,
+      "c3Score": 1,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8898513513513513,
+      "c1Score": 0.87,
+      "c2Score": 0.8524324324324326,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.48585606060606057,
+      "c1Score": 0.20500000000000002,
+      "c2Score": 0.8160173160173161,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 0,
+  "totalOutputTokens": 0,
+  "estimatedCostUsd": 0,
+  "durationMs": 105940,
+  "date": "2026-06-25",
+  "submittedAt": "2026-06-25T12:00:00.000Z"
+}

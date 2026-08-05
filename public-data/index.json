@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1.0",
-  "generatedAt": "2026-08-04T03:09:34.475Z",
+  "generatedAt": "2026-08-05T03:02:29.314Z",
   "embargoHours": 48,
   "surfaces": {
     "intelligence": {
-      "published": 0,
+      "published": 41,
       "embargoed": 0
     },
     "coding": {
-      "published": 0,
+      "published": 12,
       "embargoed": 0
     },
     "scale": {
-      "published": 0,
+      "published": 141,
       "embargoed": 0
     },
     "topfloor": {
-      "published": 0,
+      "published": 3,
       "embargoed": 0
     },
     "glassbox": {
@@ -52,8 +52,5 @@
       "token"
     ],
     "notes": "Pending model observations are aggregated to counts; per-observation submitter IDs and orgs are never published."
-  },
-  "cleared": {
-    "note": "All results cleared for a fresh start. Every surface reports zero until new runs are submitted under the unified Capability / Memory Lift / Efficiency boards."
   }
 }

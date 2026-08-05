@@ -1,0 +1,77 @@
+{
+  "id": "4b6cdff5",
+  "type": "coding",
+  "runId": "4b6cdff5",
+  "benchmarkVersion": "1.0",
+  "model": "claude-opus-4-6",
+  "reportedModel": "claude-opus-4-6",
+  "apiBase": "https://api.anthropic.com",
+  "attribution": "verified",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.8178678779746077,
+  "testPassRate": 0.7833333333333333,
+  "qualityScore": 0.8397653656417366,
+  "designScore": 0.8039999999999999,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8768636363636365,
+      "c1Score": 0.9350000000000002,
+      "c2Score": 0.9431818181818183,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 11,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9718255813953489,
+      "c1Score": 1,
+      "c2Score": 0.9709302325581397,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.9448682170542635,
+      "c1Score": 1,
+      "c2Score": 0.8424806201550388,
+      "c3Score": 1,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8875242718446603,
+      "c1Score": 1,
+      "c2Score": 0.6786407766990292,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.40825768321513,
+      "c1Score": 0.1,
+      "c2Score": 0.7635933806146573,
+      "c3Score": 0.48,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 7141,
+  "totalOutputTokens": 8655,
+  "estimatedCostUsd": 0.7562399999999999,
+  "durationMs": 98332,
+  "date": "2026-04-19",
+  "submittedAt": "2026-04-19T00:32:55.075Z"
+}

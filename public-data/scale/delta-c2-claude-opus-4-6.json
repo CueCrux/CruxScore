@@ -1,0 +1,32 @@
+{
+  "id": "delta-c2-claude-opus-4-6",
+  "type": "scale",
+  "project": "delta",
+  "benchmark_name": "Enterprise SaaS Review (2M+ tokens)",
+  "model": "claude-opus-4-6",
+  "arm": "C2",
+  "arm_name": "Context-stuffed (full corpus in prompt)",
+  "agent": "claude-opus-4-6 (C2)",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "cx_em": 0.44,
+  "s_gate": 1,
+  "q_info": 0.4,
+  "core_recall": 0.4,
+  "needle_recall": 0,
+  "overall_recall": 0.333,
+  "unsafe_actions": null,
+  "c_tokens_usd": 66.96,
+  "duration_s": 456,
+  "t_human_s": 9000,
+  "v_time": 19.7,
+  "corpus_tokens": 2002046,
+  "corpus_docs": 3346,
+  "memory_system": {
+    "used": false
+  },
+  "date": "2026-04-11",
+  "metrics_version": "1.5",
+  "submittedAt": "2026-04-14T19:13:17.226Z"
+}

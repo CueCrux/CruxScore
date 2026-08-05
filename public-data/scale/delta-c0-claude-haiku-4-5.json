@@ -1,0 +1,32 @@
+{
+  "id": "delta-c0-claude-haiku-4-5",
+  "type": "scale",
+  "project": "delta",
+  "benchmark_name": "Enterprise SaaS Review (2M+ tokens)",
+  "model": "claude-haiku-4-5",
+  "arm": "C0",
+  "arm_name": "Bare (no context, no tools)",
+  "agent": "claude-haiku-4-5 (C0)",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "cx_em": 78.95,
+  "s_gate": 1,
+  "q_info": 0.6,
+  "core_recall": 0.6,
+  "needle_recall": 0,
+  "overall_recall": 0.6,
+  "unsafe_actions": null,
+  "c_tokens_usd": 0.07,
+  "duration_s": 65,
+  "t_human_s": 9000,
+  "v_time": 138.5,
+  "corpus_tokens": 2002046,
+  "corpus_docs": 3346,
+  "memory_system": {
+    "used": false
+  },
+  "date": "2026-04-11",
+  "metrics_version": "1.5",
+  "submittedAt": "2026-04-14T19:12:13.577Z"
+}

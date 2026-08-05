@@ -1,0 +1,77 @@
+{
+  "id": "a6ad46d8",
+  "type": "coding",
+  "runId": "a6ad46d8",
+  "benchmarkVersion": "1.0",
+  "model": "gpt-5.4",
+  "reportedModel": "gpt-5.4-2026-03-05",
+  "apiBase": "https://api.openai.com",
+  "attribution": "verified",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.815831508612485,
+  "testPassRate": 0.7833333333333333,
+  "qualityScore": 0.8270900246070999,
+  "designScore": 0.8160000000000001,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8622105263157895,
+      "c1Score": 0.9350000000000002,
+      "c2Score": 0.9013157894736843,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 11,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9715833333333332,
+      "c1Score": 1,
+      "c2Score": 0.9702380952380953,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.9199809160305343,
+      "c1Score": 1,
+      "c2Score": 0.7713740458015268,
+      "c3Score": 1,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.9000854700854701,
+      "c1Score": 1,
+      "c2Score": 0.7145299145299147,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.42529729729729726,
+      "c1Score": 0.1,
+      "c2Score": 0.7779922779922781,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 5907,
+  "totalOutputTokens": 5001,
+  "estimatedCostUsd": 0.0647775,
+  "durationMs": 58212,
+  "date": "2026-04-19",
+  "submittedAt": "2026-04-19T00:21:24.597Z"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "alpha-c2-claude-haiku-4-5",
+  "type": "scale",
+  "project": "alpha",
+  "benchmark_name": "Decision Recall (3-phase, single session)",
+  "model": "claude-haiku-4-5",
+  "arm": "C2",
+  "arm_name": "Context-stuffed (full corpus in prompt)",
+  "agent": "claude-haiku-4-5 (C2)",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "cx_em": 50.72,
+  "s_gate": 1,
+  "q_info": 1,
+  "core_recall": 1,
+  "needle_recall": null,
+  "overall_recall": 1,
+  "unsafe_actions": null,
+  "c_tokens_usd": 0.19,
+  "duration_s": 15,
+  "t_human_s": 4200,
+  "v_time": 280,
+  "corpus_tokens": 27118,
+  "corpus_docs": 3,
+  "memory_system": {
+    "used": false
+  },
+  "date": "2026-04-11",
+  "metrics_version": "1.5",
+  "submittedAt": "2026-04-14T19:12:13.780Z"
+}

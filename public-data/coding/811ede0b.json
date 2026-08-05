@@ -1,0 +1,77 @@
+{
+  "id": "811ede0b",
+  "type": "coding",
+  "runId": "811ede0b",
+  "benchmarkVersion": "1.0",
+  "model": "claude-fable-5",
+  "reportedModel": "claude-fable-5",
+  "apiBase": "http://100.75.64.43:10010",
+  "attribution": "first_party",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.7998256367376102,
+  "testPassRate": 0.8,
+  "qualityScore": 0.8713589621074576,
+  "designScore": 0.8160000000000001,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8488829787234043,
+      "c1Score": 0.87,
+      "c2Score": 0.946808510638298,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 12,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9133255813953489,
+      "c1Score": 0.87,
+      "c2Score": 0.9709302325581397,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.8997204724409449,
+      "c1Score": 0.87,
+      "c2Score": 0.8806299212598427,
+      "c3Score": 1,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8347633587786258,
+      "c1Score": 0.87,
+      "c2Score": 0.6950381679389313,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.5024357923497268,
+      "c1Score": 0.20500000000000002,
+      "c2Score": 0.8633879781420766,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 38861,
+  "totalOutputTokens": 18706,
+  "estimatedCostUsd": 1.3239100000000001,
+  "durationMs": 233143,
+  "date": "2026-07-16",
+  "submittedAt": "2026-07-16T12:40:00.822Z"
+}

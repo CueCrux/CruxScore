@@ -1,0 +1,77 @@
+{
+  "id": "d9bcf025",
+  "type": "coding",
+  "runId": "d9bcf025",
+  "benchmarkVersion": "1.0",
+  "model": "gpt-5.4-mini",
+  "reportedModel": "gpt-5.4-mini-2026-03-17",
+  "apiBase": "https://api.openai.com",
+  "attribution": "verified",
+  "mode": "C-A",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "compositeScore": 0.8164784387339932,
+  "testPassRate": 0.7833333333333333,
+  "qualityScore": 0.8289383963828374,
+  "designScore": 0.8160000000000001,
+  "totalTasks": 5,
+  "taskResults": [
+    {
+      "taskId": "bugfix-01",
+      "family": "bugfix",
+      "composite": 0.8540670731707317,
+      "c1Score": 0.9350000000000002,
+      "c2Score": 0.878048780487805,
+      "c3Score": 0.6299999999999999,
+      "testsPassed": 11,
+      "testsTotal": 12
+    },
+    {
+      "taskId": "extension-01",
+      "family": "extension",
+      "composite": 0.9715833333333332,
+      "c1Score": 1,
+      "c2Score": 0.9702380952380953,
+      "c3Score": 0.9099999999999999,
+      "testsPassed": 16,
+      "testsTotal": 16
+    },
+    {
+      "taskId": "greenfield-01",
+      "family": "greenfield",
+      "composite": 0.9129101562499999,
+      "c1Score": 1,
+      "c2Score": 0.751171875,
+      "c3Score": 1,
+      "testsPassed": 20,
+      "testsTotal": 20
+    },
+    {
+      "taskId": "refactor-01",
+      "family": "refactor",
+      "composite": 0.8981818181818182,
+      "c1Score": 1,
+      "c2Score": 0.7090909090909092,
+      "c3Score": 1,
+      "testsPassed": 10,
+      "testsTotal": 10
+    },
+    {
+      "taskId": "test-quality-01",
+      "family": "test-quality",
+      "composite": 0.44564981273408233,
+      "c1Score": 0.1,
+      "c2Score": 0.8361423220973783,
+      "c3Score": 0.54,
+      "testsPassed": 0,
+      "testsTotal": 10
+    }
+  ],
+  "totalInputTokens": 5907,
+  "totalOutputTokens": 4738,
+  "estimatedCostUsd": 0.0099436,
+  "durationMs": 19764,
+  "date": "2026-04-19",
+  "submittedAt": "2026-04-19T00:20:49.110Z"
+}
