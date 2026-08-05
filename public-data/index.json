@@ -12,7 +12,7 @@
       "embargoed": 0
     },
     "scale": {
-      "published": 79,
+      "published": 0,
       "embargoed": 0
     },
     "topfloor": {
@@ -24,7 +24,7 @@
       "embargoed": 0
     },
     "context": {
-      "published": 82,
+      "published": 0,
       "embargoed": 0
     },
     "pendingModels": {
@@ -53,9 +53,7 @@
     ],
     "notes": "Pending model observations are aggregated to counts; per-observation submitter IDs and orgs are never published."
   },
-  "cleaning": {
-    "rule": "either",
-    "removed": 186,
-    "note": "Records without both a context-token count and a measured cost were removed: a result with no token bill cannot be ranked on Efficiency or compared on cost."
+  "cleared": {
+    "note": "All results cleared for a fresh start. Every surface reports zero until new runs are submitted under the unified Capability / Memory Lift / Efficiency boards."
   }
 }
