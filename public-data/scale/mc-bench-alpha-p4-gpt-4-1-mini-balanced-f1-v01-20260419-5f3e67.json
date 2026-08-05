@@ -36,7 +36,7 @@
   "submittedAt": "2026-04-19T00:50:37.046Z",
   "rig": {
     "model": "gpt-4.1-mini",
-    "memory_backend": "none",
+    "memory_backend": "raw-tools",
     "effort_tier": null
   }
 }
