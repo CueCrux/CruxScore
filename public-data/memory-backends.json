@@ -75,5 +75,19 @@
       "isControl": true,
       "retrieval": false
     }
+  },
+  "legacyArmMap": {
+    "scale": {
+      "C0": "none",
+      "C2": "vendor-native",
+      "F1": "raw-tools",
+      "T2": "crux"
+    },
+    "topfloor": {
+      "C0": "vendor-native",
+      "T1": "raw-tools",
+      "T2": "crux",
+      "T3": "crux"
+    }
   }
 }

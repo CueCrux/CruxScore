@@ -10,7 +10,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { MEMORY_BACKENDS, BASELINE_BACKEND } from "../src/memory-backend.js";
+import { MEMORY_BACKENDS, BASELINE_BACKEND, LEGACY_ARM_MAP } from "../src/memory-backend.js";
 
 const out = resolve(import.meta.dirname!, "..", "public-data", "memory-backends.json");
 writeFileSync(
@@ -24,6 +24,11 @@ writeFileSync(
         + "per-suite treatment-arm labels, which were ambiguous across suites: 'C0' meant a "
         + "bare model in Scale and full context-stuffing in Top Floor.",
       backends: MEMORY_BACKENDS,
+      // Published so the research bench pages resolve arm -> backend from the
+      // same table the boards use, instead of each keeping its own glossary.
+      // scale.vue's local copy had drifted to describing C0 as
+      // "Context-Stuffed 32k" while the records say "Bare (no context, no tools)".
+      legacyArmMap: LEGACY_ARM_MAP,
     },
     null,
     2,
