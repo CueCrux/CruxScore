@@ -18,6 +18,14 @@ describe("export filter matches the cleaning rule", () => {
     expect(exporter).toMatch(/isInstrumented\(record\)/);
   });
 
+  it("identifies leaderboard rows by model, not by rig", () => {
+    // `rig` is attached by the backfill over the published mirror, so a freshly
+    // exported run does not have it yet. Gating on `rig` let every new record
+    // through and refilled the board the night after it was cleared.
+    expect(exporter).toMatch(/typeof record\.model === "string"/);
+    expect(exporter).not.toMatch(/!\("rig" in record\)\) return true/);
+  });
+
   for (const field of ["context_tokens", "corpus_tokens"]) {
     it(`both scripts recognise ${field} as a context-token field`, () => {
       expect(exporter).toContain(field);
@@ -32,9 +40,13 @@ describe("export filter matches the cleaning rule", () => {
     });
   }
 
-  it("both scope the gate to leaderboard rows only", () => {
-    // Scorecards and bundles carry no rig and must never be dropped.
-    expect(exporter).toMatch(/"rig" in record/);
+  it("each scopes the gate to leaderboard rows, by the right marker", () => {
+    // The two scripts run at different points and must test different things.
+    // The exporter sees FRESH records straight from the source store, which have
+    // no `rig` yet — it identifies a row by `model`. The cleaner runs over the
+    // published mirror, where the backfill has already attached `rig`.
+    // Scorecards and bundles have neither and are never dropped by either.
+    expect(exporter).toMatch(/typeof record\.model === "string"/);
     expect(cleaner).toMatch(/"rig" in rec/);
   });
 });

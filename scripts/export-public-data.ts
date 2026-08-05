@@ -128,9 +128,19 @@ function hasMeasure(record: any, fields: string[]): boolean {
  * because the records are still present and publishable in the source store.
  */
 function isInstrumented(record: any): boolean {
-  // Not a leaderboard row — scorecards, bundles, manifests are out of scope.
-  if (!record || typeof record !== "object" || !("rig" in record)) return true;
+  // A leaderboard row is one that names a model. Keying this off `rig` was a
+  // hole: `rig` is attached by the backfill, which runs over the published
+  // mirror and not the source store, so every freshly exported run lacked it and
+  // sailed straight through the gate. That is how a daily sync refilled the
+  // board immediately after it was cleared.
+  if (!isLeaderboardRow(record)) return true;
   return hasMeasure(record, CTX_TOKEN_FIELDS) && hasMeasure(record, COST_FIELDS);
+}
+
+/** Scorecards, bundles and manifests carry no model and are not ranked. */
+function isLeaderboardRow(record: any): boolean {
+  return !!record && typeof record === "object" && !Array.isArray(record)
+    && typeof record.model === "string" && record.model.length > 0;
 }
 
 function isPublishable(record: any, embargoMs: number): boolean {
