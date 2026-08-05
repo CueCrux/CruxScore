@@ -31,7 +31,7 @@
   "submittedAt": "2026-04-14T19:12:14.388Z",
   "rig": {
     "model": "claude-opus-4-6",
-    "memory_backend": "none",
+    "memory_backend": "vendor-native",
     "effort_tier": null
   }
 }

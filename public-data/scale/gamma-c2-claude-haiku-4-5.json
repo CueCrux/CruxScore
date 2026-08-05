@@ -31,7 +31,7 @@
   "submittedAt": "2026-04-14T19:12:14.186Z",
   "rig": {
     "model": "claude-haiku-4-5",
-    "memory_backend": "none",
+    "memory_backend": "vendor-native",
     "effort_tier": null
   }
 }

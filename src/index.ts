@@ -33,6 +33,16 @@ export {
   backendForArm,
 } from "./rig.js";
 export type { EffortTier, Rig, RigResult } from "./rig.js";
+export {
+  MEMORY_BACKENDS,
+  BASELINE_BACKEND,
+  LEGACY_ARM_MAP,
+  isKnownBackend,
+  backendLabel,
+  isControlBackend,
+  resolveMemoryBackend,
+} from "./memory-backend.js";
+export type { MemoryBackendSpec } from "./memory-backend.js";
 export { computeDerived } from "./derived.js";
 export { computeComposite } from "./composite.js";
 export { computeCruxScore } from "./score.js";

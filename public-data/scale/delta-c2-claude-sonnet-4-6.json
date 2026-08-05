@@ -34,7 +34,7 @@
   "submittedAt": "2026-04-14T19:00:38.530Z",
   "rig": {
     "model": "claude-sonnet-4-6",
-    "memory_backend": "none",
+    "memory_backend": "vendor-native",
     "effort_tier": null
   }
 }
