@@ -34,6 +34,30 @@ export {
 } from "./rig.js";
 export type { EffortTier, Rig, RigResult } from "./rig.js";
 export {
+  validateProfile,
+  knobsFor,
+  nextTier,
+  tierRange,
+  ProfileError,
+} from "./difficulty-profile.js";
+export type { DifficultyProfile, TierKnobs } from "./difficulty-profile.js";
+export {
+  climb,
+  needsLadderExtension,
+  CLEAR_THRESHOLD,
+  FAILURE_STOP,
+  VOID_RETRIES,
+} from "./climb.js";
+export type {
+  TierOutcome,
+  TierRun,
+  TierResult,
+  StopReason,
+  ClimbResult,
+  ClimbOptions,
+  TierRunner,
+} from "./climb.js";
+export {
   MEMORY_BACKENDS,
   BASELINE_BACKEND,
   LEGACY_ARM_MAP,
