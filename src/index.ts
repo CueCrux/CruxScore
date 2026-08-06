@@ -81,3 +81,18 @@ export type { FundamentalId, DerivedId } from "./single.js";
 export { fromCommunityLite } from "./community-lite.js";
 export type { CommunityLiteInput, CommunityLiteExtra } from "./community-lite.js";
 export { generatePassport, verifyPassport, isValidPassportFormat } from "./passport.js";
+export {
+  runGate,
+  runBatch,
+  batchIsHealthy,
+  NOVELTY_THRESHOLD,
+  HEALTHY_PASS_RATE,
+} from "./fixture-gate.js";
+export type {
+  Candidate,
+  CheckName,
+  CheckResult,
+  Verdict,
+  GateProbes,
+  BatchReport,
+} from "./fixture-gate.js";
