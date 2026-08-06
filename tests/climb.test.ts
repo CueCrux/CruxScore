@@ -349,3 +349,31 @@ describe("the shipped Context profile", () => {
     expect((knobsFor(assertProfile(doc), "D3").haystack_n as number)).toBe(300);
   });
 });
+
+describe("the shipped Top Floor profile", () => {
+  const doc = JSON.parse(
+    readFileSync(resolve(ROOT_DIR, "benchmarks", "topfloor", "difficulty-profile.json"), "utf8"),
+  )
+
+  it("is a valid profile", () => {
+    expect(() => assertProfile(doc)).not.toThrow()
+  })
+
+  it("claims no tier it has no floors for", () => {
+    // The ceiling is what the generated content reaches, not what the tower is
+    // designed to reach one day. A rung with no fixtures would report a frontier
+    // no rig could have climbed.
+    const p = assertProfile(doc)
+    for (const tier of tierRange(p)) {
+      const floors = knobsFor(p, tier).floors as number[]
+      expect(Array.isArray(floors)).toBe(true)
+      expect(floors.length).toBeGreaterThan(0)
+    }
+  })
+
+  it("assigns every floor to exactly one tier", () => {
+    const p = assertProfile(doc)
+    const all = tierRange(p).flatMap(t => knobsFor(p, t).floors as number[])
+    expect(new Set(all).size).toBe(all.length)
+  })
+})
