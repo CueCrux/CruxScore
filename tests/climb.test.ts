@@ -15,6 +15,12 @@ import {
   type DifficultyProfile,
 } from "../src/difficulty-profile.js";
 import type { DifficultyTier } from "../src/tiers.js";
+import { assertProfile } from "../src/difficulty-profile.js";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT_DIR = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -268,5 +274,78 @@ describe("frontier is monotone in ability", () => {
       expect(f).toBeGreaterThanOrEqual(previous);
       previous = f;
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Profile documents — the JSON contract shared with the Python benches
+// ---------------------------------------------------------------------------
+
+describe("assertProfile", () => {
+  const good = {
+    bench: "context",
+    floorTier: "D2",
+    ceilingTier: "D3",
+    tiers: { D2: { haystack_n: 50 }, D3: { haystack_n: 300 } },
+  };
+
+  it("accepts and narrows a well-formed document", () => {
+    const p = assertProfile(good);
+    expect(p.bench).toBe("context");
+    expect(knobsFor(p, "D3")).toEqual({ haystack_n: 300 });
+  });
+
+  it("rejects non-objects", () => {
+    for (const bad of [null, undefined, 42, "profile", [good]]) {
+      expect(() => assertProfile(bad)).toThrow(/must be an object/);
+    }
+  });
+
+  it("rejects missing or empty identity fields", () => {
+    for (const key of ["bench", "floorTier", "ceilingTier"]) {
+      expect(() => assertProfile({ ...good, [key]: "" })).toThrow(new RegExp(key));
+      expect(() => assertProfile({ ...good, [key]: undefined })).toThrow(new RegExp(key));
+    }
+  });
+
+  it("rejects a missing or non-object tiers map", () => {
+    expect(() => assertProfile({ ...good, tiers: undefined })).toThrow(/tiers must be an object/);
+    expect(() => assertProfile({ ...good, tiers: [] })).toThrow(/tiers must be an object/);
+  });
+
+  it("applies the same structural rules as a hand-built profile", () => {
+    // A gap in a JSON profile is exactly as dangerous as one in code.
+    expect(() => assertProfile({ ...good, ceilingTier: "D5" })).toThrow(/missing knobs/);
+  });
+});
+
+describe("the shipped Context profile", () => {
+  const doc = JSON.parse(
+    readFileSync(
+      resolve(ROOT_DIR, "benchmarks", "context", "difficulty-profile.json"),
+      "utf8",
+    ),
+  );
+
+  it("is a valid profile", () => {
+    expect(() => assertProfile(doc)).not.toThrow();
+  });
+
+  it("scales the haystack strictly upward with tier", () => {
+    // If a rung is not harder than the one below it, the ladder has a flat spot
+    // and the frontier stops meaning anything at that point.
+    const p = assertProfile(doc);
+    let previous = -1;
+    for (const tier of tierRange(p)) {
+      const n = knobsFor(p, tier).haystack_n as number;
+      expect(n).toBeGreaterThan(previous);
+      previous = n;
+    }
+  });
+
+  it("keeps the historical default reachable as a named tier", () => {
+    // CDB_S6_N defaulted to 300; pre-ladder runs should map onto D3 rather than
+    // being stranded off the scale.
+    expect((knobsFor(assertProfile(doc), "D3").haystack_n as number)).toBe(300);
   });
 });

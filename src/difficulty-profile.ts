@@ -86,6 +86,37 @@ export function validateProfile(profile: DifficultyProfile): void {
   }
 }
 
+/**
+ * Validate an already-parsed profile document and narrow it.
+ *
+ * Takes a parsed object rather than a path deliberately: benches are split
+ * between TypeScript and Python, so the profile lives in JSON as the single
+ * source of truth and each language reads its own file. Keeping `fs` out of the
+ * published library also keeps this testable without mocking a filesystem.
+ */
+export function assertProfile(doc: unknown): DifficultyProfile {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+    throw new ProfileError("profile must be an object");
+  }
+  const d = doc as Record<string, unknown>;
+  for (const key of ["bench", "floorTier", "ceilingTier"]) {
+    if (typeof d[key] !== "string" || !(d[key] as string).length) {
+      throw new ProfileError(`profile.${key} must be a non-empty string`);
+    }
+  }
+  if (!d.tiers || typeof d.tiers !== "object" || Array.isArray(d.tiers)) {
+    throw new ProfileError("profile.tiers must be an object");
+  }
+  const profile: DifficultyProfile = {
+    bench: d.bench as string,
+    floorTier: d.floorTier as DifficultyTier,
+    ceilingTier: d.ceilingTier as DifficultyTier,
+    tiers: d.tiers as Record<string, TierKnobs>,
+  };
+  validateProfile(profile);
+  return profile;
+}
+
 /** Knobs for a tier. Throws if the tier is outside the profile's range. */
 export function knobsFor(profile: DifficultyProfile, tier: DifficultyTier): TierKnobs {
   validateProfile(profile);

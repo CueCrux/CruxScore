@@ -32,12 +32,13 @@ def _codename(r):
     return f"Project {r.choice(ADJ).capitalize()}"
 
 
-def gen_case(section, seed, version="v1"):
+def gen_case(section, seed, version="v1", tier=None):
     """Dispatch on suite version. v1 (default) is byte-identical to CDB-v1 so the
     62 published v1 records still verify; v1.1 uses the expanded /100 banks below.
     `version` accepts "v1"/"v1.1" or a full suite id ("CDB-v1.1")."""
     if str(version).replace("CDB-", "").replace("_", ".") in ("v1.1", "1.1"):
-        return gen_case_v11(section, seed)
+        case = gen_case_v11(section, seed, tier=tier)
+        return _apply_tier(case, section, seed, tier)
     r = rng(section, seed)
     cn = _codename(r)
     slug = cn.split()[1].lower()
@@ -158,6 +159,80 @@ def gen_case(section, seed, version="v1"):
 # ---------------------------------------------------------------------------
 
 N_SCORED = 20  # scored probes per section (S2-S6)
+
+# --- difficulty ladder -------------------------------------------------------
+# The tier changes ONLY how deeply the signal is buried. Every scored section
+# keeps the same 20 probes at every tier, so a higher tier is not a different
+# question — it is the same question under more noise. That keeps the ladder a
+# single axis; mixing in new sections per tier would change the KIND of
+# difficulty and make frontiers across tiers incomparable.
+_PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "difficulty-profile.json")
+
+
+def load_profile():
+    with open(_PROFILE_PATH) as fh:
+        return json.load(fh)
+
+
+def tier_knobs(tier):
+    """Knobs for a tier. Raises rather than defaulting: a silent fallback would
+    publish a run at a difficulty nobody selected."""
+    prof = load_profile()
+    knobs = prof["tiers"].get(tier)
+    if knobs is None:
+        raise SystemExit(
+            f"unknown tier {tier!r} for bench {prof['bench']} "
+            f"(range {prof['floorTier']}..{prof['ceilingTier']})")
+    return knobs
+
+
+def _distractors(r, n, offset=0):
+    """Filler notes that are plausible but never answer a probe."""
+    return [{"key": f"note_{i + offset:06d}",
+             "value": (f"routine operational note {i + offset}: nightly batch, log rotation, "
+                       f"cache warm, healthcheck ok")}
+            for i in range(n)]
+
+
+def _apply_tier(case, section, seed, tier):
+    """Apply the tier to a freshly built case: bury the signal and stamp the
+    corpus.
+
+    Done centrally rather than in each section branch so a new section cannot
+    silently opt out of the ladder. S6 buries itself (the haystack IS its
+    subject), so it is skipped here to avoid double-burying.
+    """
+    if tier is None:
+        return case
+    knobs = tier_knobs(tier)
+    if section != "S6":
+        _bury(case, rng(f"{section}-haystack", seed), int(knobs["haystack_n"]))
+    # Corpus identity must carry the tier: the same probes at D3 and D6 are NOT
+    # the same measurement, and a number reported against the wrong one is not
+    # recoverable after the fact.
+    case["corpus"] = f"{CORPUS}-{tier}"
+    case["difficulty_tier"] = tier
+    case["haystack_n"] = int(knobs["haystack_n"])
+    return case
+
+
+def _bury(case, r, haystack_n):
+    """Inject `haystack_n` distractors around a case's prior, in place.
+
+    Applied to every scored section, not just S6. Scaling only the needle
+    section would leave four fifths of the bench flat, so a climb would measure
+    one section's difficulty and call it the bench's.
+    """
+    if haystack_n <= 0 or not case.get("scored"):
+        return case
+    prior = case.get("prior") or []
+    prior = prior + _distractors(r, haystack_n)
+    r.shuffle(prior)
+    case["prior"] = prior
+    case["haystack_n"] = haystack_n
+    return case
+
 N_LEAK = 5     # S1 leak-gate probes (not in the composite)
 
 REGION = ["us-fen-1", "eu-moor-2", "ap-tide-3", "sa-salt-4", "us-gantry-5", "eu-cistern-6"]
@@ -245,7 +320,7 @@ def _probes(facts):
             for i, f in enumerate(facts)]
 
 
-def gen_case_v11(section, seed):
+def gen_case_v11(section, seed, tier=None):
     r = rng(section, seed)
 
     if section == "S1":  # rederivable LEAK GATE (excluded from the /100 composite)
@@ -312,7 +387,10 @@ def gen_case_v11(section, seed):
                 "scored": True, "prior": prior, "probes": _probes(facts), "files": {}}
 
     if section == "S6":  # scale / needle — 20 needles among N distractors
-        n = int(os.environ.get("CDB_S6_N", "300"))
+        # Tier wins over the legacy env var; the env var stays so pre-ladder
+        # callers keep working rather than silently changing difficulty.
+        n = (int(tier_knobs(tier)["haystack_n"]) if tier
+             else int(os.environ.get("CDB_S6_N", "300")))
         facts = _recall_bank(r)
         for f in facts:
             f["query"] = f["key"].replace("_", " ")
@@ -413,7 +491,18 @@ def gen_case_v11(section, seed):
 
 
 if __name__ == "__main__":
-    sec = sys.argv[1] if len(sys.argv) > 1 else "S2"
-    seed = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-    ver = sys.argv[3] if len(sys.argv) > 3 else "v1"
-    print(json.dumps(gen_case(sec, seed, ver), indent=2))
+    import argparse
+    ap = argparse.ArgumentParser(description="Generate one CDB case.")
+    ap.add_argument("section", nargs="?", default="S2")
+    ap.add_argument("seed", nargs="?", type=int, default=1)
+    ap.add_argument("version", nargs="?", default="v1")
+    ap.add_argument("--tier", default=None,
+                    help="Difficulty tier (D2..D6). Scales the haystack the signal is "
+                         "buried in; the probes are identical at every tier. Omit for "
+                         "legacy behaviour (CDB_S6_N env, untiered corpus id).")
+    ap.add_argument("--profile", action="store_true",
+                    help="Print the difficulty profile and exit.")
+    a = ap.parse_args()
+    if a.profile:
+        print(json.dumps(load_profile(), indent=2)); raise SystemExit(0)
+    print(json.dumps(gen_case(a.section, a.seed, a.version, tier=a.tier), indent=2))

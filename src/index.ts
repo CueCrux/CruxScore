@@ -34,6 +34,7 @@ export {
 } from "./rig.js";
 export type { EffortTier, Rig, RigResult } from "./rig.js";
 export {
+  assertProfile,
   validateProfile,
   knobsFor,
   nextTier,
