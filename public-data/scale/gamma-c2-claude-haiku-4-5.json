@@ -1,0 +1,32 @@
+{
+  "id": "gamma-c2-claude-haiku-4-5",
+  "type": "scale",
+  "project": "gamma",
+  "benchmark_name": "Constraint Resolution (5-phase, contradictions)",
+  "model": "claude-haiku-4-5",
+  "arm": "C2",
+  "arm_name": "Context-stuffed (full corpus in prompt)",
+  "agent": "claude-haiku-4-5 (C2)",
+  "submitter": "CueCrux Labs",
+  "organization": "CueCrux Labs",
+  "githubLogin": "CueCrux-Myles",
+  "cx_em": 132.44,
+  "s_gate": 1,
+  "q_info": 0.9375,
+  "core_recall": 0.9375,
+  "needle_recall": null,
+  "overall_recall": 0.9375,
+  "unsafe_actions": null,
+  "c_tokens_usd": 0.084,
+  "duration_s": 22,
+  "t_human_s": 9900,
+  "v_time": 450,
+  "corpus_tokens": 357426,
+  "corpus_docs": 5,
+  "memory_system": {
+    "used": false
+  },
+  "date": "2026-04-11",
+  "metrics_version": "1.5",
+  "submittedAt": "2026-04-14T19:12:14.186Z"
+}
