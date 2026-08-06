@@ -1,0 +1,33 @@
+{
+  "bench": "context",
+  "floorTier": "D2",
+  "ceilingTier": "D6",
+  "note": "Difficulty for a context-dependence bench is how deeply the signal is buried. Every scored section keeps the SAME 20 probes at every tier — only the surrounding haystack grows. That isolates one axis: a higher tier is not a different question, it is the same question under more noise. D3 reproduces the historical default (CDB_S6_N=300), so pre-ladder runs sit at D3 rather than being stranded off the scale.",
+  "tiers": {
+    "D2": {
+      "haystack_n": 50,
+      "supersession_depth": 2,
+      "note": "Signal is findable by reading everything."
+    },
+    "D3": {
+      "haystack_n": 300,
+      "supersession_depth": 3,
+      "note": "Historical default. Context-stuffing still fits a large window."
+    },
+    "D4": {
+      "haystack_n": 2000,
+      "supersession_depth": 5,
+      "note": "Stuffing starts to crowd out the answer."
+    },
+    "D5": {
+      "haystack_n": 20000,
+      "supersession_depth": 8,
+      "note": "Beyond a comfortable window; retrieval should separate from stuffing here."
+    },
+    "D6": {
+      "haystack_n": 200000,
+      "supersession_depth": 12,
+      "note": "Stuffing is not an option. Only resolution-quality retrieval survives."
+    }
+  }
+}

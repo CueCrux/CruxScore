@@ -1,0 +1,38 @@
+{
+  "bench": "topfloor",
+  "floorTier": "D2",
+  "ceilingTier": "D4",
+  "note": "Floors are the ladder; the tier for each is DERIVED from its blueprint difficulty (hops plus capability demands), never hand-assigned. The ceiling is D4 because that is what the generated content actually reaches \u2014 floors 16+ do not exist yet, and claiming D5/D6 rungs that have no fixtures would report a frontier no rig could have climbed. Extending the ladder here means generating Act III+, not editing this file.",
+  "tiers": {
+    "D2": {
+      "floors": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "note": "10 floor(s) derive to D2"
+    },
+    "D3": {
+      "floors": [
+        11,
+        13,
+        14
+      ],
+      "note": "3 floor(s) derive to D3"
+    },
+    "D4": {
+      "floors": [
+        12,
+        15
+      ],
+      "note": "2 floor(s) derive to D4"
+    }
+  }
+}
