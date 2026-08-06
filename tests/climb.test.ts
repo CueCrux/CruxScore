@@ -377,3 +377,40 @@ describe("the shipped Top Floor profile", () => {
     expect(new Set(all).size).toBe(all.length)
   })
 })
+
+describe("every shipped difficulty profile", () => {
+  // GlassBox is deliberately absent: its 504 items are organised by
+  // attack_class and clean/adversarial, which is pressure, not difficulty.
+  // Shipping it a profile would fabricate a ladder it does not have.
+  const BENCHES = ['context', 'topfloor', 'coding', 'intelligence']
+
+  for (const bench of BENCHES) {
+    it(`${bench} ships a valid profile`, () => {
+      const doc = JSON.parse(
+        readFileSync(resolve(ROOT_DIR, "benchmarks", bench, "difficulty-profile.json"), "utf8"),
+      )
+      expect(() => assertProfile(doc)).not.toThrow()
+      expect(assertProfile(doc).bench).toBe(bench)
+    })
+  }
+
+  it("coding declares exactly one rung, matching its actual spread", () => {
+    const p = assertProfile(JSON.parse(
+      readFileSync(resolve(ROOT_DIR, "benchmarks", "coding", "difficulty-profile.json"), "utf8"),
+    ))
+    expect(tierRange(p)).toEqual(["D3"])
+  })
+
+  it("intelligence maps its five IRT tiers in strictly increasing order", () => {
+    const p = assertProfile(JSON.parse(
+      readFileSync(resolve(ROOT_DIR, "benchmarks", "intelligence", "difficulty-profile.json"), "utf8"),
+    ))
+    let lastB = -Infinity, lastIrt = -Infinity
+    for (const tier of tierRange(p)) {
+      const k = knobsFor(p, tier)
+      expect(k.b as number).toBeGreaterThan(lastB)
+      expect(k.irt_tier as number).toBeGreaterThan(lastIrt)
+      lastB = k.b as number; lastIrt = k.irt_tier as number
+    }
+  })
+})

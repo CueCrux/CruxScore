@@ -1,0 +1,13 @@
+{
+  "bench": "coding",
+  "floorTier": "D3",
+  "ceilingTier": "D3",
+  "note": "ONE RUNG. All five shipped tasks carry difficulty 2 — one per family, no spread — so the bench can express exactly one tier today. That is not a placeholder to be quietly widened: any rig that clears D3 will trip needsLadderExtension immediately, which is the correct and informative state. Extending this ladder means admitting generated D4+ tasks through the validation gate (src/fixture-gate.ts), not editing this file. Anchor is PROVISIONAL: D3 (45 min) is an estimate of what one of these tasks costs a senior engineer, not a panel measurement.",
+  "tiers": {
+    "D3": {
+      "task_difficulty": 2,
+      "tasks": ["bugfix-01", "extension-01", "greenfield-01", "refactor-01", "test-quality-01"],
+      "note": "The full shipped set: one task per family at difficulty 2."
+    }
+  }
+}
