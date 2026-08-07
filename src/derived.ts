@@ -16,6 +16,14 @@ import type { CruxFundamentals, CruxDerived, SafetyContext } from "./types.js";
  *   tools were available, so S_detect=0 is not meaningful). S_gate and S_stale
  *   still apply — destructive actions always score zero.
  */
+/**
+ * Accuracy below which V_yield is not reported.
+ *
+ * Deliberately the same 0.70 the climb uses to decide a tier is cleared: a rig
+ * that would not clear the rung should not be ranked for efficiency on it.
+ */
+export const YIELD_ACCURACY_FLOOR = 0.7;
+
 export function computeDerived(f: CruxFundamentals, safetyContext?: SafetyContext): CruxDerived {
   // Q_info = (R_decision + R_constraint + R_incident) / count_non_null  (§2.1 Q1)
   const infoComponents = [f.R_decision, f.R_constraint, f.R_incident];
@@ -65,6 +73,23 @@ export function computeDerived(f: CruxFundamentals, safetyContext?: SafetyContex
   const V_cost =
     Q_info != null ? f.C_tokens_usd / Math.max(Q_info, 0.01) : null;
 
+  // V_yield = Q_info / C_tokens_usd, gated on an accuracy floor  (§2.2 V5)
+  //
+  // Combines accuracy and cost in one number that CANNOT be won by being cheap
+  // and wrong. V_cost (V2) is a bare ratio with no floor, so a rig at Q_info
+  // 0.10 costing $0.02 scores 0.200 against 1.053 for a rig at 0.95 costing
+  // $1.00 — the useless one ranks five times better.
+  //
+  // The floor closes that. Below it the answer is null rather than a poor
+  // score: a rig that would not clear a tier has no meaningful efficiency ON
+  // that tier, and ranking it anyway invites exactly the cheap-and-wrong
+  // optimisation. Null is also correct when nothing was spent — yield per
+  // dollar is undefined at zero dollars, not infinite.
+  const V_yield =
+    Q_info != null && Q_info >= YIELD_ACCURACY_FLOOR && f.C_tokens_usd > 0
+      ? Q_info / f.C_tokens_usd
+      : null;
+
   // V_orient = T_orient / T_task  (§2.2 V3)
   const V_orient =
     f.T_orient_s != null && f.T_task_s > 0 ? f.T_orient_s / f.T_task_s : null;
@@ -101,6 +126,7 @@ export function computeDerived(f: CruxFundamentals, safetyContext?: SafetyContex
     Q_proposition,
     V_time,
     V_cost,
+    V_yield,
     V_orient,
     V_retrieval,
   };
