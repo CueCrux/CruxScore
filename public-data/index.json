@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "generatedAt": "2026-08-06T03:07:59.374Z",
+  "generatedAt": "2026-08-07T03:02:00.851Z",
   "embargoHours": 48,
   "surfaces": {
     "intelligence": {
@@ -52,8 +52,5 @@
       "token"
     ],
     "notes": "Pending model observations are aggregated to counts; per-observation submitter IDs and orgs are never published."
-  },
-  "cleared": {
-    "note": "All results cleared for a fresh start. Every surface reports zero until new runs are submitted under the unified Capability / Memory Lift / Efficiency boards."
   }
 }
