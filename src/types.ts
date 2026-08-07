@@ -89,6 +89,8 @@ export interface CruxDerived {
   // Efficiency (§2.2)
   V_time: number | null;
   V_cost: number | null;
+  /** V5: quality yield per dollar, gated on an accuracy floor. Higher is better. */
+  V_yield: number | null;
   V_orient: number | null;
   V_retrieval: number | null;
 }

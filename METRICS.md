@@ -108,6 +108,27 @@ Q6 is proposition-level partial credit. Ground-truth answers are decomposed into
 | **V3** | Orient Ratio | V_orient | `T_orient / T_task` | ratio [0,1] (lower = faster to orient) |
 | **V4** | Retrieval Efficiency | V_retrieval | `R_retrieval / max(N_tools, 1)` | ratio (retrieval recall per tool call) |
 
+#### V5 — Quality Yield (`V_yield`)
+
+`V_yield = Q_info / C_tokens_usd`, reported only when `Q_info >= 0.70` and `C_tokens_usd > 0`.
+Higher is better. Unit: quality per USD.
+
+One number combining accuracy and cost that **cannot be won by being cheap and wrong**.
+`V_cost` (V2) is a bare ratio with no accuracy floor, so a rig at `Q_info` 0.10 costing $0.02
+scores 0.200 against 1.053 for a rig at 0.95 costing $1.00 — the useless configuration ranks
+five times better. V5 exists because that inversion is not a corner case: on a saturating
+bench, accuracy is flat and cost is the only moving part, so a cost-shaped metric without an
+accuracy gate becomes the ranking.
+
+Null, not a low score, when below the floor: a rig that would not clear a tier has no
+meaningful efficiency *on* that tier, and ranking it anyway invites the cheap-and-wrong
+optimisation the floor exists to prevent. Also null at zero cost — yield per dollar is
+undefined at zero dollars, not infinite, so a subscription run recording no spend must not top
+an efficiency board.
+
+The floor is deliberately the same 0.70 the climb uses to decide a tier is cleared. It is a
+threshold, not a measurement, and moving it changes every published V5.
+
 ---
 
 ## 3. Composite: The Crux Score
@@ -346,7 +367,8 @@ To add a metric:
 | 1.0 | 2026-03-26 | Initial publication of the canonical core metric set. |
 | 1.1 | 2026-03-29 | Extension: +5 fundamentals (I6 Temporal Accuracy, I7 Supersession Accuracy, I8 Abstention Precision, I9 Retrieval Recall, K4 Cross-Session Synthesis), +2 derived (Q5 Abstention Quality, V4 Retrieval Efficiency). Motivated by memory benchmark ability-coverage gaps. No v1.0 formula changes. |
 | 1.2 | 2026-03-31 | Extension: +2 fundamentals (I10 Proposition Recall, I11 Contradiction Rate), +1 derived (Q6 Proposition Quality). Enables proposition-level partial credit for model-vs-model comparison. No v1.0/v1.1 formula changes. |
-| 1.3 | — | **Implemented, undocumented.** `src/types.ts` carries v1.3 extension fields (I_provenance, I_premise_rejection, K_novel_synthesis) but no changelog entry was written. The fields are live; this row records the gap rather than inventing the history. |
+| 1.3 | 2026-08-06 | Extension: +1 derived (V5 Quality Yield) — accuracy-gated cost efficiency, added because V2 ranks cheap-and-wrong above accurate-and-costly. Also retroactively documents the v1.3 extension fields already present in `src/types.ts` (I_provenance, I_premise_rejection, K_novel_synthesis). No v1.0-1.2 formula changes. |
+| ~~1.3~~ | — | ~~**Implemented, undocumented.**~~ `src/types.ts` carries v1.3 extension fields (I_provenance, I_premise_rejection, K_novel_synthesis) but no changelog entry was written. The fields are live; this row records the gap rather than inventing the history. |
 | 1.4–1.6 | — | **Emitted, not implemented.** `benchmarks/context/run_matrix.py` stamps `metrics_version: "1.6"` on published records (and older records carry `"1.5"`), ahead of anything the package implements. No fundamentals or derived metrics were added under these numbers. |
 
 > **Known drift.** `computeCruxScore` stamps `"1.2"` — the highest version the reference

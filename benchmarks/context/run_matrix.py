@@ -181,11 +181,13 @@ def run_one_session(sb_root, case, block, body_probes, model):
     return answers, u, model_id, cost, lat
 
 
-def run_cell(section, seed, backend, model, out_root, version="v1", batch_size=5):
-    case = gen.gen_case(section, seed, version)
+def run_cell(section, seed, backend, model, out_root, version="v1", batch_size=5, tier=None):
+    case = gen.gen_case(section, seed, version, tier=tier)
     suite_version = case.get("suite_version", "CDB-v1")
     scored = case.get("scored", section != "S1")
-    cell = out_root / f"{section}-{backend}-s{seed}"
+    # Tier belongs in the path: without it a ladder writes every rung to one
+    # directory and keeps only the last.
+    cell = out_root / (f"{section}-{backend}-s{seed}" + (f"-{tier}" if tier else ""))
     cell.mkdir(parents=True, exist_ok=True)
     gold_sha = sha(json.dumps(case, sort_keys=True))
 
@@ -260,6 +262,10 @@ def main():
     ap.add_argument("--model", default="sonnet")
     ap.add_argument("--out", default=None)
     ap.add_argument("--suite-version", default="v1", help='"v1" (frozen) or "v1.1" (/100 banks)')
+    ap.add_argument("--tier", default=None,
+                    help="Difficulty tier (D2..D6). Scales the haystack the probes are buried "
+                         "in; the probes themselves are identical at every tier. Omit for legacy "
+                         "untiered behaviour.")
     ap.add_argument("--batch-size", type=int, default=5, help="probes per cold session")
     ap.add_argument("--emit", action="store_true")
     a = ap.parse_args()
@@ -277,7 +283,8 @@ def main():
             for backend in order:
                 print(f"### {section} / {backend} / seed {seed}")
                 cells.append(run_cell(section, seed, backend, a.model, out_root,
-                                      version=a.suite_version, batch_size=a.batch_size))
+                                      version=a.suite_version, batch_size=a.batch_size,
+                                      tier=a.tier))
 
     # deltas + McNemar vs none & vendor-native, per (section, seed)
     idx = {(c["section"], c["seed"], c["backend"]): c for c in cells}

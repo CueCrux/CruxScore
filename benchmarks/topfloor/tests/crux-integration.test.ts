@@ -140,7 +140,7 @@ describe("scoreTopFloorRun", () => {
 
   it("stamps the package metrics_version, not a benchmark-local one", () => {
     const { crux } = scoreTopFloorRun(uniformMappings(1), TELEMETRY);
-    expect(crux.metrics_version).toBe("1.2");
+    expect(crux.metrics_version).toBe("1.3");
   });
 });
 

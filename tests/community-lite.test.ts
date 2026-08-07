@@ -103,7 +103,7 @@ describe("fromCommunityLite", () => {
       });
       const score = computeCruxScore(fundamentals, undefined, metadata);
 
-      expect(score.metrics_version).toBe("1.2");
+      expect(score.metrics_version).toBe("1.3");
       expect(score.composite.S_gate).toBe(1);
       // Cx_em computable because t_human_s is set and Q_info has data
       expect(score.composite.Cx_em).not.toBeNull();
